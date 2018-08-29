@@ -20,19 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "ostreams.h"
+#include <iostream>
 
-template<typename CharT>
-constexpr size_t fill_buffer( CharT *buffer, size_t capacity, int n ) {
-	auto buff_os = ::daw::io::make_memory_buffer_stream( buffer, capacity );
-
-	buff_os << "Hello the number is: " << ' ' << -234432 << ' ' << true
-	        << " string literal " << n;
-
-	return buff_os.get_underlying_stream( ).size( );
-}
-
-struct use_console {};
+#include "memory_stream.h"
 
 template<typename Float, size_t buff_sz = 500>
 struct str_t {
@@ -43,20 +33,7 @@ struct str_t {
 		buff_os << "The number is: " << f << ". " << 5 << " times number is "
 		        << ( static_cast<Float>( 5 ) * f ) << '\n';
 	}
-
-	str_t( use_console, Float f ) {
-		daw::con_out << "The number is: " << f << ". " << 5 << " times number is "
-		             << ( static_cast<Float>( 5 ) * f ) << '\n';
-	}
 };
-
-/*
-template<typename Float>
-str_t( Float value )->str_t<Float>;
-
-template<typename Float>
-str_t( use_console, Float value )->str_t<Float>;
-*/
 
 auto test( ) {
 	constexpr auto result = str_t<double>( 1234560.435333 );
@@ -66,15 +43,5 @@ auto test( ) {
 
 int main( int argc, char ** ) {
 	std::cout << static_cast<std::string_view>( test( ).buffer ) << '\n';
-	float const f = static_cast<float>( argc ) * 1.2334f;
-	std::cout << "processing: float " << f << '\n';
-	std::cout << static_cast<std::string_view>( str_t<float>( f ).buffer )
-	          << '\n';
-	double const d = static_cast<double>( argc ) * 1.2334;
-	std::cout << "processing: double " << d << '\n';
-	std::cout << static_cast<std::string_view>( str_t<double>( d ).buffer )
-	          << '\n';
-	std::cout << '\n';
-
 	return 0;
 }

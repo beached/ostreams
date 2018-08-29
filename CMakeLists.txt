@@ -26,7 +26,10 @@ set( HEADER_FILES
 	${HEADER_FOLDER}/ostreams.h
 	${HEADER_FOLDER}/ostream_helpers.h
 	${HEADER_FOLDER}/ostream_converters.h
+	${HEADER_FOLDER}/memory_stream.h
+	${HEADER_FOLDER}/console_stream.h
 )
 
-add_executable( ostreams_test ${HEADER_FILES} ${TEST_FOLDER}/ostreams_test.cpp )
+add_executable( console_test ${HEADER_FILES} ${TEST_FOLDER}/console_test.cpp )
+add_executable( memory_test ${HEADER_FILES} ${TEST_FOLDER}/memory_test.cpp )
 
