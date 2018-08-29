@@ -24,7 +24,6 @@
 
 #include <array>
 #include <cstdint>
-#include <iostream>
 #include <iterator>
 #include <limits>
 #include <string>
@@ -120,13 +119,6 @@ namespace daw {
 				static constexpr void
 				display( basic_output_stream<CharT, OutputCallback> &os, CharT c ) {
 					os( c );
-				}
-
-				template<typename CharT, typename OutputCallback>
-				static constexpr void
-				display( basic_output_stream<CharT, OutputCallback> &os,
-				         CharT const *str, size_t N ) {
-					os( std::basic_string_view<CharT>( str, N ) );
 				}
 			};
 

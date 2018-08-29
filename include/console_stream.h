@@ -24,7 +24,6 @@
 
 #include <array>
 #include <cstdint>
-#include <iostream>
 #include <iterator>
 #include <limits>
 #include <string>
@@ -67,6 +66,6 @@ namespace daw {
 		}
 	} // namespace io
 
-	static auto con_out = io::make_con_out<char>( );
-	static auto con_wout = io::make_con_out<wchar_t>( );
+	auto con_out = io::make_con_out<char>( );
+	auto con_wout = io::make_con_out<wchar_t>( );
 } // namespace daw

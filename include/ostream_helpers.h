@@ -22,8 +22,6 @@
 
 #pragma once
 
-#include <stdexcept>
-
 #include <daw/daw_traits.h>
 
 namespace daw {
