@@ -24,7 +24,7 @@
 
 template<typename CharT>
 constexpr size_t fill_buffer( CharT *buffer, size_t capacity, int n ) {
-	auto buff_os = ::daw::make_memory_buffer_stream( buffer, capacity );
+	auto buff_os = ::daw::io::make_memory_buffer_stream( buffer, capacity );
 
 	buff_os << "Hello the number is: " << ' ' << -234432 << ' ' << true
 	        << " string literal " << n;
@@ -32,33 +32,34 @@ constexpr size_t fill_buffer( CharT *buffer, size_t capacity, int n ) {
 	return buff_os.get_underlying_stream( ).size( );
 }
 
-/*
-template<typename Float>
-struct str_t {
-	static constexpr size_t buff_sz = std::numeric_limits<Float>::max_exponent10+2;
+struct use_console {};
 
-	daw::io::ostream_converters::impl::sv_buff<char, buff_sz> buffer;
-
-	explicit constexpr str_t( Float f )
-	  : buffer( daw::io::ostream_converters::to_string<char>( f ) ) {}
-};
-*/
-
-template<typename Float, size_t buff_sz=500>
+template<typename Float, size_t buff_sz = 500>
 struct str_t {
 	char buffer[buff_sz + 1] = {0};
 
 	explicit constexpr str_t( Float f ) {
-		auto buff_os = ::daw::make_memory_buffer_stream( buffer, buff_sz );
-		buff_os << "The number is: " << f << ' ' << 5 << " times\n";
+		auto buff_os = ::daw::io::make_memory_buffer_stream( buffer, buff_sz );
+		buff_os << "The number is: " << f << ". " << 5 << " times number is "
+		        << ( static_cast<Float>( 5 ) * f ) << '\n';
+	}
+
+	str_t( use_console, Float f ) {
+		daw::con_out << "The number is: " << f << ". " << 5 << " times number is "
+		             << ( static_cast<Float>( 5 ) * f ) << '\n';
 	}
 };
 
+/*
 template<typename Float>
 str_t( Float value )->str_t<Float>;
 
+template<typename Float>
+str_t( use_console, Float value )->str_t<Float>;
+*/
+
 auto test( ) {
-	constexpr auto result = str_t( 1234560.435333 );
+	constexpr auto result = str_t<double>( 1234560.435333 );
 	// constexpr auto result = str_t( 0x1p87f );
 	return result;
 }
@@ -67,12 +68,13 @@ int main( int argc, char ** ) {
 	std::cout << static_cast<std::string_view>( test( ).buffer ) << '\n';
 	float const f = static_cast<float>( argc ) * 1.2334f;
 	std::cout << "processing: float " << f << '\n';
-	std::cout << static_cast<std::string_view>( str_t( f ).buffer ) << '\n';
+	std::cout << static_cast<std::string_view>( str_t<float>( f ).buffer )
+	          << '\n';
 	double const d = static_cast<double>( argc ) * 1.2334;
 	std::cout << "processing: double " << d << '\n';
-	std::cout << static_cast<std::string_view>( str_t( d ).buffer ) << '\n';
+	std::cout << static_cast<std::string_view>( str_t<double>( d ).buffer )
+	          << '\n';
 	std::cout << '\n';
 
 	return 0;
 }
-

@@ -24,6 +24,9 @@
 
 #include <limits>
 
+#include <daw/daw_exception.h>
+#include <daw/daw_traits.h>
+
 #include "ostream_helpers.h"
 
 namespace daw {
@@ -33,7 +36,7 @@ namespace daw {
 				template<typename T>
 				constexpr auto num_digits( T value ) noexcept {
 					using int_t = std::decay_t<T>;
-					static_assert( std::is_integral_v<int_t>,
+					static_assert( daw::is_integral_v<int_t>,
 					               "value must be an integer type" );
 					if( value == 0 ) {
 						return static_cast<int_t>( 1 );
@@ -46,7 +49,7 @@ namespace daw {
 					return result;
 				}
 
-				template<typename Number, std::enable_if_t<std::is_arithmetic_v<Number>,
+				template<typename Number, std::enable_if_t<daw::is_arithmetic_v<Number>,
 				                                           std::nullptr_t> = nullptr>
 				constexpr Number pow10( uintmax_t n ) noexcept {
 					Number result = static_cast<Number>( 1 );
@@ -56,9 +59,6 @@ namespace daw {
 					}
 					return result;
 				}
-
-				template<typename F>
-				constexpr bool is_floating_point_v = std::is_floating_point<F>::value;
 
 				template<typename F>
 				constexpr bool is_inf( F value ) noexcept {
@@ -110,7 +110,7 @@ namespace daw {
 
 					constexpr sv_buff( ) noexcept = default;
 
-					constexpr CharT const * data( ) const {
+					constexpr CharT const *data( ) const {
 						return buffer;
 					}
 
@@ -119,16 +119,14 @@ namespace daw {
 					}
 
 					constexpr void push_back( CharT c ) {
-						if( len + 1 >= N ) {
-							daw_throw<buffer_full_exception>( );
-						}
+						daw::exception::precondition_check<buffer_full_exception>( len + 1 <
+						                                                           N );
 						buffer[len++] = c;
 					}
 
 					constexpr void push_back( std::basic_string_view<CharT> sv ) {
-						if( len + sv.size( ) >= N ) {
-							daw_throw<buffer_full_exception>( );
-						}
+						daw::exception::precondition_check<buffer_full_exception>(
+						  len + sv.size( ) < N );
 						for( auto c : sv ) {
 							buffer[len++] = c;
 						}
@@ -192,8 +190,8 @@ namespace daw {
 			} // namespace impl
 
 			template<typename CharT,
-			         std::enable_if_t<(std::is_same_v<char, std::decay_t<CharT>> ||
-			                           std::is_same_v<wchar_t, std::decay_t<CharT>>),
+			         std::enable_if_t<(daw::is_same_v<char, std::decay_t<CharT>> ||
+			                           daw::is_same_v<wchar_t, std::decay_t<CharT>>),
 			                          std::nullptr_t> = nullptr>
 			constexpr std::basic_string_view<CharT>
 			to_string( CharT const *str ) noexcept {
@@ -219,8 +217,8 @@ namespace daw {
 			}
 
 			template<typename CharT, typename Integer,
-			         std::enable_if_t<(std::is_integral_v<std::decay_t<Integer>> &&
-			                           !std::is_same_v<bool, std::decay_t<Integer>>),
+			         std::enable_if_t<(daw::is_integral_v<std::decay_t<Integer>> &&
+			                           !daw::is_same_v<bool, std::decay_t<Integer>>),
 			                          std::nullptr_t> = nullptr>
 			static constexpr auto to_string( Integer value ) {
 				impl::sv_buff<CharT, std::numeric_limits<Integer>::digits10> result{};
@@ -244,7 +242,7 @@ namespace daw {
 			}
 
 			template<typename CharT, typename Bool,
-			         std::enable_if_t<std::is_same_v<bool, std::decay_t<Bool>>,
+			         std::enable_if_t<daw::is_same_v<bool, std::decay_t<Bool>>,
 			                          std::nullptr_t> = nullptr>
 			constexpr auto to_string( Bool b ) noexcept {
 				impl::sv_buff<CharT, 5> result{};
@@ -264,11 +262,13 @@ namespace daw {
 			}
 
 			template<typename CharT, typename Float,
-			         std::enable_if_t<impl::is_floating_point_v<Float>,
+			         std::enable_if_t<daw::is_floating_point_v<Float>,
 			                          std::nullptr_t> = nullptr>
 			constexpr auto to_string( Float value, int round_to = -1 ) {
 				using value_t = std::decay_t<Float>;
-				impl::sv_buff<CharT, (std::numeric_limits<value_t>::max_exponent10+2)> result{};
+				impl::sv_buff<CharT,
+				              ( std::numeric_limits<value_t>::max_exponent10 + 2 )>
+				  result{};
 
 				if( round_to < 0 ) {
 					round_to = std::numeric_limits<value_t>::max_digits10;
@@ -290,14 +290,14 @@ namespace daw {
 					return result;
 				}
 				auto const e = impl::find_whole_exponent( value );
-				auto p10 = impl::pow10<value_t>( e+1 );
+				auto p10 = impl::pow10<value_t>( e + 1 );
 				auto tmp_value = value;
 
 				for( uint16_t ex = 0; ex <= e; ++ex ) {
 					auto digit = static_cast<char>( tmp_value / p10 );
-					if( digit > 10 || digit < 0 ) {
-						daw_throw<impl::unexpected_state>( );
-					}
+					daw::exception::precondition_check<impl::unexpected_state>(
+					  digit >= 0 && digit <= 10 );
+
 					if( ex > std::numeric_limits<value_t>::max_digits10 ) {
 						digit = 0;
 					}
@@ -313,13 +313,14 @@ namespace daw {
 				}
 				result.push_back( impl::get_decimal<CharT>{}( ) );
 
-				auto const num_dec_digits =
-				  impl::min_value( impl::min_value( round_to, impl::max_fractional_digits<Float> ),
-				             std::numeric_limits<Float>::max_digits10 - e );
+				auto const num_dec_digits = impl::min_value(
+				  impl::min_value( round_to, impl::max_fractional_digits<Float> ),
+				  std::numeric_limits<Float>::max_digits10 - e );
 				for( int n = 0; n < num_dec_digits &&
 				                tmp_value > std::numeric_limits<Float>::min( );
 				     ++n ) {
-					auto digit = static_cast<char>( tmp_value * static_cast<Float>( 10 ) );
+					auto digit =
+					  static_cast<char>( tmp_value * static_cast<Float>( 10 ) );
 					result.push_back( impl::get_zero<CharT>{}( ) + digit );
 					tmp_value -= static_cast<Float>( digit ) / static_cast<Float>( 10 );
 					tmp_value *= static_cast<Float>( 10 );
@@ -334,7 +335,7 @@ namespace daw {
 
 				template<typename T>
 				constexpr bool has_tostring2_v =
-				  std::experimental::is_detected_v<impl::has_tostring_detect2, T>;
+				  daw::is_detected_v<impl::has_tostring_detect2, T>;
 
 				using daw::io::ostream_converters::to_string;
 				template<typename T>
@@ -343,10 +344,9 @@ namespace daw {
 
 				template<typename T>
 				constexpr bool has_tostring_v =
-				  std::experimental::is_detected_v<has_tostring_detect, T>;
+				  daw::is_detected_v<has_tostring_detect, T>;
 
 			} // namespace impl
 		}   // namespace ostream_converters
 	}     // namespace io
 } // namespace daw
-

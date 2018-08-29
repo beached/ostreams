@@ -23,22 +23,11 @@
 #pragma once
 
 #include <stdexcept>
-#include <experimental/type_traits>
 
-using std::experimental::is_detected_v;
+#include <daw/daw_traits.h>
 
 namespace daw {
 	struct buffer_full_exception {};
-
-	template<typename ExceptionType = std::runtime_error, typename... Args>
-	[[noreturn]] void daw_throw( Args &&... args ) {
-#if defined( __cpp_exceptions ) || defined( __EXCEPTIONS ) ||                  \
-  defined( _CPPUNWIND )
-		throw ExceptionType( std::forward<Args>( args )... );
-#else
-		std::terminate( );
-#endif
-	}
 
 	namespace impl {
 		template<typename String>
@@ -49,9 +38,8 @@ namespace daw {
 
 		template<typename String>
 		constexpr bool is_string_like_v =
-		  is_detected_v<has_data_member_detect, String>
-		    &&std::experimental::is_detected_v<has_size_member_detect, String>;
+		  daw::is_detected_v<has_data_member_detect, String>
+		    &&daw::is_detected_v<has_size_member_detect, String>;
 
 	} // namespace impl
 } // namespace daw
-

@@ -31,6 +31,9 @@
 #include <string_view>
 #include <type_traits>
 
+#include <daw/daw_exception.h>
+#include <daw/daw_traits.h>
+
 #include "ostream_converters.h"
 #include "ostream_helpers.h"
 
@@ -42,28 +45,29 @@ namespace daw {
 
 		public:
 			using reference = basic_output_stream &;
+			using const_reference = basic_output_stream const &;
 
-			constexpr explicit basic_output_stream(
-			  OutputCallback const
-			    &oi ) noexcept( std::is_nothrow_copy_constructible_v<OutputCallback> )
+			constexpr explicit basic_output_stream( OutputCallback &oi ) noexcept(
+			  daw::is_nothrow_copy_constructible_v<OutputCallback> )
 			  : m_out( oi ) {}
 
 			constexpr explicit basic_output_stream( OutputCallback &&oi ) noexcept(
-			  std::is_nothrow_move_constructible_v<OutputCallback> )
+			  daw::is_nothrow_move_constructible_v<OutputCallback> )
 			  : m_out( std::move( oi ) ) {}
 
 			static constexpr bool is_nothrow_on_char_v =
 			  noexcept( m_out( std::declval<CharT>( ) ) );
+
 			static constexpr bool is_nothrow_on_sv_v =
 			  noexcept( m_out( std::declval<std::basic_string_view<CharT>>( ) ) );
 
 			template<typename String,
 			         std::enable_if_t<( ::daw::impl::is_string_like_v<String> &&
-			                            !std::is_same_v<CharT, String>),
+			                            !daw::is_same_v<CharT, String>),
 			                          std::nullptr_t> = nullptr>
 			constexpr reference
 			operator( )( String &&str ) noexcept( is_nothrow_on_sv_v ) {
-				static_assert( std::is_same_v<std::decay_t<CharT>,
+				static_assert( daw::is_same_v<std::decay_t<CharT>,
 				                              std::decay_t<decltype( *str.data( ) )>>,
 				               "str must contain CharT data" );
 
@@ -77,11 +81,17 @@ namespace daw {
 				return *this;
 			}
 
-			constexpr OutputCallback const &get_underlying_stream( ) const noexcept {
-				return m_out;
+			constexpr const_reference operator( )( CharT c ) const
+			  noexcept( is_nothrow_on_char_v ) {
+				m_out( c );
+				return *this;
 			}
 
 			constexpr OutputCallback &get_underlying_stream( ) noexcept {
+				return m_out;
+			}
+
+			constexpr OutputCallback const &get_underlying_stream( ) const noexcept {
 				return m_out;
 			}
 		};
@@ -92,13 +102,13 @@ namespace daw {
 			template<typename CharT, typename OutputCallback, typename T>
 			using has_operator_lsh_lsh_detect = decltype( operator<<(
 			  std::declval<
-			    ::daw::io::basic_output_stream<CharT, OutputCallback> &>( ),
+			    ::daw::io::basic_output_stream<CharT, OutputCallback> const &>( ),
 			  std::declval<T const &>( ) ) );
 
 			struct display_value {
 				template<typename CharT, typename OutputCallback, typename T,
 				         std::enable_if_t<
-				           (!std::is_same_v<std::decay_t<CharT>, std::decay_t<T>>),
+				           (!daw::is_same_v<std::decay_t<CharT>, std::decay_t<T>>),
 				           std::nullptr_t> = nullptr>
 				static constexpr void
 				display( basic_output_stream<CharT, OutputCallback> &os, T &&value ) {
@@ -131,6 +141,8 @@ namespace daw {
 			};
 
 			struct stdout_callable {
+				constexpr stdout_callable( ) noexcept = default;
+
 				inline void operator( )( char c ) const noexcept {
 					putchar( c );
 				}
@@ -151,7 +163,7 @@ namespace daw {
 
 		template<typename CharT = char>
 		class char_buffer_stream {
-			static_assert( !std::is_const_v<CharT>,
+			static_assert( !daw::is_const_v<CharT>,
 			               "Cannot write to a const buffer" );
 			size_t m_capacity = 0;
 			size_t m_position = 0;
@@ -190,22 +202,20 @@ namespace daw {
 
 		public:
 			constexpr void operator( )( CharT c ) {
-				if( is_full( ) ) {
-					daw_throw<buffer_full_exception>( );
-				}
+				daw::exception::precondition_check<buffer_full_exception>(
+				  !is_full( ) );
 				append( c );
 			}
 
 			constexpr void operator( )( std::basic_string_view<CharT> sv ) {
-				if( capacity( ) - size( ) < sv.size( ) ) {
-					daw_throw<buffer_full_exception>( );
-				}
+				daw::exception::precondition_check<buffer_full_exception>(
+				  sv.size( ) <= capacity( ) - size( ) );
 				for( auto c : sv ) {
 					append( c );
 				}
 			}
 
-			constexpr void reset( ) noexcept {
+			constexpr void reset( ) const noexcept {
 				m_position = 0;
 			}
 
@@ -227,16 +237,14 @@ namespace daw {
 			return basic_output_stream<CharT, OutputCallback>(
 			  std::forward<OutputCallback>( oi ) );
 		}
-	} // namespace io
 
-	template<typename CharT>
-	constexpr auto make_memory_buffer_stream( CharT *buffer,
-	                                          size_t capacity ) noexcept {
-		return ::daw::io::make_output_stream<CharT>(
-		  ::daw::io::char_buffer_stream<CharT>( buffer, capacity ) );
-	}
+		template<typename CharT>
+		constexpr auto make_memory_buffer_stream( CharT *buffer,
+		                                          size_t capacity ) noexcept {
+			return ::daw::io::make_output_stream<CharT>(
+			  ::daw::io::char_buffer_stream<CharT>( buffer, capacity ) );
+		}
 
-	namespace io {
 		template<typename CharT, typename OutputCallback, size_t N>
 		constexpr basic_output_stream<CharT, OutputCallback> &
 		operator<<( basic_output_stream<CharT, OutputCallback> &os,
@@ -254,6 +262,14 @@ namespace daw {
 			  &os, std::forward<T>( value )}( );
 			return os;
 		}
-	} // namespace io
-} // namespace daw
 
+		template<typename CharT>
+		constexpr auto make_con_out( ) noexcept {
+			return daw::io::make_output_stream<CharT>(
+			  daw::io::impl::stdout_callable( ) );
+		}
+	} // namespace io
+
+	static auto con_out = io::make_con_out<char>( );
+	static auto con_wout = io::make_con_out<wchar_t>( );
+} // namespace daw
