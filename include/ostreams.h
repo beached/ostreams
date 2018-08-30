@@ -124,7 +124,9 @@ namespace daw {
 		constexpr OutputStream &operator<<( OutputStream &os,
 		                                    CharT const ( &str )[N] ) {
 
-			os( daw::basic_string_view<CharT>( str, N - 1 ) );
+			for( size_t n=0; n<(N-1); ++n ) {
+				os( str[n] );
+			}
 			return os;
 		}
 
