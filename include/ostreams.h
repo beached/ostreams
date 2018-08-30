@@ -49,7 +49,7 @@ namespace daw {
 		 *		      template<typename String,
 		 *		               std::enable_if_t<(
 		 *::daw::impl::is_string_like_v<String> &&
-		 *		                                  !::daw::impl::is_character_v<String>),
+		 *		                                  !::daw::traits::is_character_v<String>),
 		 *		                                std::nullptr_t> = nullptr>
 		 *		      constexpr void operator( )( String &&str );
 		 *		    };
@@ -88,7 +88,7 @@ namespace daw {
 		// Stream Operators
 		template<typename OutputStream, typename CharT, size_t N,
 		         std::enable_if_t<(is_output_stream_v<CharT, OutputStream> &&
-		                           daw::impl::is_character_v<CharT>),
+		                           daw::traits::is_character_v<CharT>),
 		                          std::nullptr_t> = nullptr>
 		constexpr OutputStream &
 		operator<<( OutputStream &os,

@@ -25,8 +25,6 @@
 #include <cstdio>
 #include <cwchar>
 
-#include <daw/daw_string_view.h>
-
 #include "file_stream.h"
 
 namespace daw {

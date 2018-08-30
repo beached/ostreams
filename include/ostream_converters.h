@@ -193,7 +193,7 @@ namespace ostream_converters {
 		};
 	} // namespace impl
 
-	template<typename CharT, std::enable_if_t<daw::impl::is_character_v<CharT>,
+	template<typename CharT, std::enable_if_t<daw::traits::is_character_v<CharT>,
 	                                          std::nullptr_t> = nullptr>
 	constexpr daw::basic_string_view<CharT>
 	to_string( CharT const *str ) noexcept {
@@ -222,7 +222,7 @@ namespace ostream_converters {
 	         std::enable_if_t<(daw::is_integral_v<daw::remove_cvref_t<Integer>> &&
 	                           !daw::is_same_v<bool, std::decay_t<Integer>> &&
 	                           !daw::is_floating_point_v<std::decay_t<Integer>> &&
-	                           !daw::impl::is_character_v<Integer>),
+	                           !daw::traits::is_character_v<Integer>),
 	                          std::nullptr_t> = nullptr>
 	static constexpr auto to_string( Integer value ) {
 		impl::sv_buff<CharT, std::numeric_limits<Integer>::digits10> result{};
@@ -258,7 +258,7 @@ namespace ostream_converters {
 		return result;
 	}
 
-	template<typename CharT, std::enable_if_t<::daw::impl::is_character_v<CharT>,
+	template<typename CharT, std::enable_if_t<::daw::traits::is_character_v<CharT>,
 	                                          std::nullptr_t> = nullptr>
 	constexpr auto to_string( CharT c ) noexcept {
 		impl::sv_buff<CharT, 1> result{};
