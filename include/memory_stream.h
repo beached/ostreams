@@ -22,14 +22,10 @@
 
 #pragma once
 
-#include <array>
-#include <cstdint>
-#include <iostream>
-#include <iterator>
-#include <limits>
 #include <string>
-#include <string_view>
-#include <type_traits>
+
+#include <daw/daw_string_view.h>
+#include <daw/daw_traits.h>
 
 #include "ostreams.h"
 
@@ -81,7 +77,7 @@ namespace daw {
 				append( c );
 			}
 
-			constexpr void operator( )( std::basic_string_view<CharT> sv ) {
+			constexpr void operator( )( daw::basic_string_view<CharT> sv ) {
 				daw::exception::precondition_check<buffer_full_exception>(
 				  sv.size( ) <= capacity( ) - size( ) );
 				for( auto c : sv ) {
@@ -89,12 +85,12 @@ namespace daw {
 				}
 			}
 
-			constexpr void reset( ) const noexcept {
+			constexpr void reset( ) noexcept {
 				m_position = 0;
 			}
 
-			constexpr std::basic_string_view<CharT> to_string_view( ) const noexcept {
-				return std::basic_string_view<CharT>( data( ), size( ) );
+			constexpr daw::basic_string_view<CharT> to_string_view( ) const noexcept {
+				return daw::basic_string_view<CharT>( data( ), size( ) );
 			}
 
 			std::basic_string<CharT> to_string( ) const {

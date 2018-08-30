@@ -22,6 +22,9 @@
 
 #include <iostream>
 
+#include <daw/daw_string_view.h>
+
+
 #include "memory_stream.h"
 
 template<typename Float, size_t buff_sz = 500>
@@ -42,6 +45,6 @@ auto test( ) {
 }
 
 int main( int argc, char ** ) {
-	std::cout << static_cast<std::string_view>( test( ).buffer ) << '\n';
+	std::cout << static_cast<daw::string_view>( test( ).buffer ) << '\n';
 	return 0;
 }

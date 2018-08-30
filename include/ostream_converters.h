@@ -22,9 +22,11 @@
 
 #pragma once
 
+#include <string>
 #include <limits>
 
 #include <daw/daw_exception.h>
+#include <daw/daw_string_view.h>
 #include <daw/daw_traits.h>
 
 #include "ostream_helpers.h"
@@ -124,7 +126,7 @@ namespace daw {
 						buffer[len++] = c;
 					}
 
-					constexpr void push_back( std::basic_string_view<CharT> sv ) {
+					constexpr void push_back( daw::basic_string_view<CharT> sv ) {
 						daw::exception::precondition_check<buffer_full_exception>(
 						  len + sv.size( ) < N );
 						for( auto c : sv ) {
@@ -132,8 +134,8 @@ namespace daw {
 						}
 					}
 
-					constexpr operator std::basic_string_view<CharT>( ) const noexcept {
-						return std::string_view( buffer, len );
+					constexpr operator daw::basic_string_view<CharT>( ) const noexcept {
+						return daw::basic_string_view<CharT>( buffer, len );
 					}
 				};
 
@@ -193,27 +195,27 @@ namespace daw {
 			         std::enable_if_t<(daw::is_same_v<char, std::decay_t<CharT>> ||
 			                           daw::is_same_v<wchar_t, std::decay_t<CharT>>),
 			                          std::nullptr_t> = nullptr>
-			constexpr std::basic_string_view<CharT>
+			constexpr daw::basic_string_view<CharT>
 			to_string( CharT const *str ) noexcept {
-				return std::basic_string_view<CharT>( str, impl::strlen( str ) );
+				return daw::basic_string_view<CharT>( str, impl::strlen( str ) );
 			}
 
 			template<size_t N, typename CharT>
-			constexpr std::basic_string_view<CharT>
+			constexpr daw::basic_string_view<CharT>
 			to_string( CharT const ( &str )[N] ) noexcept {
-				return std::basic_string_view<CharT>( str, N - 1 );
+				return daw::basic_string_view<CharT>( str, N - 1 );
 			}
 
 			template<typename CharT>
-			constexpr std::basic_string_view<CharT>
-			to_string( std::basic_string_view<CharT> str ) noexcept {
+			constexpr daw::basic_string_view<CharT>
+			to_string( daw::basic_string_view<CharT> str ) noexcept {
 				return str;
 			}
 
 			template<typename CharT>
-			std::basic_string_view<CharT>
+			daw::basic_string_view<CharT>
 			to_string( std::basic_string<CharT> const &str ) noexcept {
-				return std::basic_string_view<CharT>( str.data( ), str.size( ) );
+				return daw::basic_string_view<CharT>( str.data( ), str.size( ) );
 			}
 
 			template<typename CharT, typename Integer,

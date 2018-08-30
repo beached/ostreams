@@ -38,6 +38,5 @@ namespace daw {
 		constexpr bool is_string_like_v =
 		  daw::is_detected_v<has_data_member_detect, String>
 		    &&daw::is_detected_v<has_size_member_detect, String>;
-
 	} // namespace impl
 } // namespace daw

@@ -22,16 +22,10 @@
 
 #pragma once
 
-#include <array>
-#include <cstdint>
-#include <iterator>
-#include <limits>
-#include <string>
-#include <string_view>
-#include <type_traits>
+#include <cstdio>
+#include <cwchar>
 
-#include <daw/daw_exception.h>
-#include <daw/daw_traits.h>
+#include <daw/daw_string_view.h>
 
 #include "ostreams.h"
 
@@ -50,7 +44,7 @@ namespace daw {
 				}
 
 				template<typename CharT>
-				inline void operator( )( std::basic_string_view<CharT> str ) const
+				inline void operator( )( daw::basic_string_view<CharT> str ) const
 				  noexcept {
 					for( auto c : str ) {
 						putchar( c );

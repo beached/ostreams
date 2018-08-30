@@ -22,15 +22,9 @@
 
 #pragma once
 
-#include <array>
-#include <cstdint>
-#include <iterator>
-#include <limits>
-#include <string>
-#include <string_view>
 #include <type_traits>
 
-#include <daw/daw_exception.h>
+#include <daw/daw_string_view.h>
 #include <daw/daw_traits.h>
 
 #include "ostream_converters.h"
@@ -58,11 +52,11 @@ namespace daw {
 			  noexcept( m_out( std::declval<CharT>( ) ) );
 
 			static constexpr bool is_nothrow_on_sv_v =
-			  noexcept( m_out( std::declval<std::basic_string_view<CharT>>( ) ) );
+			  noexcept( m_out( std::declval<daw::basic_string_view<CharT>>( ) ) );
 
 			template<typename String,
-			         std::enable_if_t<( ::daw::impl::is_string_like_v<String> &&
-			                            !daw::is_same_v<CharT, String>),
+			         std::enable_if_t<(::daw::impl::is_string_like_v<String> &&
+			                           !daw::is_same_v<CharT, String>),
 			                          std::nullptr_t> = nullptr>
 			constexpr reference
 			operator( )( String &&str ) noexcept( is_nothrow_on_sv_v ) {
@@ -70,7 +64,7 @@ namespace daw {
 				                              std::decay_t<decltype( *str.data( ) )>>,
 				               "str must contain CharT data" );
 
-				m_out( std::basic_string_view<CharT>( str.data( ), str.size( ) ) );
+				m_out( daw::basic_string_view<CharT>( str.data( ), str.size( ) ) );
 				return *this;
 			}
 
@@ -143,7 +137,7 @@ namespace daw {
 		constexpr basic_output_stream<CharT, OutputCallback> &
 		operator<<( basic_output_stream<CharT, OutputCallback> &os,
 		            CharT const ( &str )[N] ) {
-			os( std::basic_string_view<CharT>( str, N - 1 ) );
+			os( daw::basic_string_view<CharT>( str, N - 1 ) );
 			return os;
 		}
 
@@ -158,4 +152,3 @@ namespace daw {
 		}
 	} // namespace io
 } // namespace daw
-
