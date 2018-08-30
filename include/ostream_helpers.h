@@ -40,6 +40,7 @@ namespace daw {
 		    &&daw::is_detected_v<has_size_member_detect, String>;
 
 		template<typename T>
-		  constexpr bool is_character_v = is_same_v<char, remove_cvref_t<T>> || is_same_v<wchar_t, remove_cvref_t<T>>;
+		constexpr bool is_character_v = is_same_v<char, remove_cvref_t<T>> ||
+		                                is_same_v<wchar_t, remove_cvref_t<T>>;
 	} // namespace impl
 } // namespace daw

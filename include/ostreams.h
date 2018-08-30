@@ -129,10 +129,12 @@ namespace daw {
 		}
 
 		template<typename OutputStream, typename T,
-		         std::enable_if_t<is_output_stream_v<OutputStream>,
+		         std::enable_if_t<(is_output_stream_v<OutputStream>),
 		                          std::nullptr_t> = nullptr>
 		constexpr OutputStream &operator<<( OutputStream &os, T &&value ) {
 			using CharT = typename OutputStream::character_t;
+			static_assert( ::ostream_converters::has_to_string_v<CharT, T>,
+			               "Could not find a valid to_string<CharT> overload" );
 			using ::ostream_converters::to_string;
 			os( to_string<CharT>( std::forward<T>( value ) ) );
 			return os;

@@ -33,7 +33,7 @@ namespace daw {
 	namespace io {
 		template<typename CharT = char>
 		class char_buffer_stream {
-			static_assert( !daw::is_const_v<CharT>,
+			static_assert( !::daw::is_const_v<CharT>,
 			               "Cannot write to a const buffer" );
 			size_t m_capacity = 0;
 			size_t m_position = 0;
@@ -72,13 +72,13 @@ namespace daw {
 
 		public:
 			constexpr void operator( )( CharT c ) {
-				daw::exception::precondition_check<buffer_full_exception>(
+				::daw::exception::precondition_check<buffer_full_exception>(
 				  !is_full( ) );
 				append( c );
 			}
 
-			constexpr void operator( )( daw::basic_string_view<CharT> sv ) {
-				daw::exception::precondition_check<buffer_full_exception>(
+			constexpr void operator( )( ::daw::basic_string_view<CharT> sv ) {
+				::daw::exception::precondition_check<buffer_full_exception>(
 				  sv.size( ) <= capacity( ) - size( ) );
 				for( auto c : sv ) {
 					append( c );
@@ -89,8 +89,9 @@ namespace daw {
 				m_position = 0;
 			}
 
-			constexpr daw::basic_string_view<CharT> to_string_view( ) const noexcept {
-				return daw::basic_string_view<CharT>( data( ), size( ) );
+			constexpr ::daw::basic_string_view<CharT> to_string_view( ) const
+			  noexcept {
+				return ::daw::basic_string_view<CharT>( data( ), size( ) );
 			}
 
 			std::basic_string<CharT> to_string( ) const {
@@ -102,7 +103,7 @@ namespace daw {
 		constexpr auto make_memory_buffer_stream( CharT *buffer,
 		                                          size_t capacity ) noexcept {
 			return ::daw::io::make_output_stream<CharT>(
-			  ::daw::io::char_buffer_stream<CharT>( buffer, capacity ) );
+			  char_buffer_stream<CharT>( buffer, capacity ) );
 		}
 	} // namespace io
 } // namespace daw

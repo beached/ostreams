@@ -105,7 +105,7 @@ namespace ostream_converters {
 
 		template<typename CharT, size_t N>
 		struct sv_buff {
-			CharT buffer[N + 1] = {0};
+			CharT buffer[N + 1] = {static_cast<CharT>( 0 )};
 			size_t len = 0;
 
 			constexpr size_t capacity( ) const noexcept {
@@ -258,7 +258,8 @@ namespace ostream_converters {
 		return result;
 	}
 
-	template<typename CharT>
+	template<typename CharT, std::enable_if_t<::daw::impl::is_character_v<CharT>,
+	                                          std::nullptr_t> = nullptr>
 	constexpr auto to_string( CharT c ) noexcept {
 		impl::sv_buff<CharT, 1> result{};
 		result.push_back( c );
@@ -268,14 +269,13 @@ namespace ostream_converters {
 	template<
 	  typename CharT, typename Float,
 	  std::enable_if_t<daw::is_floating_point_v<Float>, std::nullptr_t> = nullptr>
-	constexpr auto to_string( Float value, int round_to = -1 ) {
+	constexpr auto to_string( Float &&value ) {
 		using value_t = std::decay_t<Float>;
 		impl::sv_buff<CharT, ( std::numeric_limits<value_t>::max_exponent10 + 2 )>
 		  result{};
 
-		if( round_to < 0 ) {
-			round_to = std::numeric_limits<value_t>::max_digits10;
-		}
+		auto const round_to = std::numeric_limits<value_t>::max_digits10;
+
 		if( value == static_cast<value_t>( 0.0 ) ) {
 			result.push_back( '0' );
 			return result;
@@ -335,13 +335,17 @@ namespace ostream_converters {
 		using has_tostring_detect2 =
 		  decltype( to_string( std::declval<T const &>( ) ) );
 
-		using ::ostream_converters::to_string;
-		template<typename T>
-		using has_tostring_detect =
-		  decltype( to_string( std::declval<T const &>( ) ) );
-
-		template<typename T>
-		constexpr bool has_tostring_v = daw::is_detected_v<has_tostring_detect, T>;
+		namespace to_string_detect {
+			using ::ostream_converters::to_string;
+			template<typename CharT, typename T>
+			using has_to_string_detect =
+			  decltype( to_string<CharT>( std::declval<T const &>( ) ) );
+		} // namespace to_string_detect
 
 	} // namespace impl
+
+	template<typename CharT, typename T>
+	constexpr bool has_to_string_v =
+	  daw::is_detected_v<impl::to_string_detect::has_to_string_detect, CharT,
+	                     ::daw::remove_cvref_t<T>>;
 } // namespace ostream_converters

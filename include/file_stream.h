@@ -105,7 +105,7 @@ namespace daw {
 				fileout_callable &operator=( fileout_callable const & ) = delete;
 
 				template<typename CharT>
-				inline void operator( )( daw::basic_string_view<CharT> str ) const
+				inline void operator( )( ::daw::basic_string_view<CharT> str ) const
 				  noexcept {
 					// not using fputs as string_view may not be zero terminated
 					for( auto c : str ) {
@@ -121,8 +121,8 @@ namespace daw {
 	  CharT const ( &file_name )[n],
 	  io::file_open_flags flags = io::file_open_flags::Write ) noexcept {
 
-		return daw::io::make_output_stream<CharT>(
-		  daw::io::impl::fileout_callable( file_name.to_string( ), flags ) );
+		return ::daw::io::make_output_stream<CharT>(
+		  ::daw::io::impl::fileout_callable( file_name.to_string( ), flags ) );
 	}
 
 	template<typename CharT>
@@ -130,8 +130,8 @@ namespace daw {
 	  std::basic_string<CharT> const &file_name,
 	  io::file_open_flags flags = io::file_open_flags::Write ) noexcept {
 
-		return daw::io::make_output_stream<CharT>(
-		  daw::io::impl::fileout_callable( file_name, flags ) );
+		return ::daw::io::make_output_stream<CharT>(
+		  ::daw::io::impl::fileout_callable( file_name, flags ) );
 	}
 
 	template<typename CharT,
@@ -147,7 +147,7 @@ namespace daw {
 
 	template<typename CharT = char>
 	inline auto make_file_stream( FILE *fp, bool take_ownership = false ) {
-		return daw::io::make_output_stream<CharT>(
-		  daw::io::impl::fileout_callable( fp, take_ownership ) );
+		return ::daw::io::make_output_stream<CharT>(
+		  ::daw::io::impl::fileout_callable( fp, take_ownership ) );
 	}
 } // namespace daw
