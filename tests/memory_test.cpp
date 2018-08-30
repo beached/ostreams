@@ -55,21 +55,15 @@ struct A {};
 // daw::basic_string_view
 template<typename CharT>
 constexpr auto to_string( A ) noexcept {
-	struct result_t {
-		CharT const *r = "A";
-		CharT const *data( ) const {
-			return r;
-		}
-		size_t size( ) const {
-			return 1;
-		}
-	};
-	return result_t{};
+	buffer_t<1> result;
+	result.data( )[0] = 'A';
+	return result;
 }
 
 template<size_t buff_sz = 74, typename Float>
-auto test( Float f ) {
-	buffer_t<75> buffer{};
+constexpr auto test( Float f ) {
+	// If buffer isn't large enough a buffer_full_exception will be thrown
+	buffer_t<76> buffer{};
 	auto buff_os =
 	  ::daw::io::make_memory_buffer_stream( buffer.data( ), buffer.size( ) );
 	buff_os << A{} << " The number is: " << f << ". " << 5 << " times number is "
@@ -78,9 +72,13 @@ auto test( Float f ) {
 	return buffer;
 }
 
-static auto test_result = test( 1234560.435333 );
+constexpr static auto const test_result = test( 1234560.435333 );
+
+auto const &test2( ) {
+	return test_result;
+}
 
 int main( int argc, char ** ) {
-	daw::con_out << test_result << '\n';
+	daw::con_out << test2( ) << '\n';
 	return 0;
 }

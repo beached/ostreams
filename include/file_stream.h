@@ -35,94 +35,125 @@ namespace daw {
 		enum class file_open_flags : bool { Write, Append };
 
 		namespace impl {
-			class fileout_callable {
-				FILE *m_file_handle;
-				bool m_is_owner = true;
+			struct write_char {
+				constexpr write_char( ) noexcept = default;
 
-			public:
-				template<typename CharT>
-				inline explicit fileout_callable(
-				  std::basic_string<CharT> const &file_name,
-				  file_open_flags flags ) noexcept
-				  : m_file_handle(
-				      fopen( file_name.c_str( ),
-				             ( flags == file_open_flags::Write ? "w" : "a" ) ) ) {}
-
-				inline explicit fileout_callable( FILE *fp, bool take_ownership )
-				  : m_file_handle( fp )
-				  , m_is_owner( take_ownership ) {}
-
-				inline void operator( )( char c ) const noexcept {
-					putc( c, m_file_handle );
+				inline auto operator( )( char c, FILE *f ) const noexcept {
+					return putc( c, f );
 				}
 
-				inline void operator( )( wchar_t c ) const noexcept {
-					putwc( c, m_file_handle );
+				inline auto operator( )( wchar_t c, FILE *f ) const noexcept {
+					return putwc( c, f );
 				}
+			};
+		} // namespace impl
+		template<typename CharT>
+		class file_stream {
+			FILE *m_file_handle;
+			bool m_is_owner = true;
 
-				inline explicit operator bool( ) const noexcept {
-					return static_cast<bool>( m_file_handle );
+		public:
+			// OutputStream Interface
+			using character_t = CharT;
+
+			inline explicit file_stream( std::basic_string<CharT> const &file_name,
+			                             file_open_flags flags ) noexcept
+			  : m_file_handle(
+			      fopen( file_name.c_str( ),
+			             ( flags == file_open_flags::Write ? "w" : "a" ) ) ) {}
+
+			inline explicit file_stream( FILE *fp, bool take_ownership )
+			  : m_file_handle( fp )
+			  , m_is_owner( take_ownership ) {}
+
+			// OutputStream Interface
+			inline auto operator( )( CharT c ) const noexcept {
+				return impl::write_char{}( c, m_file_handle );
+			}
+
+			// OutputStream Interface
+			template<typename String,
+			         std::enable_if_t<( ::daw::impl::is_string_like_v<String> &&
+			                            !::daw::impl::is_character_v<String>),
+			                          std::nullptr_t> = nullptr>
+			constexpr void operator( )( String &&str ) const noexcept {
+				static_assert(
+				  daw::is_same_v<remove_cvref_t<CharT>,
+				                 remove_cvref_t<decltype( *str.data( ) )>>,
+				  "String's data( ) character type must match that of output stream" );
+
+				auto ptr = str.data( );
+				auto const sz = str.size( );
+				for( size_t n = 0; n < sz; ++n ) {
+					impl::write_char{}( *ptr++, m_file_handle );
 				}
+			}
 
-				inline FILE *native_handle( ) const {
-					return m_file_handle;
+			inline explicit operator bool( ) const noexcept {
+				return static_cast<bool>( m_file_handle );
+			}
+
+			inline FILE *native_handle( ) const {
+				return m_file_handle;
+			}
+
+			inline void flush( ) noexcept {
+				fflush( m_file_handle );
+			}
+
+			inline void close( ) noexcept {
+				auto tmp = std::exchange( m_file_handle, nullptr );
+				if( tmp ) {
+					fflush( tmp );
+					fclose( tmp );
 				}
+			}
 
-				inline void flush( ) noexcept {
-					fflush( m_file_handle );
+			inline ~file_stream( ) {
+				if( m_is_owner ) {
+					close( );
 				}
+			}
 
-				inline void close( ) noexcept {
-					auto tmp = std::exchange( m_file_handle, nullptr );
-					if( tmp ) {
-						fflush( tmp );
-						fclose( tmp );
-					}
-				}
+			inline file_stream( file_stream &&other ) noexcept
+			  : m_file_handle( other.m_file_handle )
+			  , m_is_owner( std::exchange( other.m_is_owner, false ) ) {}
 
-				inline ~fileout_callable( ) {
+			inline file_stream &operator=( file_stream &&rhs ) noexcept {
+				if( this != &rhs ) {
 					if( m_is_owner ) {
 						close( );
 					}
+					m_is_owner = std::exchange( rhs.m_is_owner, false );
+					m_file_handle = rhs.m_file_handle;
 				}
+				return *this;
+			}
 
-				inline fileout_callable( fileout_callable &&other ) noexcept
-				  : m_file_handle( other.m_file_handle )
-				  , m_is_owner( std::exchange( other.m_is_owner, false ) ) {}
+			file_stream( file_stream const & ) = delete;
+			file_stream &operator=( file_stream const & ) = delete;
+		};
 
-				inline fileout_callable &operator=( fileout_callable &&rhs ) noexcept {
-					if( this != &rhs ) {
-						if( m_is_owner ) {
-							close( );
-						}
-						m_is_owner = std::exchange( rhs.m_is_owner, false );
-						m_file_handle = rhs.m_file_handle;
-					}
-					return *this;
-				}
+		template<typename CharT>
+		struct supports_output_stream_interface<file_stream<CharT>>
+		  : std::true_type {};
+	} // namespace io
 
-				fileout_callable( fileout_callable const & ) = delete;
-				fileout_callable &operator=( fileout_callable const & ) = delete;
-			};
-		} // namespace impl
-	}   // namespace io
-
-	template<typename CharT, size_t n>
+	template<typename CharT, typename f_char_t, size_t N>
 	auto make_file_stream(
-	  CharT const ( &file_name )[n],
+	  f_char_t const ( &file_name )[N],
 	  io::file_open_flags flags = io::file_open_flags::Write ) noexcept {
 
-		return ::daw::io::make_output_stream<CharT>(
-		  ::daw::io::impl::fileout_callable( file_name.to_string( ), flags ) );
+		return io::file_stream<CharT>(
+		  std::basic_string<f_char_t>( file_name, N - 1 ), flags );
 	}
 
-	template<typename CharT>
+	template<typename CharT, typename f_char_t>
 	auto make_file_stream(
-	  std::basic_string<CharT> const &file_name,
+	  std::basic_string<f_char_t> const &file_name,
 	  io::file_open_flags flags = io::file_open_flags::Write ) noexcept {
 
-		return ::daw::io::make_output_stream<CharT>(
-		  ::daw::io::impl::fileout_callable( file_name, flags ) );
+		return io::file_stream<CharT>( file_name, flags );
 	}
 
 	template<typename CharT,
@@ -133,12 +164,13 @@ namespace daw {
 	  CharT const *file_name,
 	  io::file_open_flags flags = io::file_open_flags::Write ) noexcept {
 
-		return make_file_stream( std::basic_string<CharT>( file_name ), flags );
+		return io::file_stream<CharT>( std::basic_string<CharT>( file_name ),
+		                               flags );
 	}
 
 	template<typename CharT = char>
 	inline auto make_file_stream( FILE *fp, bool take_ownership = false ) {
-		return ::daw::io::make_output_stream<CharT>(
-		  ::daw::io::impl::fileout_callable( fp, take_ownership ) );
+
+		return io::file_stream<CharT>( fp, take_ownership );
 	}
 } // namespace daw

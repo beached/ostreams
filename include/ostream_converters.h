@@ -269,8 +269,8 @@ namespace ostream_converters {
 	template<
 	  typename CharT, typename Float,
 	  std::enable_if_t<daw::is_floating_point_v<Float>, std::nullptr_t> = nullptr>
-	constexpr auto to_string( Float &&value ) {
-		using value_t = std::decay_t<Float>;
+	constexpr auto to_string( Float value ) {
+		using value_t = daw::remove_cvref_t<Float>;
 		impl::sv_buff<CharT, ( std::numeric_limits<value_t>::max_exponent10 + 2 )>
 		  result{};
 

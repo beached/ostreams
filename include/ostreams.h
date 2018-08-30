@@ -32,99 +32,75 @@
 
 namespace daw {
 	namespace io {
+		// Specialize for your OutputStream type to overload from std::true_type to
+		// indicate you support the interface as outlined below
 		template<typename>
-		struct is_output_stream : std::false_type {};
+		struct supports_output_stream_interface : std::false_type {};
 
-		template<typename T>
-		constexpr bool is_output_stream_v =
-		  is_output_stream<remove_cvref_t<T>>::value;
+		/* **** Sample OutputStream
+		    template<typename CharT>
+		    struct basic_output_stream {
+		      using character_t = CharT;
 
-		template<typename CharT, typename OutputCallback>
-		class basic_output_stream {
-			OutputCallback m_out;
+		      constexpr void operator( )( CharT c );
 
-		public:
-			using character_t = CharT;
-			using callback_t = OutputCallback;
-			using reference = basic_output_stream &;
-			using const_reference = basic_output_stream const &;
-
-			constexpr explicit basic_output_stream( OutputCallback &oi ) noexcept(
-			  daw::is_nothrow_copy_constructible_v<OutputCallback> )
-			  : m_out( oi ) {}
-
-			constexpr explicit basic_output_stream( OutputCallback &&oi ) noexcept(
-			  daw::is_nothrow_move_constructible_v<OutputCallback> )
-			  : m_out( std::move( oi ) ) {}
-
-			static constexpr bool is_nothrow_on_char_v =
-			  noexcept( m_out( std::declval<CharT>( ) ) );
-
-			// String only requires a size( ) and data( ) member
-			template<typename String,
-			         std::enable_if_t<( ::daw::impl::is_string_like_v<String> &&
-			                            !::daw::impl::is_character_v<String>),
-			                          std::nullptr_t> = nullptr>
-			constexpr reference operator( )( String &&str ) noexcept {
-				static_assert(
-				  daw::is_same_v<remove_cvref_t<CharT>,
-				                 remove_cvref_t<decltype( *str.data( ) )>>,
-				  "String's data( ) character type must match that of output stream" );
-
-				auto ptr = str.data( );
-				auto const sz = str.size( );
-				for( size_t n = 0; n < sz; ++n ) {
-					m_out( *ptr++ );
-				}
-				return *this;
-			}
-
-			constexpr reference
-			operator( )( CharT c ) noexcept( is_nothrow_on_char_v ) {
-				m_out( c );
-				return *this;
-			}
-
-			constexpr const_reference operator( )( CharT c ) const
-			  noexcept( is_nothrow_on_char_v ) {
-				m_out( c );
-				return *this;
-			}
-
-			constexpr OutputCallback const &raw_handle( ) const noexcept {
-				return m_out;
-			}
-
-			constexpr OutputCallback &raw_handle( ) noexcept {
-				return m_out;
-			}
-		};
-
-		template<typename CharT, typename OutputCallback>
-		struct is_output_stream<basic_output_stream<CharT, OutputCallback>>
-		  : std::true_type {};
-
+		      // String requires a size( ) and data( ) member
+		      template<typename String,
+		               std::enable_if_t<( ::daw::impl::is_string_like_v<String> &&
+		                                  !::daw::impl::is_character_v<String>),
+		                                std::nullptr_t> = nullptr>
+		      constexpr void operator( )( String &&str );
+		    };
+		*/
 		namespace impl {
-			using ::daw::io::basic_output_stream;
+			template<typename CharT, typename OutputStream>
+			using has_operator_parens_char =
+			  decltype( std::declval<remove_cvref_t<OutputStream>>( )(
+			    std::declval<CharT>( ) ) );
 
-			template<typename CharT, typename OutputCallback, typename T>
-			using has_operator_lsh_lsh_detect = decltype( operator<<(
-			  std::declval<
-			    ::daw::io::basic_output_stream<CharT, OutputCallback> const &>( ),
-			  std::declval<T const &>( ) ) );
+			template<typename CharT>
+			struct operator_parens_string_t {
+				CharT const *data( ) const;
+				size_t size( ) const;
+			};
+
+			template<typename CharT, typename OutputStream>
+			using has_operator_parens_string =
+			  decltype( std::declval<remove_cvref_t<OutputStream>>( )(
+			    std::declval<operator_parens_string_t<CharT>>( ) ) );
+
+			template<typename CharT, typename OutputStream>
+			constexpr bool has_operator_parans_char_v =
+			  daw::is_detected_v<has_operator_parens_char, CharT, OutputStream>;
+
+			template<typename CharT, typename OutputStream>
+			constexpr bool has_operator_parans_string_v =
+			  daw::is_detected_v<has_operator_parens_string, CharT, OutputStream>;
+
+			template<typename, typename = daw::void_t<>>
+			struct os_character {
+				using type = void;
+			};
+
+			template<typename OutputStream>
+			struct os_character<OutputStream,
+			                    daw::void_t<typename OutputStream::character_t>> {
+				using type = typename OutputStream::character_t;
+			};
+
+			template<typename OutputStream>
+			using os_character_t = typename os_character<OutputStream>::type;
 		} // namespace impl
-
-		template<typename CharT, typename OutputCallback>
-		constexpr auto make_output_stream( OutputCallback &&oi ) {
-			return basic_output_stream<CharT, OutputCallback>(
-			  std::forward<OutputCallback>( oi ) );
-		}
+		template<typename OutputStream>
+		constexpr bool is_output_stream_v =
+		  supports_output_stream_interface<remove_cvref_t<OutputStream>>::value;
 
 		template<typename OutputStream, typename CharT, size_t N,
-		         std::enable_if_t<is_output_stream_v<OutputStream>,
+		         std::enable_if_t<is_output_stream_v<CharT, OutputStream>,
 		                          std::nullptr_t> = nullptr>
-		constexpr OutputStream &operator<<( OutputStream &os,
-		                                    CharT const ( &str )[N] ) noexcept( noexcept( os)) {
+		constexpr OutputStream &
+		operator<<( OutputStream &os,
+		            CharT const ( &str )[N] ) noexcept( noexcept( os ) ) {
 
 			for( size_t n = 0; n < ( N - 1 ); ++n ) {
 				os( str[n] );
@@ -137,8 +113,17 @@ namespace daw {
 		                          std::nullptr_t> = nullptr>
 		constexpr OutputStream &operator<<( OutputStream &os, T &&value ) {
 			using CharT = typename OutputStream::character_t;
+			// Can type T be called with to_string
 			static_assert( ::ostream_converters::has_to_string_v<CharT, T>,
 			               "Could not find a valid to_string<CharT> overload" );
+			// Is OutputStream callable with a single CharT
+			static_assert( impl::has_operator_parans_char_v<CharT, OutputStream>,
+			               "Missing operator( )( CharT ) member on OutputStream" );
+
+			// Is OutputStream callable with a String (has size( ) and data( ) member)
+			static_assert( impl::has_operator_parans_string_v<CharT, OutputStream>,
+			               "Missing operator( )( String ) member on OutputStream" );
+
 			using ::ostream_converters::to_string;
 			os( to_string<CharT>( std::forward<T>( value ) ) );
 			return os;

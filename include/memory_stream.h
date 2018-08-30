@@ -32,7 +32,7 @@
 namespace daw {
 	namespace io {
 		template<typename CharT = char>
-		class char_buffer_stream {
+		class memory_stream {
 			static_assert( !::daw::is_const_v<CharT>,
 			               "Cannot write to a const buffer" );
 			size_t m_capacity = 0;
@@ -40,8 +40,11 @@ namespace daw {
 			CharT *m_first = nullptr;
 
 		public:
-			constexpr char_buffer_stream( ) noexcept = default;
-			constexpr char_buffer_stream( CharT *buffer, size_t capacity ) noexcept
+			// OutputStream Interface
+			using character_t = CharT;
+
+			constexpr memory_stream( ) noexcept = default;
+			constexpr memory_stream( CharT *buffer, size_t capacity ) noexcept
 			  : m_capacity( capacity )
 			  , m_first( buffer ) {}
 
@@ -71,17 +74,31 @@ namespace daw {
 			}
 
 		public:
+			// OutputStream Interface
 			constexpr void operator( )( CharT c ) {
 				::daw::exception::precondition_check<buffer_full_exception>(
 				  !is_full( ) );
 				append( c );
 			}
 
-			constexpr void operator( )( ::daw::basic_string_view<CharT> sv ) {
+			// OutputStream Interface
+			template<typename String,
+			         std::enable_if_t<( ::daw::impl::is_string_like_v<String> &&
+			                            !::daw::impl::is_character_v<String>),
+			                          std::nullptr_t> = nullptr>
+			constexpr void operator( )( String &&str ) {
+				static_assert(
+				  daw::is_same_v<remove_cvref_t<CharT>,
+				                 remove_cvref_t<decltype( *str.data( ) )>>,
+				  "String's data( ) character type must match that of output stream" );
+
 				::daw::exception::precondition_check<buffer_full_exception>(
-				  sv.size( ) <= capacity( ) - size( ) );
-				for( auto c : sv ) {
-					append( c );
+				  str.size( ) <= capacity( ) - size( ) );
+
+				auto ptr = str.data( );
+				auto const sz = str.size( );
+				for( size_t n = 0; n < sz; ++n ) {
+					append( *ptr++ );
 				}
 			}
 
@@ -100,10 +117,13 @@ namespace daw {
 		};
 
 		template<typename CharT>
+		struct supports_output_stream_interface<memory_stream<CharT>>
+		  : std::true_type {};
+
+		template<typename CharT>
 		constexpr auto make_memory_buffer_stream( CharT *buffer,
 		                                          size_t capacity ) noexcept {
-			return ::daw::io::make_output_stream<CharT>(
-			  char_buffer_stream<CharT>( buffer, capacity ) );
+			return memory_stream<CharT>( buffer, capacity );
 		}
 	} // namespace io
 } // namespace daw

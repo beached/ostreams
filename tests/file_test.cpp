@@ -31,7 +31,7 @@ int main( int argc, char **argv ) {
 	}
 	{
 		auto fs_out = daw::make_file_stream( argv[1] );
-		if( !fs_out.raw_handle( ) ) {
+		if( !fs_out ) {
 			std::perror( "File opening failed" );
 			exit( EXIT_FAILURE );
 		}
