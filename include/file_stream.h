@@ -37,21 +37,27 @@ namespace daw {
 		namespace impl {
 			class fileout_callable {
 				FILE *m_file_handle;
+				bool m_is_owner = true;
 
 			public:
 				template<typename CharT>
-				inline explicit fileout_callable( std::basic_string<CharT> const &file_name,
-				                           file_open_flags flags ) noexcept
+				inline explicit fileout_callable(
+				  std::basic_string<CharT> const &file_name,
+				  file_open_flags flags ) noexcept
 				  : m_file_handle(
 				      fopen( file_name.c_str( ),
 				             ( flags == file_open_flags::Write ? "w" : "a" ) ) ) {}
 
+				inline explicit fileout_callable( FILE *fp, bool take_ownership )
+				  : m_file_handle( fp )
+				  , m_is_owner( take_ownership ) {}
+
 				inline void operator( )( char c ) const noexcept {
-					fputc( c, m_file_handle );
+					putc( c, m_file_handle );
 				}
 
 				inline void operator( )( wchar_t c ) const noexcept {
-					fputwc( c, m_file_handle );
+					putwc( c, m_file_handle );
 				}
 
 				inline explicit operator bool( ) const noexcept {
@@ -75,15 +81,22 @@ namespace daw {
 				}
 
 				inline ~fileout_callable( ) {
-					close( );
+					if( m_is_owner ) {
+						close( );
+					}
 				}
 
 				inline fileout_callable( fileout_callable &&other ) noexcept
-				  : m_file_handle( std::exchange( other.m_file_handle, nullptr ) ) {}
+				  : m_file_handle( other.m_file_handle )
+				  , m_is_owner( std::exchange( other.m_is_owner, false ) ) {}
 
 				inline fileout_callable &operator=( fileout_callable &&rhs ) noexcept {
 					if( this != &rhs ) {
-						m_file_handle = std::exchange( rhs.m_file_handle, nullptr );
+						if( m_is_owner ) {
+							close( );
+						}
+						m_is_owner = std::exchange( rhs.m_is_owner, false );
+						m_file_handle = rhs.m_file_handle;
 					}
 					return *this;
 				}
@@ -96,7 +109,7 @@ namespace daw {
 				  noexcept {
 					// not using fputs as string_view may not be zero terminated
 					for( auto c : str ) {
-						putchar( c );
+						operator( )( c );
 					}
 				}
 			};
@@ -121,11 +134,20 @@ namespace daw {
 		  daw::io::impl::fileout_callable( file_name, flags ) );
 	}
 
-	template<typename CharT>
+	template<typename CharT,
+	         std::enable_if_t<(daw::is_same_v<char, remove_cvref_t<CharT>> ||
+	                           daw::is_same_v<wchar_t, remove_cvref_t<CharT>>),
+	                          std::nullptr_t> = nullptr>
 	auto make_file_stream(
 	  CharT const *file_name,
 	  io::file_open_flags flags = io::file_open_flags::Write ) noexcept {
 
 		return make_file_stream( std::basic_string<CharT>( file_name ), flags );
+	}
+
+	template<typename CharT = char>
+	inline auto make_file_stream( FILE *fp, bool take_ownership = false ) {
+		return daw::io::make_output_stream<CharT>(
+		  daw::io::impl::fileout_callable( fp, take_ownership ) );
 	}
 } // namespace daw

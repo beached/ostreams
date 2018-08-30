@@ -27,39 +27,9 @@
 
 #include <daw/daw_string_view.h>
 
-#include "ostreams.h"
+#include "file_stream.h"
 
 namespace daw {
-	namespace io {
-		namespace impl {
-			struct stdout_callable {
-				constexpr stdout_callable( ) noexcept = default;
-
-				inline void operator( )( char c ) const noexcept {
-					putchar( c );
-				}
-
-				inline void operator( )( wchar_t c ) const noexcept {
-					putwchar( c );
-				}
-
-				template<typename CharT>
-				inline void operator( )( daw::basic_string_view<CharT> str ) const
-				  noexcept {
-					for( auto c : str ) {
-						putchar( c );
-					}
-				}
-			};
-		} // namespace impl
-
-		template<typename CharT>
-		constexpr auto make_con_out( ) noexcept {
-			return daw::io::make_output_stream<CharT>(
-			  daw::io::impl::stdout_callable( ) );
-		}
-	} // namespace io
-
-	auto con_out = io::make_con_out<char>( );
-	auto con_wout = io::make_con_out<wchar_t>( );
+	auto con_out = make_file_stream( stdout );
+	auto con_wout = make_file_stream<wchar_t>( stdout );
 } // namespace daw

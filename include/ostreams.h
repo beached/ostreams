@@ -151,9 +151,10 @@ namespace daw {
 		template<typename OutputStream, typename CharT, size_t N,
 		         std::enable_if_t<is_output_stream_v<OutputStream>,
 		                          std::nullptr_t> = nullptr>
-		constexpr OutputStream &operator<<( OutputStream &os, CharT const (&str)[N] ) {
+		constexpr OutputStream &operator<<( OutputStream &os,
+		                                    CharT const ( &str )[N] ) {
 
-			os( daw::basic_string_view<CharT>( str, N-1 ) );
+			os( daw::basic_string_view<CharT>( str, N - 1 ) );
 			return os;
 		}
 
@@ -163,7 +164,7 @@ namespace daw {
 		constexpr OutputStream &operator<<( OutputStream &os, T &&value ) {
 
 			::daw::io::impl::display_struct<OutputStream, T>{
-					&os, std::forward<T>( value ) }( );
+			  &os, std::forward<T>( value )}( );
 
 			return os;
 		}
