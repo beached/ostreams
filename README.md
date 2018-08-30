@@ -1,2 +1,2 @@
 # ostreams
-A constexpr output stream
+A constexpr output stream.  See tests for example of usage
