@@ -24,7 +24,6 @@
 
 #include <daw/daw_string_view.h>
 
-
 #include "memory_stream.h"
 
 template<typename Float, size_t buff_sz = 500>

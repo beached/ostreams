@@ -55,8 +55,8 @@ namespace daw {
 			  noexcept( m_out( std::declval<daw::basic_string_view<CharT>>( ) ) );
 
 			template<typename String,
-			         std::enable_if_t<(::daw::impl::is_string_like_v<String> &&
-			                           !daw::is_same_v<CharT, String>),
+			         std::enable_if_t<( ::daw::impl::is_string_like_v<String> &&
+			                            !daw::is_same_v<CharT, String>),
 			                          std::nullptr_t> = nullptr>
 			constexpr reference
 			operator( )( String &&str ) noexcept( is_nothrow_on_sv_v ) {
