@@ -88,14 +88,6 @@ namespace daw {
 				m_out( c );
 				return *this;
 			}
-
-			constexpr OutputCallback &get_underlying_stream( ) noexcept {
-				return m_out;
-			}
-
-			constexpr OutputCallback const &get_underlying_stream( ) const noexcept {
-				return m_out;
-			}
 		};
 
 		template<typename CharT, typename OutputCallback>

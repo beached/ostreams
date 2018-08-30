@@ -96,10 +96,6 @@ namespace daw {
 			std::basic_string<CharT> to_string( ) const {
 				return std::basic_string<CharT>( data( ), size( ) );
 			}
-
-			constexpr basic_output_stream<CharT, char_buffer_stream> to_stream( ) {
-				return basic_output_stream<CharT, char_buffer_stream>( *this );
-			}
 		};
 
 		template<typename CharT>

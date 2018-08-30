@@ -54,7 +54,7 @@ namespace daw {
 				template<typename Number, std::enable_if_t<daw::is_arithmetic_v<Number>,
 				                                           std::nullptr_t> = nullptr>
 				constexpr Number pow10( uintmax_t n ) noexcept {
-					Number result = static_cast<Number>( 1 );
+					auto result = static_cast<Number>( 1 );
 					while( n > 1 ) {
 						result *= static_cast<Number>( 10 );
 						--n;
@@ -334,10 +334,6 @@ namespace daw {
 				template<typename T>
 				using has_tostring_detect2 =
 				  decltype( to_string( std::declval<T const &>( ) ) );
-
-				template<typename T>
-				constexpr bool has_tostring2_v =
-				  daw::is_detected_v<impl::has_tostring_detect2, T>;
 
 				using daw::io::ostream_converters::to_string;
 				template<typename T>
