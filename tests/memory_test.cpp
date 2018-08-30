@@ -21,10 +21,10 @@
 // SOFTWARE.
 
 
-#include <iostream>
 #include <daw/daw_string_view.h>
 
 #include "memory_stream.h"
+#include "console_stream.h"
 
 template<typename Float, size_t buff_sz = 74>
 struct str_t {
@@ -44,6 +44,6 @@ auto const & test( ) {
 
 
 int main( int argc, char ** ) {
-	std::cout << static_cast<daw::string_view>( test( ).buffer ) << '\n';
+	daw::con_out << static_cast<daw::string_view>( test( ).buffer ) << '\n';
 	return 0;
 }
