@@ -26,7 +26,7 @@
 
 #include "memory_stream.h"
 
-template<typename Float, size_t buff_sz = 500>
+template<typename Float, size_t buff_sz = 75>
 struct str_t {
 	char buffer[buff_sz + 1] = {0};
 
