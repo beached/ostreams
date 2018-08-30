@@ -26,24 +26,33 @@
 #include "memory_stream.h"
 #include "console_stream.h"
 
-template<typename Float, size_t buff_sz = 74>
-struct str_t {
-	char buffer[buff_sz + 1] = {0};
+template<size_t buff_sz, typename CharT = char>
+class buffer_t {
+	CharT value[buff_sz+1] = {0};
+	static constexpr size_t sz = buff_sz;
+public:
+	constexpr size_t size( ) const noexcept { return sz; }
+	constexpr CharT const * data( ) const noexcept { return value; }
+	constexpr CharT * data( ) noexcept { return value; }
 
-	explicit constexpr str_t( Float f ) {
-		auto buff_os = ::daw::io::make_memory_buffer_stream( buffer, buff_sz );
-		buff_os << "The number is: " << f << ". " << 5 << " times number is "
-		        << ( static_cast<Float>( 5 ) * f ) << '\n';
-	}
+	constexpr buffer_t( ) noexcept = default;
+
+	constexpr operator CharT const *( ) const noexcept { return data( ); }
 };
 
-auto const & test( ) {
-	static constexpr auto result = str_t<double>( 1234560.435333 );
-	return result;
+template<size_t buff_sz = 74, typename Float>
+constexpr auto test( Float f ) {
+	buffer_t<75> buffer{};
+	auto buff_os = ::daw::io::make_memory_buffer_stream( buffer.data( ), buffer.size( ) );
+	buff_os << "The number is: " << f << ". " << 5 << " times number is "
+					<< ( static_cast<Float>( 5 ) * f ) << '\n';
+
+	return buffer;
 }
 
+static auto test_result = test( 1234560.435333 );
 
 int main( int argc, char ** ) {
-	daw::con_out << static_cast<daw::string_view>( test( ).buffer ) << '\n';
+	daw::con_out << test_result << '\n';
 	return 0;
 }
