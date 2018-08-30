@@ -89,11 +89,11 @@ namespace daw {
 				return *this;
 			}
 
-			constexpr OutputCallback const & raw_handle( ) const noexcept {
+			constexpr OutputCallback const &raw_handle( ) const noexcept {
 				return m_out;
 			}
 
-			constexpr OutputCallback & raw_handle( ) noexcept {
+			constexpr OutputCallback &raw_handle( ) noexcept {
 				return m_out;
 			}
 		};
@@ -148,13 +148,22 @@ namespace daw {
 			  std::forward<OutputCallback>( oi ) );
 		}
 
+		template<typename OutputStream, typename CharT, size_t N,
+		         std::enable_if_t<is_output_stream_v<OutputStream>,
+		                          std::nullptr_t> = nullptr>
+		constexpr OutputStream &operator<<( OutputStream &os, CharT const (&str)[N] ) {
+
+			os( daw::basic_string_view<CharT>( str, N-1 ) );
+			return os;
+		}
+
 		template<typename OutputStream, typename T,
 		         std::enable_if_t<is_output_stream_v<OutputStream>,
 		                          std::nullptr_t> = nullptr>
 		constexpr OutputStream &operator<<( OutputStream &os, T &&value ) {
 
 			::daw::io::impl::display_struct<OutputStream, T>{
-			  &os, std::forward<T>( value )}( );
+					&os, std::forward<T>( value ) }( );
 
 			return os;
 		}

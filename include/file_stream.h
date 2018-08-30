@@ -36,12 +36,11 @@ namespace daw {
 
 		namespace impl {
 			class fileout_callable {
-				FILE *m_file_handle = nullptr;
-				public:
-				constexpr fileout_callable( ) noexcept = default;
+				FILE *m_file_handle;
 
+			public:
 				template<typename CharT>
-				explicit fileout_callable( std::basic_string<CharT> const &file_name,
+				inline explicit fileout_callable( std::basic_string<CharT> const &file_name,
 				                           file_open_flags flags ) noexcept
 				  : m_file_handle(
 				      fopen( file_name.c_str( ),
@@ -63,25 +62,39 @@ namespace daw {
 					return m_file_handle;
 				}
 
-				void close( ) noexcept {
+				inline void flush( ) noexcept {
+					fflush( m_file_handle );
+				}
+
+				inline void close( ) noexcept {
 					auto tmp = std::exchange( m_file_handle, nullptr );
 					if( tmp ) {
+						fflush( tmp );
 						fclose( tmp );
 					}
 				}
 
-				~fileout_callable( ) {
+				inline ~fileout_callable( ) {
 					close( );
 				}
 
-				fileout_callable( fileout_callable && ) noexcept = default;
-				fileout_callable &operator=( fileout_callable && ) noexcept = default;
+				inline fileout_callable( fileout_callable &&other ) noexcept
+				  : m_file_handle( std::exchange( other.m_file_handle, nullptr ) ) {}
+
+				inline fileout_callable &operator=( fileout_callable &&rhs ) noexcept {
+					if( this != &rhs ) {
+						m_file_handle = std::exchange( rhs.m_file_handle, nullptr );
+					}
+					return *this;
+				}
 
 				fileout_callable( fileout_callable const & ) = delete;
 				fileout_callable &operator=( fileout_callable const & ) = delete;
+
 				template<typename CharT>
 				inline void operator( )( daw::basic_string_view<CharT> str ) const
 				  noexcept {
+					// not using fputs as string_view may not be zero terminated
 					for( auto c : str ) {
 						putchar( c );
 					}
@@ -113,7 +126,6 @@ namespace daw {
 	  CharT const *file_name,
 	  io::file_open_flags flags = io::file_open_flags::Write ) noexcept {
 
-		return make_file_stream( std::basic_string<CharT>( file_name ),
-		                         flags );
+		return make_file_stream( std::basic_string<CharT>( file_name ), flags );
 	}
 } // namespace daw

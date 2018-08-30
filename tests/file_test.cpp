@@ -34,6 +34,8 @@ int main( int argc, char **argv ) {
 		std::perror( "File opening failed" );
 		exit( EXIT_FAILURE );
 	}
+	fs_out << "Hello\n";
+	/*
 	float const f = static_cast<float>( argc ) * 1.2334f;
 	fs_out << "The number is: " << f << ". " << argc << " times number is "
 	       << ( static_cast<float>( argc ) * f ) << '\n';
@@ -42,6 +44,7 @@ int main( int argc, char **argv ) {
 	fs_out << "The number is: " << d << ". " << argc << " times number is "
 	       << ( static_cast<double>( argc ) * d ) << '\n';
 	fs_out << '\n';
+	 */
 
 	return EXIT_SUCCESS;
 }
