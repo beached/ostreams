@@ -133,7 +133,7 @@ namespace daw {
 		                          std::nullptr_t> = nullptr>
 		constexpr OutputStream &operator<<( OutputStream &os, T &&value ) {
 			using CharT = typename OutputStream::character_t;
-			using ::daw::io::ostream_converters::to_string;
+			using ::ostream_converters::to_string;
 			os( to_string<CharT>( std::forward<T>( value ) ) );
 			return os;
 		}
