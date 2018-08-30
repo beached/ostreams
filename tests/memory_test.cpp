@@ -20,8 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <iostream>
 
+#include <iostream>
 #include <daw/daw_string_view.h>
 
 #include "memory_stream.h"
@@ -37,10 +37,11 @@ struct str_t {
 	}
 };
 
-auto test( ) {
-	auto result = str_t<double>( 1234560.435333 );
+auto const & test( ) {
+	static constexpr auto result = str_t<double>( 1234560.435333 );
 	return result;
 }
+
 
 int main( int argc, char ** ) {
 	std::cout << static_cast<daw::string_view>( test( ).buffer ) << '\n';
