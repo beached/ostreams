@@ -32,11 +32,20 @@
 
 namespace daw {
 	namespace io {
+		template<typename>
+		struct is_output_stream : std::false_type {};
+
+		template<typename T>
+		constexpr bool is_output_stream_v =
+		  is_output_stream<remove_cvref_t<T>>::value;
+
 		template<typename CharT, typename OutputCallback>
 		class basic_output_stream {
 			OutputCallback m_out;
 
 		public:
+			using character_t = CharT;
+			using callback_t = OutputCallback;
 			using reference = basic_output_stream &;
 			using const_reference = basic_output_stream const &;
 
@@ -89,6 +98,10 @@ namespace daw {
 			}
 		};
 
+		template<typename CharT, typename OutputCallback>
+		struct is_output_stream<basic_output_stream<CharT, OutputCallback>>
+		  : std::true_type {};
+
 		namespace impl {
 			using ::daw::io::basic_output_stream;
 
@@ -116,10 +129,12 @@ namespace daw {
 				}
 			};
 
-			template<typename CharT, typename OutputCallback, typename Arg>
+			template<typename OutputStream, typename T,
+			         std::enable_if_t<is_output_stream_v<OutputStream>,
+			                          std::nullptr_t> = nullptr>
 			struct display_struct {
-				basic_output_stream<CharT, OutputCallback> *os;
-				Arg arg;
+				daw::remove_cvref_t<OutputStream> *os;
+				T arg;
 
 				constexpr void operator( )( ) {
 					display_value::display( *os, arg );
@@ -133,21 +148,14 @@ namespace daw {
 			  std::forward<OutputCallback>( oi ) );
 		}
 
-		template<typename CharT, typename OutputCallback, size_t N>
-		constexpr basic_output_stream<CharT, OutputCallback> &
-		operator<<( basic_output_stream<CharT, OutputCallback> &os,
-		            CharT const ( &str )[N] ) {
-			os( daw::basic_string_view<CharT>( str, N - 1 ) );
-			return os;
-		}
-
-		template<typename CharT, typename OutputCallback, typename T,
-		         std::enable_if_t<(ostream_converters::impl::has_tostring_v<T>),
+		template<typename OutputStream, typename T,
+		         std::enable_if_t<is_output_stream_v<OutputStream>,
 		                          std::nullptr_t> = nullptr>
-		constexpr basic_output_stream<CharT, OutputCallback> &
-		operator<<( basic_output_stream<CharT, OutputCallback> &os, T &&value ) {
-			::daw::io::impl::display_struct<CharT, OutputCallback, T>{
+		constexpr OutputStream &operator<<( OutputStream &os, T &&value ) {
+
+			::daw::io::impl::display_struct<OutputStream, T>{
 			  &os, std::forward<T>( value )}( );
+
 			return os;
 		}
 	} // namespace io
