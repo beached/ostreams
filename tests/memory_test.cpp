@@ -38,8 +38,7 @@ struct str_t {
 };
 
 auto test( ) {
-	constexpr auto result = str_t<double>( 1234560.435333 );
-	// constexpr auto result = str_t( 0x1p87f );
+	auto result = str_t<double>( 1234560.435333 );
 	return result;
 }
 

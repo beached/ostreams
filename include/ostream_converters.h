@@ -110,25 +110,28 @@ namespace daw {
 					CharT buffer[N + 1] = {0};
 					size_t len = 0;
 
+					constexpr size_t capacity( ) const noexcept {
+						return N;
+					}
+
 					constexpr sv_buff( ) noexcept = default;
 
-					constexpr CharT const *data( ) const {
+					constexpr CharT const *data( ) const noexcept {
 						return buffer;
 					}
 
-					constexpr size_t size( ) const {
+					constexpr size_t size( ) const noexcept {
 						return len;
 					}
 
 					constexpr void push_back( CharT c ) {
-						daw::exception::precondition_check<buffer_full_exception>( len + 1 <
-						                                                           N );
+						daw::exception::precondition_check<buffer_full_exception>( len + 1 <= capacity( ) );
 						buffer[len++] = c;
 					}
 
 					constexpr void push_back( daw::basic_string_view<CharT> sv ) {
 						daw::exception::precondition_check<buffer_full_exception>(
-						  len + sv.size( ) < N );
+						  len + sv.size( ) <= capacity( ) );
 						for( auto c : sv ) {
 							buffer[len++] = c;
 						}
@@ -192,8 +195,7 @@ namespace daw {
 			} // namespace impl
 
 			template<typename CharT,
-			         std::enable_if_t<(daw::is_same_v<char, std::decay_t<CharT>> ||
-			                           daw::is_same_v<wchar_t, std::decay_t<CharT>>),
+			         std::enable_if_t<daw::impl::is_character_v<CharT>,
 			                          std::nullptr_t> = nullptr>
 			constexpr daw::basic_string_view<CharT>
 			to_string( CharT const *str ) noexcept {
@@ -219,8 +221,10 @@ namespace daw {
 			}
 
 			template<typename CharT, typename Integer,
-			         std::enable_if_t<(daw::is_integral_v<std::decay_t<Integer>> &&
-			                           !daw::is_same_v<bool, std::decay_t<Integer>>),
+			         std::enable_if_t<(daw::is_integral_v<remove_cvref_t<Integer>> &&
+			                           !daw::is_same_v<bool, std::decay_t<Integer>> &&
+			                           !daw::is_floating_point_v<std::decay_t<Integer>> &&
+			                           !daw::impl::is_character_v<Integer>),
 			                          std::nullptr_t> = nullptr>
 			static constexpr auto to_string( Integer value ) {
 				impl::sv_buff<CharT, std::numeric_limits<Integer>::digits10> result{};

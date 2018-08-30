@@ -110,36 +110,6 @@ namespace daw {
 			  std::declval<
 			    ::daw::io::basic_output_stream<CharT, OutputCallback> const &>( ),
 			  std::declval<T const &>( ) ) );
-
-			struct display_value {
-				template<typename CharT, typename OutputCallback, typename T,
-				         std::enable_if_t<
-				           (!daw::is_same_v<std::decay_t<CharT>, std::decay_t<T>>),
-				           std::nullptr_t> = nullptr>
-				static constexpr void
-				display( basic_output_stream<CharT, OutputCallback> &os, T &&value ) {
-					using ::daw::io::ostream_converters::to_string;
-					os( to_string<CharT>( std::forward<T>( value ) ) );
-				}
-
-				template<typename CharT, typename OutputCallback>
-				static constexpr void
-				display( basic_output_stream<CharT, OutputCallback> &os, CharT c ) {
-					os( c );
-				}
-			};
-
-			template<typename OutputStream, typename T,
-			         std::enable_if_t<is_output_stream_v<OutputStream>,
-			                          std::nullptr_t> = nullptr>
-			struct display_struct {
-				daw::remove_cvref_t<OutputStream> *os;
-				T arg;
-
-				constexpr void operator( )( ) {
-					display_value::display( *os, arg );
-				}
-			};
 		} // namespace impl
 
 		template<typename CharT, typename OutputCallback>
@@ -162,10 +132,9 @@ namespace daw {
 		         std::enable_if_t<is_output_stream_v<OutputStream>,
 		                          std::nullptr_t> = nullptr>
 		constexpr OutputStream &operator<<( OutputStream &os, T &&value ) {
-
-			::daw::io::impl::display_struct<OutputStream, T>{
-			  &os, std::forward<T>( value )}( );
-
+			using CharT = typename OutputStream::character_t;
+			using ::daw::io::ostream_converters::to_string;
+			os( to_string<CharT>( std::forward<T>( value ) ) );
 			return os;
 		}
 	} // namespace io
