@@ -60,20 +60,22 @@ namespace daw {
 			static constexpr bool is_nothrow_on_char_v =
 			  noexcept( m_out( std::declval<CharT>( ) ) );
 
-			static constexpr bool is_nothrow_on_sv_v =
-			  noexcept( m_out( std::declval<daw::basic_string_view<CharT>>( ) ) );
-
+			// String only requires a size( ) and data( ) member
 			template<typename String,
 			         std::enable_if_t<( ::daw::impl::is_string_like_v<String> &&
-			                            !daw::is_same_v<CharT, String>),
+			                            !::daw::impl::is_character_v<String>),
 			                          std::nullptr_t> = nullptr>
-			constexpr reference
-			operator( )( String &&str ) noexcept( is_nothrow_on_sv_v ) {
-				static_assert( daw::is_same_v<std::decay_t<CharT>,
-				                              std::decay_t<decltype( *str.data( ) )>>,
-				               "str must contain CharT data" );
+			constexpr reference operator( )( String &&str ) noexcept {
+				static_assert(
+				  daw::is_same_v<remove_cvref_t<CharT>,
+				                 remove_cvref_t<decltype( *str.data( ) )>>,
+				  "String's data( ) character type must match that of output stream" );
 
-				m_out( daw::basic_string_view<CharT>( str.data( ), str.size( ) ) );
+				auto ptr = str.data( );
+				auto const sz = str.size( );
+				for( size_t n = 0; n < sz; ++n ) {
+					m_out( *ptr++ );
+				}
 				return *this;
 			}
 
@@ -122,9 +124,9 @@ namespace daw {
 		         std::enable_if_t<is_output_stream_v<OutputStream>,
 		                          std::nullptr_t> = nullptr>
 		constexpr OutputStream &operator<<( OutputStream &os,
-		                                    CharT const ( &str )[N] ) {
+		                                    CharT const ( &str )[N] ) noexcept( noexcept( os)) {
 
-			for( size_t n=0; n<(N-1); ++n ) {
+			for( size_t n = 0; n < ( N - 1 ); ++n ) {
 				os( str[n] );
 			}
 			return os;

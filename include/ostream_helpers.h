@@ -36,8 +36,8 @@ namespace daw {
 
 		template<typename String>
 		constexpr bool is_string_like_v =
-		  daw::is_detected_v<has_data_member_detect, String>
-		    &&daw::is_detected_v<has_size_member_detect, String>;
+		  daw::is_detected_v<has_data_member_detect, remove_cvref_t<String>>
+		    &&daw::is_detected_v<has_size_member_detect, remove_cvref_t<String>>;
 
 		template<typename T>
 		constexpr bool is_character_v = is_same_v<char, remove_cvref_t<T>> ||

@@ -48,21 +48,27 @@ public:
 	}
 };
 
-struct A{ };
+struct A {};
 
 // Only need to define a structure that has data( ) and size( ) members
+// This includes std::basic_string, std::basic_string_view,
+// daw::basic_string_view
 template<typename CharT>
 constexpr auto to_string( A ) noexcept {
 	struct result_t {
-		CharT const * r = "A";
-		CharT const * data( ) const { return r; }
-		size_t size( ) const { return 1 ; }
+		CharT const *r = "A";
+		CharT const *data( ) const {
+			return r;
+		}
+		size_t size( ) const {
+			return 1;
+		}
 	};
 	return result_t{};
 }
 
 template<size_t buff_sz = 74, typename Float>
-constexpr auto test( Float f ) {
+auto test( Float f ) {
 	buffer_t<75> buffer{};
 	auto buff_os =
 	  ::daw::io::make_memory_buffer_stream( buffer.data( ), buffer.size( ) );

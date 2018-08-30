@@ -103,15 +103,6 @@ namespace daw {
 
 				fileout_callable( fileout_callable const & ) = delete;
 				fileout_callable &operator=( fileout_callable const & ) = delete;
-
-				template<typename CharT>
-				inline void operator( )( ::daw::basic_string_view<CharT> str ) const
-				  noexcept {
-					// not using fputs as string_view may not be zero terminated
-					for( auto c : str ) {
-						operator( )( c );
-					}
-				}
 			};
 		} // namespace impl
 	}   // namespace io
