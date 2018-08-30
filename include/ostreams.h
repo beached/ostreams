@@ -37,21 +37,24 @@ namespace daw {
 		template<typename>
 		struct supports_output_stream_interface : std::false_type {};
 
-		/* **** Sample OutputStream
-		    template<typename CharT>
-		    struct basic_output_stream {
-		      using character_t = CharT;
-
-		      constexpr void operator( )( CharT c );
-
-		      // String requires a size( ) and data( ) member
-		      template<typename String,
-		               std::enable_if_t<( ::daw::impl::is_string_like_v<String> &&
-		                                  !::daw::impl::is_character_v<String>),
-		                                std::nullptr_t> = nullptr>
-		      constexpr void operator( )( String &&str );
-		    };
-		*/
+		/* **** Sample OutputStream ****
+		 *
+		 *   template<typename CharT>
+		 *   struct basic_output_stream {
+		 *     using character_t = CharT;
+		 *
+		 *     constexpr void operator( )( CharT c );
+		 *
+		 *		      // String requires a size( ) and data( ) member
+		 *		      template<typename String,
+		 *		               std::enable_if_t<(
+		 *::daw::impl::is_string_like_v<String> &&
+		 *		                                  !::daw::impl::is_character_v<String>),
+		 *		                                std::nullptr_t> = nullptr>
+		 *		      constexpr void operator( )( String &&str );
+		 *		    };
+		 *
+		 */
 		namespace impl {
 			template<typename CharT, typename OutputStream>
 			using has_operator_parens_char =
@@ -76,31 +79,20 @@ namespace daw {
 			template<typename CharT, typename OutputStream>
 			constexpr bool has_operator_parans_string_v =
 			  daw::is_detected_v<has_operator_parens_string, CharT, OutputStream>;
-
-			template<typename, typename = daw::void_t<>>
-			struct os_character {
-				using type = void;
-			};
-
-			template<typename OutputStream>
-			struct os_character<OutputStream,
-			                    daw::void_t<typename OutputStream::character_t>> {
-				using type = typename OutputStream::character_t;
-			};
-
-			template<typename OutputStream>
-			using os_character_t = typename os_character<OutputStream>::type;
 		} // namespace impl
+
 		template<typename OutputStream>
 		constexpr bool is_output_stream_v =
 		  supports_output_stream_interface<remove_cvref_t<OutputStream>>::value;
 
+		// Stream Operators
 		template<typename OutputStream, typename CharT, size_t N,
-		         std::enable_if_t<is_output_stream_v<CharT, OutputStream>,
+		         std::enable_if_t<(is_output_stream_v<CharT, OutputStream> &&
+		                           daw::impl::is_character_v<CharT>),
 		                          std::nullptr_t> = nullptr>
 		constexpr OutputStream &
 		operator<<( OutputStream &os,
-		            CharT const ( &str )[N] ) noexcept( noexcept( os ) ) {
+		            CharT const ( &str )[N] ) noexcept( noexcept( os( str[0] ) ) ) {
 
 			for( size_t n = 0; n < ( N - 1 ); ++n ) {
 				os( str[n] );
