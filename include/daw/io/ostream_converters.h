@@ -106,6 +106,7 @@ namespace ostream_converters {
 
 	} // namespace impl
 
+	// character pointer
 	template<typename CharT, std::enable_if_t<daw::traits::is_character_v<CharT>,
 	                                          std::nullptr_t> = nullptr>
 	constexpr daw::basic_string_view<CharT>
@@ -113,12 +114,14 @@ namespace ostream_converters {
 		return daw::basic_string_view<CharT>( str, impl::strlen( str ) );
 	}
 
+	// string_view
 	template<typename CharT>
 	constexpr daw::basic_string_view<CharT>
 	to_string( daw::basic_string_view<CharT> str ) noexcept {
 		return str;
 	}
 
+	// std::basic_string
 	// TODO add overload for the operator<< to use accepts_asciiz
 	template<typename CharT>
 	daw::basic_string_view<CharT>
@@ -126,6 +129,7 @@ namespace ostream_converters {
 		return daw::basic_string_view<CharT>( str.data( ), str.size( ) );
 	}
 
+	// Integer numbers
 	template<
 	  typename CharT, typename Integer,
 	  std::enable_if_t<
@@ -155,6 +159,7 @@ namespace ostream_converters {
 		return result;
 	}
 
+	// Bool
 	template<typename CharT, typename Bool,
 	         std::enable_if_t<
 	           daw::all_true_v<daw::is_same_v<bool, daw::remove_cvref_t<Bool>>,
@@ -180,6 +185,8 @@ namespace ostream_converters {
 		return daw::static_string_t<CharT, 5>( L"false" );
 	}
 
+	// Single character (char, wchar_t).  Need to be treated separately from other
+	// integers
 	template<typename CharT,
 	         std::enable_if_t<::daw::traits::is_character_v<CharT>,
 	                          std::nullptr_t> = nullptr>
@@ -189,6 +196,7 @@ namespace ostream_converters {
 		return result;
 	}
 
+	// Floating point numbers
 	template<
 	  typename CharT, typename Float,
 	  std::enable_if_t<daw::is_floating_point_v<Float>, std::nullptr_t> = nullptr>

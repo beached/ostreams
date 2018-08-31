@@ -64,7 +64,9 @@ auto const &test2( ) {
 	return test_result;
 }
 
+
 int main( int, char ** ) {
 	daw::con_out << test2( ) << '\n';
 	return 0;
 }
+

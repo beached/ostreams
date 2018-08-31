@@ -22,9 +22,11 @@
 
 #pragma once
 
+#ifndef NOSTRING
 #include <string>
-
 #include <daw/daw_string_view.h>
+#endif
+
 #include <daw/daw_traits.h>
 
 #include "ostreams.h"
@@ -106,6 +108,7 @@ namespace daw {
 				m_position = 0;
 			}
 
+#ifndef NOSTRING
 			constexpr ::daw::basic_string_view<CharT> to_string_view( ) const
 			  noexcept {
 				return ::daw::basic_string_view<CharT>( data( ), size( ) );
@@ -115,7 +118,7 @@ namespace daw {
 				return std::basic_string<CharT>( data( ), size( ) );
 			}
 		};
-
+#endif
 		template<typename CharT>
 		struct supports_output_stream_interface<memory_stream<CharT>>
 		  : std::true_type {};

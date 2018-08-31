@@ -43,9 +43,10 @@ inline void do_not_optimize( T && t ) noexcept {
 
 struct stringstream_test {
 	void operator( )( size_t count, int number ) const {
+		std::stringstream ss{};
 		for( size_t n = 0; n < count; ++n ) {
+			ss.clear( );
 			do_not_optimize( number );
-			std::stringstream ss{};
 			ss << "The answer to the meaining of life is " << number << ' '
 			   << ( static_cast<float>( number ) * 1.5f ) << '\n';
 			do_not_optimize( ss );
@@ -55,14 +56,14 @@ struct stringstream_test {
 
 struct snprintf_test {
 	void operator( )( size_t count, int number ) const {
+		daw::static_string_t<char, 50> buffer{};
 		for( size_t n = 0; n < count; ++n ) {
-			do_not_optimize( number );
-			daw::static_string_t<char, 50> buffer{};
 			buffer.resize( buffer.capacity( ), false );
-
+			do_not_optimize( number );
 			snprintf( buffer.data( ), buffer.capacity( ),
 			          "The asnwer to the meaning of life is %d %f\n", number,
 			          static_cast<float>( number ) * 1.5f );
+			buffer.shrink_to_fit( );
 			do_not_optimize( buffer );
 		}
 	}
@@ -70,12 +71,10 @@ struct snprintf_test {
 
 struct memory_stream_test {
 	void operator( )( size_t count, int number ) const {
+		daw::static_string_t<char, 50> buffer{};
 		for( size_t n = 0; n < count; ++n ) {
 			do_not_optimize( number );
-			daw::static_string_t<char, 50> buffer{};
 
-			// Indicate we want to have the full size of static_string as in use, and
-			// do not default init the char's to 0
 			buffer.resize( buffer.capacity( ), false );
 
 			auto ss =
@@ -83,6 +82,7 @@ struct memory_stream_test {
 
 			ss << "The answer to the meaining of life is " << number << ' '
 			   << ( static_cast<float>( number ) * 1.5f ) << '\n';
+			buffer.shrink_to_fit( );
 			do_not_optimize( buffer );
 		}
 	}
