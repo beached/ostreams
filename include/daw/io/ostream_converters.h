@@ -113,18 +113,13 @@ namespace ostream_converters {
 		return daw::basic_string_view<CharT>( str, impl::strlen( str ) );
 	}
 
-	template<size_t N, typename CharT>
-	constexpr daw::basic_string_view<CharT>
-	to_string( CharT const ( &str )[N] ) noexcept {
-		return daw::basic_string_view<CharT>( str, N - 1 );
-	}
-
 	template<typename CharT>
 	constexpr daw::basic_string_view<CharT>
 	to_string( daw::basic_string_view<CharT> str ) noexcept {
 		return str;
 	}
 
+	// TODO add overload for the operator<< to use accepts_asciiz
 	template<typename CharT>
 	daw::basic_string_view<CharT>
 	to_string( std::basic_string<CharT> const &str ) noexcept {
@@ -166,13 +161,10 @@ namespace ostream_converters {
 	                           daw::is_same_v<char, daw::remove_cvref_t<CharT>>>,
 	           std::nullptr_t> = nullptr>
 	constexpr auto to_string( Bool b ) noexcept {
-		daw::static_string_t<CharT, 5> result{};
 		if( b ) {
-			result.push_back( "true" );
-		} else {
-			result.push_back( "false" );
+			return daw::static_string_t<CharT, 5>( "true" );
 		}
-		return result;
+		return daw::static_string_t<CharT, 5>( "false" );
 	}
 
 	template<
@@ -182,13 +174,10 @@ namespace ostream_converters {
 	                    daw::is_same_v<wchar_t, daw::remove_cvref_t<CharT>>>,
 	    std::nullptr_t> = nullptr>
 	constexpr auto to_string( Bool b ) noexcept {
-		daw::static_string_t<CharT, 5> result{};
 		if( b ) {
-			result.push_back( L"true" );
-		} else {
-			result.push_back( L"false" );
+			return daw::static_string_t<CharT, 5>( L"true" );
 		}
-		return result;
+		return daw::static_string_t<CharT, 5>( L"false" );
 	}
 
 	template<typename CharT,
