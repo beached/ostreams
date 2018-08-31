@@ -23,9 +23,9 @@
 #include <iostream>
 #include <sstream>
 
-#include <daw/daw_benchmark.h>
 #include <daw/daw_utility.h>
 
+#include "./benchmark.h"
 #include "daw/io/console_stream.h"
 #include "daw/io/memory_stream.h"
 
@@ -110,19 +110,19 @@ int main( int argc, char ** ) {
 	std::ios_base::sync_with_stdio( false );
 	constexpr size_t const count = 100'000;
 	std::cout << "char buffer" << std::endl;
-	daw::bench_test2( "std::string_stream", stringstream_test{}, count, count,
-	                  argc );
-	daw::bench_test2( "snprintf", snprintf_test{}, count, count, argc );
-	daw::bench_test2( "daw::memory_stream", memory_stream_test{}, count, count,
-	                  argc );
+	daw::benchmark( "std::string_stream", stringstream_test{}, count, count,
+	                argc );
+	daw::benchmark( "snprintf", snprintf_test{}, count, count, argc );
+	daw::benchmark( "daw::memory_stream", memory_stream_test{}, count, count,
+	                argc );
 
 	std::cout << "\nconsole" << std::endl;
-	daw::bench_test2( "srd::cerr", cerr_test{}, count, count, argc );
+	daw::benchmark( "srd::cerr", cerr_test{}, count, count, argc );
 	std::cerr << std::flush;
-	daw::bench_test2( "printf", printf_test{}, count, count, argc );
+	daw::benchmark( "printf", printf_test{}, count, count, argc );
 	fflush( stderr );
-	daw::bench_test2( "daw::console_stream", console_stream_test{}, count, count,
-	                  argc );
+	daw::benchmark( "daw::console_stream", console_stream_test{}, count, count,
+	                argc );
 	fflush( stderr );
 	return 0;
 }
