@@ -31,16 +31,23 @@
 #include "ostream_helpers.h"
 
 namespace daw {
-	template<typename CharT, size_t N>
-	struct static_string_t {
-		CharT buffer[N + 1] = {static_cast<CharT>( 0 )};
+	template<typename CharT, size_t Capacity>
+	class static_string_t {
+		CharT buffer[Capacity + 1] = {0};
 		size_t len = 0;
 
-		constexpr size_t capacity( ) const noexcept {
-			return N;
-		}
-
+	public:
 		constexpr static_string_t( ) noexcept = default;
+
+		template<size_t N>
+	  constexpr static_string_t( CharT const (&str)[N] ) noexcept: len( N-1 ) {
+	  	static_assert( (N-1) <= Capacity, "Not enough space in static_string_t" );
+	  	daw::algorithm::copy_n( str, buffer, N-1 );
+	  }
+
+		constexpr size_t capacity( ) const noexcept {
+			return Capacity;
+		}
 
 		constexpr CharT *data( ) noexcept {
 			return buffer;

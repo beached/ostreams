@@ -34,8 +34,7 @@ namespace {
 	// daw::basic_string_view
 	template<typename CharT>
 	constexpr auto to_string( A ) noexcept {
-		daw::static_string_t<CharT, 1> result;
-		result += 'A';
+		daw::static_string_t<CharT, 1> result = "A";
 		return result;
 	}
 
