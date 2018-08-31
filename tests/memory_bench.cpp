@@ -82,10 +82,7 @@ struct cerr_test {
 			daw::force_evaluation( number );
 			std::cerr << "The answer to the meaining of life is " << number << ' '
 			          << ( static_cast<float>( number ) * 1.5f ) << '\n';
-			daw::force_evaluation( std::cerr );
 		}
-		daw::force_evaluation( std::cerr );
-		std::cerr << std::flush;
 	}
 };
 
@@ -95,10 +92,7 @@ struct console_stream_test {
 			daw::force_evaluation( number );
 			daw::con_err << "The answer to the meaining of life is " << ' '
 			             << ( static_cast<float>( number ) * 1.5f ) << number << '\n';
-			daw::force_evaluation( daw::con_err );
 		}
-		daw::force_evaluation( daw::con_err );
-		daw::con_err.flush( );
 	}
 };
 
@@ -108,10 +102,7 @@ struct printf_test {
 			daw::force_evaluation( number );
 			fprintf( stderr, "The asnwer to the meaning of life is %d %f\n", number,
 			         static_cast<float>( number ) * 1.5f );
-			daw::force_evaluation( stderr );
 		}
-		daw::force_evaluation( stderr );
-		fflush( stderr );
 	}
 };
 
@@ -127,8 +118,11 @@ int main( int argc, char ** ) {
 
 	std::cout << "\nconsole" << std::endl;
 	daw::bench_test2( "srd::cerr", cerr_test{}, count, count, argc );
+	std::cerr << std::flush;
 	daw::bench_test2( "printf", printf_test{}, count, count, argc );
+	fflush( stderr );
 	daw::bench_test2( "daw::console_stream", console_stream_test{}, count, count,
 	                  argc );
+	fflush( stderr );
 	return 0;
 }
