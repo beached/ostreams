@@ -23,20 +23,32 @@
 #include <iostream>
 #include <sstream>
 
+#ifndef _MSC_VER
 #include <daw/daw_utility.h>
+#endif
 
 #include "./benchmark.h"
 #include "daw/io/console_stream.h"
 #include "daw/io/memory_stream.h"
 
+template<typename T>
+inline void do_not_optimize( T && t ) noexcept {
+#ifdef _MSC_VER
+	daw::force_evaluation_ms( std::forward<T>( t ) );
+#else
+	daw::force_evaluation( std::forward<T>( t ) );
+#endif
+}
+
+
 struct stringstream_test {
 	void operator( )( size_t count, int number ) const {
 		for( size_t n = 0; n < count; ++n ) {
-			daw::force_evaluation( number );
+			do_not_optimize( number );
 			std::stringstream ss{};
 			ss << "The answer to the meaining of life is " << number << ' '
 			   << ( static_cast<float>( number ) * 1.5f ) << '\n';
-			daw::force_evaluation( ss );
+			do_not_optimize( ss );
 		}
 	}
 };
@@ -44,14 +56,14 @@ struct stringstream_test {
 struct snprintf_test {
 	void operator( )( size_t count, int number ) const {
 		for( size_t n = 0; n < count; ++n ) {
-			daw::force_evaluation( number );
+			do_not_optimize( number );
 			daw::static_string_t<char, 50> buffer{};
 			buffer.resize( buffer.capacity( ), false );
 
 			snprintf( buffer.data( ), buffer.capacity( ),
 			          "The asnwer to the meaning of life is %d %f\n", number,
 			          static_cast<float>( number ) * 1.5f );
-			daw::force_evaluation( buffer );
+			do_not_optimize( buffer );
 		}
 	}
 };
@@ -59,7 +71,7 @@ struct snprintf_test {
 struct memory_stream_test {
 	void operator( )( size_t count, int number ) const {
 		for( size_t n = 0; n < count; ++n ) {
-			daw::force_evaluation( number );
+			do_not_optimize( number );
 			daw::static_string_t<char, 50> buffer{};
 
 			// Indicate we want to have the full size of static_string as in use, and
@@ -71,7 +83,7 @@ struct memory_stream_test {
 
 			ss << "The answer to the meaining of life is " << number << ' '
 			   << ( static_cast<float>( number ) * 1.5f ) << '\n';
-			daw::force_evaluation( buffer );
+			do_not_optimize( buffer );
 		}
 	}
 };
@@ -79,7 +91,7 @@ struct memory_stream_test {
 struct cerr_test {
 	void operator( )( size_t count, int number ) const {
 		for( size_t n = 0; n < count; ++n ) {
-			daw::force_evaluation( number );
+			do_not_optimize( number );
 			std::cerr << "The answer to the meaining of life is " << number << ' '
 			          << ( static_cast<float>( number ) * 1.5f ) << '\n';
 		}
@@ -89,7 +101,7 @@ struct cerr_test {
 struct console_stream_test {
 	void operator( )( size_t count, int number ) const {
 		for( size_t n = 0; n < count; ++n ) {
-			daw::force_evaluation( number );
+			do_not_optimize( number );
 			daw::con_err << "The answer to the meaining of life is " << ' '
 			             << ( static_cast<float>( number ) * 1.5f ) << number << '\n';
 		}
@@ -99,7 +111,7 @@ struct console_stream_test {
 struct printf_test {
 	void operator( )( size_t count, int number ) const {
 		for( size_t n = 0; n < count; ++n ) {
-			daw::force_evaluation( number );
+			do_not_optimize( number );
 			fprintf( stderr, "The asnwer to the meaning of life is %d %f\n", number,
 			         static_cast<float>( number ) * 1.5f );
 		}
