@@ -107,6 +107,10 @@ namespace daw {
 			}
 			len = new_size;
 		}
+
+		constexpr void shrink_to_fit( ) noexcept {
+			for( ; len > 0 && buffer[len] == 0; --len ) {}
+		}
 	};
 
 	template<typename CharT, size_t N>

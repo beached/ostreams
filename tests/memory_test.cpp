@@ -39,25 +39,33 @@ namespace {
 		return result;
 	}
 
-	template<typename Float>
+	template<size_t BUFF_SIZE = 100, typename Float>
 	constexpr auto test( Float f ) {
 		// If buffer isn't large enough a buffer_full_exception will be thrown
-		daw::static_string_t<char, 76> buffer{};
-		buffer.resize( 76 );
+		daw::static_string_t<char, BUFF_SIZE> buffer{};
+
+		// Indicate we want to have the full size of static_string as in use, and
+		// do not default init the char's to 0
+		buffer.resize( buffer.capacity( ), false );
+
 		auto buff_os =
 		  ::daw::io::make_memory_buffer_stream( buffer.data( ), buffer.size( ) );
+
 		buff_os << A{} << " The number is: " << f << ". " << 5
 		        << " times number is " << ( static_cast<Float>( 5 ) * f ) << '\n';
 
+		// Reset static_string size to last non-zero item in array
+		buffer.shrink_to_fit( );
 		return buffer;
 	}
 } // namespace
 
 constexpr static auto const test_result = test( 1234560.435333 );
 
-auto const &test2( ) {
-	return test_result;
+daw::string_view test2( ) {
+	return daw::string_view( test_result.data( ), test_result.size( ) );
 }
+
 int main( int argc, char ** ) {
 	daw::con_out << test2( ) << '\n';
 	return 0;
