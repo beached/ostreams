@@ -29,4 +29,6 @@
 namespace daw {
 	auto con_out = make_file_stream( stdout );
 	auto con_wout = make_file_stream<wchar_t>( stdout );
+	auto con_err = make_file_stream( stderr );
+	auto con_werr = make_file_stream<wchar_t>( stderr );
 } // namespace daw

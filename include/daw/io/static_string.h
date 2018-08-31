@@ -101,6 +101,27 @@ namespace daw {
 			return *this;
 		}
 
+		template<size_t N>
+		constexpr void push_back( value_type const ( &str )[N] ) {
+			daw::exception::precondition_check<daw::buffer_full_exception>(
+			  len + ( N - 1 ) <= capacity( ) );
+
+			for( size_t n = 0; n < ( N - 1 ); ++n ) {
+				buffer[len++] = str[n];
+			}
+		}
+
+		template<size_t N>
+		constexpr static_string_t &operator+=( value_type const ( &str )[N] ) {
+			daw::exception::precondition_check<daw::buffer_full_exception>(
+			  len + ( N - 1 ) <= capacity( ) );
+
+			for( size_t n = 0; n < ( N - 1 ); ++n ) {
+				buffer[len++] = str[n];
+			}
+			return *this;
+		}
+
 		constexpr operator daw::basic_string_view<value_type>( ) const noexcept {
 			return daw::basic_string_view<value_type>( buffer, len );
 		}

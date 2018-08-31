@@ -140,21 +140,20 @@ namespace ostream_converters {
 	                    !daw::traits::is_character_v<Integer>>,
 	    std::nullptr_t> = nullptr>
 	static constexpr auto to_string( Integer value ) {
-		daw::static_string_t<CharT, std::numeric_limits<Integer>::digits10>
-		  result{};
+		size_t const buff_size = std::numeric_limits<Integer>::digits10;
+		daw::static_string_t<CharT, buff_size> result{};
 
 		if( value < 0 ) {
-			result.push_back( daw::char_traits<CharT>::minus );
+			result += daw::char_traits<CharT>::minus;
 			value *= -1;
 		}
 
 		auto max10 = impl::pow10<Integer>( impl::num_digits<Integer>( value ) );
 		while( max10 > 0 ) {
 			auto const tmp = ( value / max10 ) * max10;
-			CharT const cur_digit =
-			  daw::char_traits<CharT>::zero + static_cast<CharT>( tmp / max10 );
 
-			result.push_back( cur_digit );
+			result += daw::char_traits<CharT>::get_char_digit( tmp / max10 );
+
 			value -= tmp;
 			max10 /= 10;
 		}
@@ -162,14 +161,32 @@ namespace ostream_converters {
 	}
 
 	template<typename CharT, typename Bool,
-	         std::enable_if_t<daw::is_same_v<bool, daw::remove_cvref_t<Bool>>,
-	                          std::nullptr_t> = nullptr>
+	         std::enable_if_t<
+	           daw::all_true_v<daw::is_same_v<bool, daw::remove_cvref_t<Bool>>,
+	                           daw::is_same_v<char, daw::remove_cvref_t<CharT>>>,
+	           std::nullptr_t> = nullptr>
 	constexpr auto to_string( Bool b ) noexcept {
 		daw::static_string_t<CharT, 5> result{};
 		if( b ) {
 			result.push_back( "true" );
 		} else {
 			result.push_back( "false" );
+		}
+		return result;
+	}
+
+	template<
+	  typename CharT, typename Bool,
+	  std::enable_if_t<
+	    daw::all_true_v<daw::is_same_v<bool, daw::remove_cvref_t<Bool>>,
+	                    daw::is_same_v<wchar_t, daw::remove_cvref_t<CharT>>>,
+	    std::nullptr_t> = nullptr>
+	constexpr auto to_string( Bool b ) noexcept {
+		daw::static_string_t<CharT, 5> result{};
+		if( b ) {
+			result.push_back( L"true" );
+		} else {
+			result.push_back( L"false" );
 		}
 		return result;
 	}
@@ -186,30 +203,31 @@ namespace ostream_converters {
 	template<
 	  typename CharT, typename Float,
 	  std::enable_if_t<daw::is_floating_point_v<Float>, std::nullptr_t> = nullptr>
-	constexpr auto to_string( Float value ) {
+	constexpr auto
+	to_string( Float value,
+	           int significant_digits = std::numeric_limits<Float>::max_digits10,
+	           int precision = std::numeric_limits<Float>::max_digits10 ) {
 		using value_t = daw::remove_cvref_t<Float>;
-		daw::static_string_t<CharT,
-		                     ( std::numeric_limits<value_t>::max_exponent10 + 2 )>
-		  result{};
-
-		auto const round_to = std::numeric_limits<value_t>::max_digits10;
+		size_t const buff_size = std::numeric_limits<value_t>::max_exponent10 + 2;
+		daw::static_string_t<CharT, buff_size> result{};
 
 		if( value == static_cast<value_t>( 0.0 ) ) {
-			result.push_back( '0' );
+			result += daw::char_traits<CharT>::get_char_digit( 0 );
 			return result;
 		}
 		if( impl::is_nan( value ) ) {
-			result.push_back( "nan" );
+			result += daw::char_traits<CharT>::nan( );
 			return result;
 		}
 		if( value < static_cast<value_t>( 0 ) ) {
-			result.push_back( '-' );
+			result += daw::char_traits<CharT>::minus;
 			value = -value;
 		}
 		if( impl::is_inf( value ) ) {
-			result.push_back( "inf" );
+			result += daw::char_traits<CharT>::inf( );
 			return result;
 		}
+
 		auto const e = impl::find_whole_exponent( value );
 		auto p10 = impl::pow10<value_t>( e + 1 );
 		auto tmp_value = value;
@@ -219,29 +237,31 @@ namespace ostream_converters {
 			daw::exception::precondition_check<impl::unexpected_state>( digit >= 0 &&
 			                                                            digit <= 10 );
 
-			if( ex > std::numeric_limits<value_t>::max_digits10 ) {
+			if( ex > std::numeric_limits<value_t>::max_digits10 ||
+			    ex > significant_digits ) {
 				digit = 0;
 			}
-			result.push_back( daw::char_traits<CharT>::get_char_digit( digit ) );
+			result += daw::char_traits<CharT>::get_char_digit( digit );
 
 			tmp_value -= static_cast<value_t>( digit ) * p10;
 			p10 /= 10.0;
 		}
 
 		if( e >= std::numeric_limits<value_t>::max_digits10 ||
+		    e > significant_digits ||
 		    tmp_value <= std::numeric_limits<value_t>::min( ) ) {
 			return result;
 		}
-		result.push_back( daw::char_traits<CharT>::decimal_point );
+		result += daw::char_traits<CharT>::decimal_point;
 
 		auto const num_dec_digits = impl::min_value(
-		  impl::min_value( round_to, impl::max_fractional_digits<Float> ),
+		  impl::min_value( precision, impl::max_fractional_digits<Float> ),
 		  std::numeric_limits<Float>::max_digits10 - e );
 		for( int n = 0;
 		     n < num_dec_digits && tmp_value > std::numeric_limits<Float>::min( );
 		     ++n ) {
 			auto digit = static_cast<char>( tmp_value * static_cast<Float>( 10 ) );
-			result.push_back( daw::char_traits<CharT>::get_char_digit( digit ) );
+			result += daw::char_traits<CharT>::get_char_digit( digit );
 			tmp_value -= static_cast<Float>( digit ) / static_cast<Float>( 10 );
 			tmp_value *= static_cast<Float>( 10 );
 		}

@@ -23,6 +23,7 @@
 #pragma once
 
 #include <daw/cpp_17.h>
+#include <daw/daw_string_view.h>
 
 namespace daw {
 	struct buffer_full_exception {};
@@ -40,29 +41,45 @@ namespace daw {
 		  daw::is_detected_v<has_size_member_detect, remove_cvref_t<String>>>;
 
 	} // namespace impl
-	template<typename CharT>
+	template<typename>
 	struct char_traits;
 
 	template<>
 	struct char_traits<char> {
-		constexpr static char const decimal_point = '.';
-		constexpr static char const zero = '0';
-		constexpr static char const minus = '-';
+		static constexpr char const decimal_point = '.';
+		static constexpr char const zero = '0';
+		static constexpr char const minus = '-';
+
+		static constexpr daw::basic_string_view<char> nan( ) {
+			return "nan";
+		};
+
+		static constexpr daw::basic_string_view<char> inf( ) {
+			return "inf";
+		};
 
 		template<typename T>
-		static constexpr char get_char_digit( T value ) noexcept {
+		static constexpr char get_char_digit( T value ) {
 			return zero + static_cast<wchar_t>( value );
 		}
 	};
 
 	template<>
 	struct char_traits<wchar_t> {
-		constexpr static wchar_t const decimal_point = L'.';
-		constexpr static wchar_t const zero = L'0';
-		constexpr static wchar_t const minus = L'-';
+		static constexpr wchar_t const decimal_point = L'.';
+		static constexpr wchar_t const zero = L'0';
+		static constexpr wchar_t const minus = L'-';
+
+		static constexpr daw::basic_string_view<wchar_t> nan( ) {
+			return L"nan";
+		};
+
+		static constexpr daw::basic_string_view<wchar_t> inf( ) {
+			return L"inf";
+		};
 
 		template<typename T>
-		static constexpr wchar_t get_char_digit( T value ) noexcept {
+		static constexpr wchar_t get_char_digit( T value ) {
 			return zero + static_cast<wchar_t>( value );
 		}
 	};

@@ -46,6 +46,14 @@ namespace daw {
 				inline auto operator( )( wchar_t c, FILE *f ) const noexcept {
 					return putwc( c, f );
 				}
+
+				inline auto operator( )( char const *ptr, FILE *f ) const noexcept {
+					return fputs( ptr, f );
+				}
+
+				inline auto operator( )( wchar_t const *ptr, FILE *f ) const noexcept {
+					return fputws( ptr, f );
+				}
 			};
 		} // namespace impl
 		template<typename CharT>
@@ -72,10 +80,15 @@ namespace daw {
 				return impl::write_char{}( c, m_file_handle );
 			}
 
+			inline auto operator( )( daw::io::impl::accept_asciiz,
+			                         CharT const *ptr ) const noexcept {
+				return impl::write_char{}( ptr, m_file_handle );
+			}
+
 			// OutputStream Interface
 			template<typename String,
-			         std::enable_if_t<(::daw::impl::is_string_like_v<String> &&
-			                           !::daw::traits::is_character_v<String>),
+			         std::enable_if_t<( ::daw::impl::is_string_like_v<String> &&
+			                            !::daw::traits::is_character_v<String>),
 			                          std::nullptr_t> = nullptr>
 			constexpr void operator( )( String &&str ) const noexcept {
 				static_assert(
