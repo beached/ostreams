@@ -21,6 +21,7 @@
 // SOFTWARE.
 
 #include "daw/io/console_stream.h"
+
 #include "daw/io/memory_stream.h"
 #include "daw/io/static_string.h"
 
@@ -63,7 +64,7 @@ auto const &test2( ) {
 	return test_result;
 }
 
-int main( int argc, char ** ) {
+int main( int, char ** ) {
 	daw::con_out << test2( ) << '\n';
 	return 0;
 }

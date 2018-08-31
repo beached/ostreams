@@ -24,11 +24,9 @@
 
 #include <type_traits>
 
-#include <daw/daw_string_view.h>
 #include <daw/daw_traits.h>
 
 #include "ostream_converters.h"
-#include "ostream_helpers.h"
 
 namespace daw {
 	namespace io {
@@ -86,10 +84,11 @@ namespace daw {
 		  supports_output_stream_interface<remove_cvref_t<OutputStream>>::value;
 
 		// Stream Operators
-		template<typename OutputStream, typename CharT, size_t N,
-		         std::enable_if_t<(is_output_stream_v<CharT, OutputStream> &&
-		                           daw::traits::is_character_v<CharT>),
-		                          std::nullptr_t> = nullptr>
+		template<
+		  typename OutputStream, typename CharT, size_t N,
+		  std::enable_if_t<daw::all_true_v<is_output_stream_v<OutputStream>,
+		                                   daw::traits::is_character_v<CharT>>,
+		                   std::nullptr_t> = nullptr>
 		constexpr OutputStream &
 		operator<<( OutputStream &os,
 		            CharT const ( &str )[N] ) noexcept( noexcept( os( str[0] ) ) ) {
@@ -106,8 +105,8 @@ namespace daw {
 		constexpr OutputStream &operator<<( OutputStream &os, T &&value ) {
 			using CharT = typename OutputStream::character_t;
 			// Can type T be called with to_string
-			static_assert( ::ostream_converters::has_to_string_v<CharT, T>,
-			               "Could not find a valid to_string<CharT> overload" );
+			static_assert(::ostream_converters::has_to_string_v<CharT, T>,
+			              "Could not find a valid to_string<CharT> overload" );
 			// Is OutputStream callable with a single CharT
 			static_assert( impl::has_operator_parans_char_v<CharT, OutputStream>,
 			               "Missing operator( )( CharT ) member on OutputStream" );

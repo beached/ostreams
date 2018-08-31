@@ -27,6 +27,7 @@
 #include <string>
 
 #include <daw/daw_string_view.h>
+#include <daw/daw_traits.h>
 
 #include "ostreams.h"
 
@@ -73,8 +74,8 @@ namespace daw {
 
 			// OutputStream Interface
 			template<typename String,
-			         std::enable_if_t<( ::daw::impl::is_string_like_v<String> &&
-			                            !::daw::traits::is_character_v<String>),
+			         std::enable_if_t<(::daw::impl::is_string_like_v<String> &&
+			                           !::daw::traits::is_character_v<String>),
 			                          std::nullptr_t> = nullptr>
 			constexpr void operator( )( String &&str ) const noexcept {
 				static_assert(

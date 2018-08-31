@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include <daw/daw_traits.h>
+#include <daw/cpp_17.h>
 
 namespace daw {
 	struct buffer_full_exception {};
