@@ -34,7 +34,8 @@ struct stringstream_test {
 		for( size_t n = 0; n < count; ++n ) {
 			daw::force_evaluation( number );
 			std::stringstream ss{};
-			ss << "The answer to the meaining of life is " << number << '\n';
+			ss << "The answer to the meaining of life is " << number << ' '
+			   << ( static_cast<float>( number ) * 1.5f ) << '\n';
 			daw::force_evaluation( ss );
 		}
 	}
@@ -48,7 +49,8 @@ struct snprintf_test {
 			buffer.resize( buffer.capacity( ), false );
 
 			snprintf( buffer.data( ), buffer.capacity( ),
-			          "The asnwer to the meaning of life is %d\n", number );
+			          "The asnwer to the meaning of life is %d %f\n", number,
+			          static_cast<float>( number ) * 1.5f );
 			daw::force_evaluation( buffer );
 		}
 	}
@@ -67,7 +69,8 @@ struct memory_stream_test {
 			auto ss =
 			  ::daw::io::make_memory_buffer_stream( buffer.data( ), buffer.size( ) );
 
-			ss << "The answer to the meaining of life is " << number << '\n';
+			ss << "The answer to the meaining of life is " << number << ' '
+			   << ( static_cast<float>( number ) * 1.5f ) << '\n';
 			daw::force_evaluation( buffer );
 		}
 	}
@@ -77,7 +80,8 @@ struct cerr_test {
 	void operator( )( size_t count, int number ) const {
 		for( size_t n = 0; n < count; ++n ) {
 			daw::force_evaluation( number );
-			std::cerr << "The answer to the meaining of life is " << number << '\n';
+			std::cerr << "The answer to the meaining of life is " << number << ' '
+			          << ( static_cast<float>( number ) * 1.5f ) << '\n';
 			daw::force_evaluation( std::cerr );
 		}
 		daw::force_evaluation( std::cerr );
@@ -89,8 +93,8 @@ struct console_stream_test {
 	void operator( )( size_t count, int number ) const {
 		for( size_t n = 0; n < count; ++n ) {
 			daw::force_evaluation( number );
-			daw::con_err << "The answer to the meaining of life is " << number
-			             << '\n';
+			daw::con_err << "The answer to the meaining of life is " << ' '
+			             << ( static_cast<float>( number ) * 1.5f ) << number << '\n';
 			daw::force_evaluation( daw::con_err );
 		}
 		daw::force_evaluation( daw::con_err );
@@ -102,7 +106,8 @@ struct printf_test {
 	void operator( )( size_t count, int number ) const {
 		for( size_t n = 0; n < count; ++n ) {
 			daw::force_evaluation( number );
-			fprintf( stderr, "The asnwer to the meaning of life is %d\n", number );
+			fprintf( stderr, "The asnwer to the meaning of life is %d %f\n", number,
+			         static_cast<float>( number ) * 1.5f );
 			daw::force_evaluation( stderr );
 		}
 		daw::force_evaluation( stderr );
