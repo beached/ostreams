@@ -20,8 +20,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <daw/daw_string_view.h>
-
 #include "daw/io/console_stream.h"
 #include "daw/io/memory_stream.h"
 #include "daw/io/static_string.h"
@@ -38,7 +36,7 @@ namespace {
 		return result;
 	}
 
-	template<size_t BUFF_SIZE = 100, typename Float>
+	template<size_t BUFF_SIZE = 76, typename Float>
 	constexpr auto test( Float f ) {
 		// If buffer isn't large enough a buffer_full_exception will be thrown
 		daw::static_string_t<char, BUFF_SIZE> buffer{};
@@ -61,8 +59,8 @@ namespace {
 
 constexpr static auto const test_result = test( 1234560.435333 );
 
-daw::string_view test2( ) {
-	return daw::string_view( test_result.data( ), test_result.size( ) );
+auto const &test2( ) {
+	return test_result;
 }
 
 int main( int argc, char ** ) {
