@@ -22,33 +22,11 @@
 
 #include <daw/daw_string_view.h>
 
-#include "console_stream.h"
-#include "memory_stream.h"
+#include "daw/io/console_stream.h"
+#include "daw/io/memory_stream.h"
+#include "daw/io/static_string.h"
 
 namespace {
-	template<size_t buff_sz, typename CharT = char>
-	class buffer_t {
-		CharT value[buff_sz + 1] = {0};
-		static constexpr size_t sz = buff_sz;
-
-	public:
-		constexpr size_t size( ) const noexcept {
-			return sz;
-		}
-		constexpr CharT const *data( ) const noexcept {
-			return value;
-		}
-		constexpr CharT *data( ) noexcept {
-			return value;
-		}
-
-		constexpr buffer_t( ) noexcept = default;
-
-		constexpr operator CharT const *( ) const noexcept {
-			return data( );
-		}
-	};
-
 	struct A {};
 
 	// Only need to define a structure that has data( ) and size( ) members
@@ -56,15 +34,16 @@ namespace {
 	// daw::basic_string_view
 	template<typename CharT>
 	constexpr auto to_string( A ) noexcept {
-		buffer_t<1> result;
-		result.data( )[0] = 'A';
+		daw::static_string_t<CharT, 1> result;
+		result += 'A';
 		return result;
 	}
 
-	template<size_t buff_sz = 74, typename Float>
+	template<typename Float>
 	constexpr auto test( Float f ) {
 		// If buffer isn't large enough a buffer_full_exception will be thrown
-		buffer_t<76> buffer{};
+		daw::static_string_t<char, 76> buffer{};
+		buffer.resize( 76 );
 		auto buff_os =
 		  ::daw::io::make_memory_buffer_stream( buffer.data( ), buffer.size( ) );
 		buff_os << A{} << " The number is: " << f << ". " << 5

@@ -30,6 +30,7 @@
 #include <daw/daw_traits.h>
 
 #include "ostream_helpers.h"
+#include "static_string.h"
 
 namespace ostream_converters {
 	namespace impl {
@@ -103,94 +104,6 @@ namespace ostream_converters {
 			return result;
 		}
 
-		template<typename CharT, size_t N>
-		struct sv_buff {
-			CharT buffer[N + 1] = {static_cast<CharT>( 0 )};
-			size_t len = 0;
-
-			constexpr size_t capacity( ) const noexcept {
-				return N;
-			}
-
-			constexpr sv_buff( ) noexcept = default;
-
-			constexpr CharT const *data( ) const noexcept {
-				return buffer;
-			}
-
-			constexpr size_t size( ) const noexcept {
-				return len;
-			}
-
-			constexpr void push_back( CharT c ) {
-				daw::exception::precondition_check<daw::buffer_full_exception>(
-				  len + 1 <= capacity( ) );
-				buffer[len++] = c;
-			}
-
-			constexpr void push_back( daw::basic_string_view<CharT> sv ) {
-				daw::exception::precondition_check<daw::buffer_full_exception>(
-				  len + sv.size( ) <= capacity( ) );
-				for( auto c : sv ) {
-					buffer[len++] = c;
-				}
-			}
-
-			constexpr operator daw::basic_string_view<CharT>( ) const noexcept {
-				return daw::basic_string_view<CharT>( buffer, len );
-			}
-		};
-
-		template<typename CharT>
-		struct get_zero;
-
-		template<>
-		struct get_zero<char> {
-			constexpr char operator( )( ) const noexcept {
-				return '0';
-			}
-		};
-
-		template<>
-		struct get_zero<wchar_t> {
-			constexpr char operator( )( ) const noexcept {
-				return L'0';
-			}
-		};
-
-		template<typename CharT>
-		struct get_decimal;
-
-		template<>
-		struct get_decimal<char> {
-			constexpr char operator( )( ) const noexcept {
-				return '.';
-			}
-		};
-
-		template<>
-		struct get_decimal<wchar_t> {
-			constexpr char operator( )( ) const noexcept {
-				return L'.';
-			}
-		};
-
-		template<typename CharT>
-		struct get_minus;
-
-		template<>
-		struct get_minus<char> {
-			constexpr char operator( )( ) const noexcept {
-				return '-';
-			}
-		};
-
-		template<>
-		struct get_minus<wchar_t> {
-			constexpr char operator( )( ) const noexcept {
-				return L'-';
-			}
-		};
 	} // namespace impl
 
 	template<typename CharT, std::enable_if_t<daw::traits::is_character_v<CharT>,
@@ -218,17 +131,20 @@ namespace ostream_converters {
 		return daw::basic_string_view<CharT>( str.data( ), str.size( ) );
 	}
 
-	template<typename CharT, typename Integer,
-	         std::enable_if_t<(daw::is_integral_v<daw::remove_cvref_t<Integer>> &&
-	                           !daw::is_same_v<bool, std::decay_t<Integer>> &&
-	                           !daw::is_floating_point_v<std::decay_t<Integer>> &&
-	                           !daw::traits::is_character_v<Integer>),
-	                          std::nullptr_t> = nullptr>
+	template<
+	  typename CharT, typename Integer,
+	  std::enable_if_t<
+	    daw::all_true_v<daw::is_integral_v<daw::remove_cvref_t<Integer>>,
+	                    !daw::is_same_v<bool, daw::remove_cvref_t<Integer>>,
+	                    !daw::is_floating_point_v<daw::remove_cvref_t<Integer>>,
+	                    !daw::traits::is_character_v<Integer>>,
+	    std::nullptr_t> = nullptr>
 	static constexpr auto to_string( Integer value ) {
-		impl::sv_buff<CharT, std::numeric_limits<Integer>::digits10> result{};
+		daw::static_string_t<CharT, std::numeric_limits<Integer>::digits10>
+		  result{};
 
 		if( value < 0 ) {
-			result.push_back( impl::get_minus<CharT>{}( ) );
+			result.push_back( daw::char_traits<CharT>::minus );
 			value *= -1;
 		}
 
@@ -236,7 +152,7 @@ namespace ostream_converters {
 		while( max10 > 0 ) {
 			auto const tmp = ( value / max10 ) * max10;
 			CharT const cur_digit =
-			  impl::get_zero<CharT>{}( ) + static_cast<CharT>( tmp / max10 );
+			  daw::char_traits<CharT>::zero + static_cast<CharT>( tmp / max10 );
 
 			result.push_back( cur_digit );
 			value -= tmp;
@@ -246,10 +162,10 @@ namespace ostream_converters {
 	}
 
 	template<typename CharT, typename Bool,
-	         std::enable_if_t<daw::is_same_v<bool, std::decay_t<Bool>>,
+	         std::enable_if_t<daw::is_same_v<bool, daw::remove_cvref_t<Bool>>,
 	                          std::nullptr_t> = nullptr>
 	constexpr auto to_string( Bool b ) noexcept {
-		impl::sv_buff<CharT, 5> result{};
+		daw::static_string_t<CharT, 5> result{};
 		if( b ) {
 			result.push_back( "true" );
 		} else {
@@ -258,10 +174,11 @@ namespace ostream_converters {
 		return result;
 	}
 
-	template<typename CharT, std::enable_if_t<::daw::traits::is_character_v<CharT>,
-	                                          std::nullptr_t> = nullptr>
+	template<typename CharT,
+	         std::enable_if_t<::daw::traits::is_character_v<CharT>,
+	                          std::nullptr_t> = nullptr>
 	constexpr auto to_string( CharT c ) noexcept {
-		impl::sv_buff<CharT, 1> result{};
+		daw::static_string_t<CharT, 1> result{};
 		result.push_back( c );
 		return result;
 	}
@@ -271,7 +188,8 @@ namespace ostream_converters {
 	  std::enable_if_t<daw::is_floating_point_v<Float>, std::nullptr_t> = nullptr>
 	constexpr auto to_string( Float value ) {
 		using value_t = daw::remove_cvref_t<Float>;
-		impl::sv_buff<CharT, ( std::numeric_limits<value_t>::max_exponent10 + 2 )>
+		daw::static_string_t<CharT,
+		                     ( std::numeric_limits<value_t>::max_exponent10 + 2 )>
 		  result{};
 
 		auto const round_to = std::numeric_limits<value_t>::max_digits10;
@@ -304,7 +222,7 @@ namespace ostream_converters {
 			if( ex > std::numeric_limits<value_t>::max_digits10 ) {
 				digit = 0;
 			}
-			result.push_back( impl::get_zero<CharT>{}( ) + digit );
+			result.push_back( daw::char_traits<CharT>::get_char_digit( digit ) );
 
 			tmp_value -= static_cast<value_t>( digit ) * p10;
 			p10 /= 10.0;
@@ -314,7 +232,7 @@ namespace ostream_converters {
 		    tmp_value <= std::numeric_limits<value_t>::min( ) ) {
 			return result;
 		}
-		result.push_back( impl::get_decimal<CharT>{}( ) );
+		result.push_back( daw::char_traits<CharT>::decimal_point );
 
 		auto const num_dec_digits = impl::min_value(
 		  impl::min_value( round_to, impl::max_fractional_digits<Float> ),
@@ -323,7 +241,7 @@ namespace ostream_converters {
 		     n < num_dec_digits && tmp_value > std::numeric_limits<Float>::min( );
 		     ++n ) {
 			auto digit = static_cast<char>( tmp_value * static_cast<Float>( 10 ) );
-			result.push_back( impl::get_zero<CharT>{}( ) + digit );
+			result.push_back( daw::char_traits<CharT>::get_char_digit( digit ) );
 			tmp_value -= static_cast<Float>( digit ) / static_cast<Float>( 10 );
 			tmp_value *= static_cast<Float>( 10 );
 		}

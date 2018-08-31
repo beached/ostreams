@@ -22,7 +22,7 @@
 
 #include <cstdlib>
 
-#include "file_stream.h"
+#include "daw/io/file_stream.h"
 
 int main( int argc, char **argv ) {
 	if( argc < 2 ) {

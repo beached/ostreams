@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "console_stream.h"
+#include "daw/io/console_stream.h"
 
 int main( int argc, char ** ) {
 	float const f = static_cast<float>( argc ) * 1.2334f;

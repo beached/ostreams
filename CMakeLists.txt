@@ -17,21 +17,22 @@ include_directories( SYSTEM "${CMAKE_BINARY_DIR}/install/include" )
 endif( )
 
 set( HEADER_FOLDER "include" )
-set( SOURCE_FOLDER "src" )
 set( TEST_FOLDER "tests" )
 
 include_directories( ${HEADER_FOLDER} )
 
 set( HEADER_FILES
-	${HEADER_FOLDER}/console_stream.h
-	${HEADER_FOLDER}/file_stream.h
-	${HEADER_FOLDER}/memory_stream.h
-	${HEADER_FOLDER}/ostreams.h
-	${HEADER_FOLDER}/ostream_converters.h
-	${HEADER_FOLDER}/ostream_helpers.h
+	${HEADER_FOLDER}/daw/io/console_stream.h
+	${HEADER_FOLDER}/daw/io/file_stream.h
+	${HEADER_FOLDER}/daw/io/memory_stream.h
+	${HEADER_FOLDER}/daw/io/ostreams.h
+	${HEADER_FOLDER}/daw/io/ostream_converters.h
+	${HEADER_FOLDER}/daw/io/ostream_helpers.h
+	${HEADER_FOLDER}/daw/io/static_string.h
 )
 
 add_executable( console_test ${HEADER_FILES} ${TEST_FOLDER}/console_test.cpp )
 add_executable( file_test ${HEADER_FILES} ${TEST_FOLDER}/file_test.cpp )
 add_executable( memory_test ${HEADER_FILES} ${TEST_FOLDER}/memory_test.cpp )
 
+install( DIRECTORY ${HEADER_FOLDER}/daw DESTINATION include )

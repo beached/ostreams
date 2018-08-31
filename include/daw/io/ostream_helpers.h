@@ -35,8 +35,35 @@ namespace daw {
 		using has_size_member_detect = decltype( std::declval<String>( ).size( ) );
 
 		template<typename String>
-		constexpr bool is_string_like_v =
-		  daw::is_detected_v<has_data_member_detect, remove_cvref_t<String>>
-		    &&daw::is_detected_v<has_size_member_detect, remove_cvref_t<String>>;
+		constexpr bool is_string_like_v = daw::all_true_v<
+		  daw::is_detected_v<has_data_member_detect, remove_cvref_t<String>>,
+		  daw::is_detected_v<has_size_member_detect, remove_cvref_t<String>>>;
+
 	} // namespace impl
+	template<typename CharT>
+	struct char_traits;
+
+	template<>
+	struct char_traits<char> {
+		constexpr static char const decimal_point = '.';
+		constexpr static char const zero = '0';
+		constexpr static char const minus = '-';
+
+		template<typename T>
+		static constexpr char get_char_digit( T value ) noexcept {
+			return zero + static_cast<wchar_t>( value );
+		}
+	};
+
+	template<>
+	struct char_traits<wchar_t> {
+		constexpr static wchar_t const decimal_point = L'.';
+		constexpr static wchar_t const zero = L'0';
+		constexpr static wchar_t const minus = L'-';
+
+		template<typename T>
+		static constexpr wchar_t get_char_digit( T value ) noexcept {
+			return zero + static_cast<wchar_t>( value );
+		}
+	};
 } // namespace daw
