@@ -49,25 +49,9 @@ namespace ostream_converters {
 			return result;
 		}
 
-		template<typename Number, std::enable_if_t<daw::is_arithmetic_v<Number>,
-		                                           std::nullptr_t> = nullptr>
-		constexpr uint16_t whole_log10( Number positive_value ) noexcept {
-			for( uint16_t n = std::numeric_limits<Number>::max_exponent10; n > 0;
-			     --n ) {
-				if( positive_value >= pow10<Number>( n ) ) {
-					return n;
-				}
-			}
-			return 0;
-		}
-
 		template<typename Result, std::enable_if_t<daw::is_arithmetic_v<Result>,
 		                                           std::nullptr_t> = nullptr>
 		constexpr Result pow10( uint16_t n ) noexcept {
-			daw::exception::dbg_precondition_check(
-			  n <= whole_log10( std::numeric_limits<Result>::max( ) ),
-			  "Attempt to overflow Result" );
-
 			switch( n ) {
 			case 0:
 				return static_cast<Result>( 1.0e+0 );
@@ -695,6 +679,18 @@ namespace ostream_converters {
 				--n;
 			}
 			return result;
+		}
+
+		template<typename Number, std::enable_if_t<daw::is_arithmetic_v<Number>,
+		                                           std::nullptr_t> = nullptr>
+		constexpr uint16_t whole_log10( Number positive_value ) noexcept {
+			for( uint16_t n = std::numeric_limits<Number>::max_exponent10; n > 0;
+			     --n ) {
+				if( positive_value >= pow10<Number>( n ) ) {
+					return n;
+				}
+			}
+			return 0;
 		}
 
 		template<typename F>
