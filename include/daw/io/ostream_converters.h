@@ -53,9 +53,9 @@ namespace ostream_converters {
 		template<typename Number, std::enable_if_t<daw::is_arithmetic_v<Number>,
 		                                           std::nullptr_t> = nullptr>
 		constexpr Number pow10( uintmax_t n ) noexcept {
-			auto result = static_cast<Number>( 1 );
+			Number result = 1;
 			while( n > 1 ) {
-				result *= static_cast<Number>( 10 );
+				result *= 10;
 				--n;
 			}
 			return result;
@@ -225,10 +225,12 @@ namespace ostream_converters {
 			return result;
 		}
 
+		//auto const e = impl::find_whole_exponent( value );
+		//auto p10 = impl::pow10<value_t>( e + 1 );
 		auto const e = impl::find_whole_exponent( value );
-		auto p10 = impl::pow10<value_t>( e + 1 );
 		auto tmp_value = value;
 
+		auto p10 = impl::pow10<value_t>( e + 1 );
 		for( uint16_t ex = 0; ex <= e; ++ex ) {
 			auto digit = static_cast<char>( tmp_value / p10 );
 			daw::exception::precondition_check<impl::unexpected_state>( digit >= 0 &&
@@ -241,7 +243,7 @@ namespace ostream_converters {
 			result += daw::char_traits<CharT>::get_char_digit( digit );
 
 			tmp_value -= static_cast<value_t>( digit ) * p10;
-			p10 /= 10.0;
+			p10 = impl::pow10<value_t>( impl::find_whole_exponent( tmp_value ) + 1 );
 		}
 
 		if( e >= std::numeric_limits<value_t>::max_digits10 ||
