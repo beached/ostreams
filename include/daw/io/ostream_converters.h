@@ -760,17 +760,18 @@ namespace ostream_converters {
 			result += daw::char_traits<CharT>::minus;
 			value *= -1;
 		}
-		auto const e = impl::whole_log10( value );
-		auto pow10 = impl::pow10<Integer>( e );
-		while( pow10 >= 1 ) {
+		for( auto pow10 = impl::pow10<Integer>( impl::whole_log10( value ) );
+		     pow10 >= 1; pow10 /= 10 ) {
+
 			auto const tmp = value / pow10;
+
 			daw::exception::dbg_precondition_check(
-			  tmp < 10, "There should only ever be a single digit number" );
+			  tmp >= 0 && tmp < 10,
+			  "There should only ever be a single digit positive number" );
 
 			result += daw::char_traits<CharT>::get_char_digit( tmp );
 
 			value -= tmp * 10;
-			pow10 /= 10;
 		}
 		return result;
 	}
