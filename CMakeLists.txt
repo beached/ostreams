@@ -3,6 +3,19 @@ project( ostreams )
 
 set(CMAKE_CXX_STANDARD 14)
 
+if( ${CMAKE_CXX_COMPILER_ID} STREQUAL 'MSVC' )
+	add_definitions( -DNOMINMAX -DD_WIN32_WINNT=0x0601 )
+	add_compile_options( /W2 )
+else( )
+	if( ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang" )
+		add_compile_options( -Weverything -Wno-c++98-compat -Wno-covered-switch-default -Wno-padded -Wno-exit-time-destructors -Wno-c++98-compat-pedantic -Wno-unused-parameter -Wno-missing-noreturn -Wno-missing-prototypes -Wno-disabled-macro-expansion -Wno-missing-braces -Wno-float-equal )
+	elseif( ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" )
+		add_compile_options( -Wall -Wno-deprecated-declarations -Wduplicated-cond -Wlogical-op -Wnull-dereference -Wold-style-cast -Wshadow)
+	endif( )
+endif( )
+
+
+
 if( EXISTS "${CMAKE_SOURCE_DIR}/dependent_projects/build" )
 	add_custom_target( dependency_stub )
 	include_directories( SYSTEM "${CMAKE_SOURCE_DIR}/dependent_projects/build/install/include" )

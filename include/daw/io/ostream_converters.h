@@ -51,7 +51,10 @@ namespace ostream_converters {
 
 		template<typename Result, std::enable_if_t<daw::is_arithmetic_v<Result>,
 		                                           std::nullptr_t> = nullptr>
-		constexpr Result pow10( uint16_t n ) noexcept {
+		constexpr Result pow10( int16_t n ) noexcept {
+			daw::exception::dbg_precondition_check(
+			  n >= 0, "Only positive values of n supported" );
+
 			switch( n ) {
 			case 0:
 				return static_cast<Result>( 1.0e+0 );
@@ -683,8 +686,8 @@ namespace ostream_converters {
 
 		template<typename Number, std::enable_if_t<daw::is_arithmetic_v<Number>,
 		                                           std::nullptr_t> = nullptr>
-		constexpr uint16_t whole_log10( Number positive_value ) noexcept {
-			for( uint16_t n = std::numeric_limits<Number>::max_exponent10; n > 0;
+		constexpr int16_t whole_log10( Number positive_value ) noexcept {
+			for( int16_t n = std::numeric_limits<Number>::max_exponent10; n > 0;
 			     --n ) {
 				if( positive_value >= pow10<Number>( n ) ) {
 					return n;
@@ -824,7 +827,8 @@ namespace ostream_converters {
 		size_t const buff_size = std::numeric_limits<Float>::max_exponent10 + 2;
 		daw::static_string_t<CharT, buff_size> result{};
 
-		if( value == 0 || value == -0.0 ) {
+		if( value == static_cast<Float>( 0 ) ||
+		    value == static_cast<Float>( -0.0 ) ) {
 			result += daw::char_traits<CharT>::get_char_digit( 0 );
 			return result;
 		}

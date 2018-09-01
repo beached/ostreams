@@ -61,7 +61,7 @@ struct snprintf_test {
 			do_not_optimize( number );
 			snprintf( buffer.data( ), buffer.capacity( ),
 			          "The asnwer to the meaning of life is %d %f\n", number,
-			          static_cast<float>( number ) * 1.5f );
+			          static_cast<double>( static_cast<float>( number ) * 1.5f ) );
 			buffer.shrink_to_fit( );
 			do_not_optimize( buffer );
 		}
@@ -112,7 +112,7 @@ struct printf_test {
 		for( size_t n = 0; n < count; ++n ) {
 			do_not_optimize( number );
 			fprintf( stderr, "The asnwer to the meaning of life is %d %f\n", number,
-			         static_cast<float>( number ) * 1.5f );
+			         static_cast<double>( static_cast<float>( number ) * 1.5f ) );
 		}
 	}
 };

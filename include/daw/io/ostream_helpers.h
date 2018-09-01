@@ -52,15 +52,15 @@ namespace daw {
 
 		static constexpr daw::basic_string_view<char> nan( ) {
 			return "nan";
-		};
+		}
 
 		static constexpr daw::basic_string_view<char> inf( ) {
 			return "inf";
-		};
+		}
 
 		template<typename T>
 		static constexpr char get_char_digit( T value ) {
-			return zero + static_cast<wchar_t>( value );
+			return zero + static_cast<char>( value );
 		}
 	};
 
@@ -72,11 +72,11 @@ namespace daw {
 
 		static constexpr daw::basic_string_view<wchar_t> nan( ) {
 			return L"nan";
-		};
+		}
 
 		static constexpr daw::basic_string_view<wchar_t> inf( ) {
 			return L"inf";
-		};
+		}
 
 		template<typename T>
 		static constexpr wchar_t get_char_digit( T value ) {

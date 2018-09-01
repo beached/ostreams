@@ -27,8 +27,18 @@
 #include "file_stream.h"
 
 namespace daw {
-	auto con_out = make_file_stream( stdout );
-	auto con_wout = make_file_stream<wchar_t>( stdout );
-	auto con_err = make_file_stream( stderr );
-	auto con_werr = make_file_stream<wchar_t>( stderr );
+#ifdef stdout
+	extern io::file_stream<char> con_out;
+	io::file_stream<char> con_out = make_file_stream<char>( stdout );
+
+	extern io::file_stream<wchar_t> con_wout;
+	io::file_stream<wchar_t> con_wout = make_file_stream<wchar_t>( stdout );
+#endif
+#ifdef stderr
+	extern io::file_stream<char> con_err;
+	io::file_stream<char> con_err = make_file_stream<char>( stderr );
+
+	extern io::file_stream<wchar_t> con_werr;
+	io::file_stream<wchar_t> con_werr = make_file_stream<wchar_t>( stderr );
+#endif
 } // namespace daw
