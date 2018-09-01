@@ -21,11 +21,23 @@
 // SOFTWARE.
 
 #include "daw/io/console_stream.h"
+#include <iomanip>
+#include <iostream>
+#include <limits>
 
 template<size_t N>
 void VerifyValue( float f, double d, char const ( &str )[N] ) {
-	daw::con_out << "fp: " << str << "f: " << f << ' ' << str << "d: " << d
-	             << '\n';
+	daw::con_out << "number: " << str << '\n' << "con_out f: " << f << '\n';
+	std::cout << "cout    f: "
+	          << std::setprecision( std::numeric_limits<float>::max_digits10 )
+	          << f << '\n';
+
+	daw::con_out << "con_out d: " << d << '\n';
+
+	std::cout << "cout    d: "
+	          << std::setprecision( std::numeric_limits<double>::max_digits10 )
+	          << d << '\n'
+	          << '\n';
 }
 
 int main( int argc, char ** ) {
@@ -36,6 +48,7 @@ int main( int argc, char ** ) {
 	double const d = static_cast<double>( argc ) * 1.2334;
 	daw::con_out << "The number is: " << d << ". " << argc << " times number is "
 	             << ( static_cast<double>( argc ) * d ) << '\n';
+	VerifyValue( 123456.0435333f, 123456.0435333, "123456.0435333" );
 	VerifyValue( 0.1f, 0.1, "0.1" );
 	VerifyValue( 0.12f, 0.12, "0.12" );
 	VerifyValue( 0.123f, 0.123, "0.123" );
@@ -51,6 +64,16 @@ int main( int argc, char ** ) {
 	             std::numeric_limits<double>::max( ), "max( )" );
 	VerifyValue( std::numeric_limits<float>::denorm_min( ),
 	             std::numeric_limits<double>::denorm_min( ), "denorm_min( )" );
+
+	VerifyValue(
+	  std::numeric_limits<float>::min( ) * std::numeric_limits<float>::max( ),
+	  std::numeric_limits<double>::min( ) * std::numeric_limits<double>::max( ),
+	  "min( )*max( )" );
+	VerifyValue( std::numeric_limits<float>::max( ) -
+	               ( std::numeric_limits<float>::max( ) / 2.0f ),
+	             std::numeric_limits<double>::max( ) -
+	               ( std::numeric_limits<double>::max( ) / 2.0 ),
+	             "max( )-(max( )/2.0)" );
 	daw::con_out << '\n';
 
 	return 0;

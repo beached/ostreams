@@ -32,14 +32,13 @@
 #include "daw/io/memory_stream.h"
 
 template<typename T>
-inline void do_not_optimize( T && t ) noexcept {
+inline void do_not_optimize( T &&t ) noexcept {
 #ifdef _MSC_VER
 	daw::force_evaluation_ms( std::forward<T>( t ) );
 #else
 	daw::force_evaluation( std::forward<T>( t ) );
 #endif
 }
-
 
 struct stringstream_test {
 	void operator( )( size_t count, int number ) const {

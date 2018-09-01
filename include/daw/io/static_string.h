@@ -183,6 +183,22 @@ namespace daw {
 		constexpr const_reference operator[]( size_type pos ) const noexcept {
 			return buffer[pos];
 		}
+
+		constexpr const_reference front( ) const noexcept {
+			return buffer[0];
+		}
+
+		constexpr reference front( ) noexcept {
+			return buffer[0];
+		}
+
+		constexpr const_reference back( ) const noexcept {
+			return buffer[size( ) - 1];
+		}
+
+		constexpr reference back( ) noexcept {
+			return buffer[size( ) - 1];
+		}
 	};
 
 	template<typename CharT, size_t N>

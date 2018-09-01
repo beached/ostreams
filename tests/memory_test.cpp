@@ -37,7 +37,7 @@ namespace {
 		return result;
 	}
 
-	template<size_t BUFF_SIZE = 76, typename Float>
+	template<size_t BUFF_SIZE = 77, typename Float>
 	constexpr auto test( Float f ) {
 		// If buffer isn't large enough a buffer_full_exception will be thrown
 		daw::static_string_t<char, BUFF_SIZE> buffer{};
@@ -64,9 +64,7 @@ auto const &test2( ) {
 	return test_result;
 }
 
-
 int main( int, char ** ) {
 	daw::con_out << test2( ) << '\n';
 	return 0;
 }
-
