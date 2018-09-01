@@ -56,6 +56,7 @@ namespace daw {
 				}
 			};
 		} // namespace impl
+
 		template<typename CharT>
 		class file_stream {
 			FILE *m_file_handle;

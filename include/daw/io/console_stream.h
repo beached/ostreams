@@ -27,18 +27,58 @@
 #include "file_stream.h"
 
 namespace daw {
-#ifdef stdout
-	extern io::file_stream<char> con_out;
-	io::file_stream<char> con_out = make_file_stream<char>( stdout );
+	namespace io {
+		template<typename CharT>
+		struct console_stream {
+			FILE * m_file_handle;
+			using character_t = CharT;
 
-	extern io::file_stream<wchar_t> con_wout;
-	io::file_stream<wchar_t> con_wout = make_file_stream<wchar_t>( stdout );
+			inline console_stream( FILE * f ) noexcept: m_file_handle( f ) { }
+
+			inline auto operator( )( CharT c ) const noexcept {
+				return impl::write_char{}( c, m_file_handle );
+			}
+
+			inline auto operator( )( ::daw::io::impl::accept_asciiz,
+			                         CharT const *ptr ) const noexcept {
+				return impl::write_char{}( ptr, m_file_handle );
+			}
+
+			// OutputStream Interface
+			template<typename String,
+			         std::enable_if_t<( ::daw::impl::is_string_like_v<String> &&
+			                            !::daw::traits::is_character_v<String>),
+			                          std::nullptr_t> = nullptr>
+			void operator( )( String &&str ) const noexcept {
+				static_assert(
+				  daw::is_same_v<remove_cvref_t<CharT>,
+				                 remove_cvref_t<decltype( *str.data( ) )>>,
+				  "String's data( ) character type must match that of output stream" );
+
+				auto ptr = str.data( );
+				auto const sz = str.size( );
+				for( size_t n = 0; n < sz; ++n ) {
+					impl::write_char{}( *ptr++, m_file_handle );
+				}
+			}
+
+			constexpr FILE *native_handle( ) const {
+				return m_file_handle;
+			}
+		};
+
+		template<typename CharT>
+		struct supports_output_stream_interface<console_stream<CharT>>
+		  : std::true_type {};
+	} // namespace io
+
+#ifdef stdout
+	auto const con_out  = io::console_stream<char>( stdout );
+	auto const con_wout = io::console_stream<wchar_t>( stdout );
 #endif
 #ifdef stderr
-	extern io::file_stream<char> con_err;
-	io::file_stream<char> con_err = make_file_stream<char>( stderr );
-
-	extern io::file_stream<wchar_t> con_werr;
-	io::file_stream<wchar_t> con_werr = make_file_stream<wchar_t>( stderr );
+	auto const con_err  = io::console_stream<char>( stderr );
+	auto const con_werr = io::console_stream<wchar_t>( stderr );
 #endif
+
 } // namespace daw

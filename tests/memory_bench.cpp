@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 
@@ -41,27 +42,30 @@ inline void do_not_optimize( T &&t ) noexcept {
 }
 
 struct stringstream_test {
-	void operator( )( size_t count, int number ) const {
-		std::stringstream ss{};
+	template<typename Number>
+	void operator( )( size_t count, Number number ) const {
+		do_not_optimize( count );
 		for( size_t n = 0; n < count; ++n ) {
-			ss.clear( );
+			std::stringstream ss{};
 			do_not_optimize( number );
-			ss << "The answer to the meaining of life is " << number << ' '
-			   << ( static_cast<float>( number ) * 1.5f ) << '\n';
+			ss << std::setprecision( std::numeric_limits<Number>::max_digits10 )
+			   << number;
 			do_not_optimize( ss );
 		}
 	}
 };
 
 struct snprintf_test {
-	void operator( )( size_t count, int number ) const {
-		daw::static_string_t<char, 50> buffer{};
+	template<typename Number>
+	void operator( )( size_t count, Number number ) const {
 		for( size_t n = 0; n < count; ++n ) {
+			daw::static_string_t<char, 325> buffer{};
 			buffer.resize( buffer.capacity( ), false );
 			do_not_optimize( number );
-			snprintf( buffer.data( ), buffer.capacity( ),
-			          "The asnwer to the meaning of life is %d %f\n", number,
-			          static_cast<double>( static_cast<float>( number ) * 1.5f ) );
+
+			snprintf( buffer.data( ), buffer.capacity( ), "%.*f",
+			          std::numeric_limits<Number>::max_digits10, number );
+
 			buffer.shrink_to_fit( );
 			do_not_optimize( buffer );
 		}
@@ -69,9 +73,10 @@ struct snprintf_test {
 };
 
 struct memory_stream_test {
-	void operator( )( size_t count, int number ) const {
-		daw::static_string_t<char, 50> buffer{};
+	template<typename Number>
+	void operator( )( size_t count, Number number ) const {
 		for( size_t n = 0; n < count; ++n ) {
+			daw::static_string_t<char, 325> buffer{};
 			do_not_optimize( number );
 
 			buffer.resize( buffer.capacity( ), false );
@@ -79,8 +84,8 @@ struct memory_stream_test {
 			auto ss =
 			  ::daw::io::make_memory_buffer_stream( buffer.data( ), buffer.size( ) );
 
-			ss << "The answer to the meaining of life is " << number << ' '
-			   << ( static_cast<float>( number ) * 1.5f ) << '\n';
+			ss << number;
+
 			buffer.shrink_to_fit( );
 			do_not_optimize( buffer );
 		}
@@ -88,52 +93,67 @@ struct memory_stream_test {
 };
 
 struct cerr_test {
-	void operator( )( size_t count, int number ) const {
+	template<typename Number>
+	void operator( )( size_t count, Number number ) const {
+		do_not_optimize( count );
 		for( size_t n = 0; n < count; ++n ) {
 			do_not_optimize( number );
-			std::cerr << "The answer to the meaining of life is " << number << ' '
-			          << ( static_cast<float>( number ) * 1.5f ) << '\n';
+			std::cerr << std::setprecision(
+			               std::numeric_limits<Number>::max_digits10 )
+			          << number;
 		}
 	}
 };
 
 struct console_stream_test {
-	void operator( )( size_t count, int number ) const {
+	template<typename Number>
+	void operator( )( size_t count, Number number ) const {
 		for( size_t n = 0; n < count; ++n ) {
 			do_not_optimize( number );
-			daw::con_err << "The answer to the meaining of life is " << ' '
-			             << ( static_cast<float>( number ) * 1.5f ) << number << '\n';
+			daw::con_err << number;
 		}
 	}
 };
 
 struct printf_test {
-	void operator( )( size_t count, int number ) const {
+	template<typename Number>
+	void operator( )( size_t count, Number number ) const {
 		for( size_t n = 0; n < count; ++n ) {
 			do_not_optimize( number );
-			fprintf( stderr, "The asnwer to the meaning of life is %d %f\n", number,
-			         static_cast<double>( static_cast<float>( number ) * 1.5f ) );
+			fprintf( stderr, "%.*f", std::numeric_limits<Number>::max_digits10,
+			         number );
 		}
 	}
 };
 
-int main( int argc, char ** ) {
-	std::ios_base::sync_with_stdio( false );
-	constexpr size_t const count = 100'000;
+template<typename Number>
+void do_bench( size_t count, Number number ) {
+	daw::con_out << "number: " << number << "\n\n";
+	do_not_optimize( number );
 	std::cout << "char buffer" << std::endl;
 	daw::benchmark( "std::string_stream", stringstream_test{}, count, count,
-	                argc );
-	daw::benchmark( "snprintf", snprintf_test{}, count, count, argc );
+	                number );
+	daw::benchmark( "snprintf", snprintf_test{}, count, count, number );
 	daw::benchmark( "daw::memory_stream", memory_stream_test{}, count, count,
-	                argc );
+	                number );
 
 	std::cout << "\nconsole" << std::endl;
-	daw::benchmark( "srd::cerr", cerr_test{}, count, count, argc );
+	daw::benchmark( "srd::cerr", cerr_test{}, count, count, number );
 	std::cerr << std::flush;
-	daw::benchmark( "printf", printf_test{}, count, count, argc );
+	daw::benchmark( "printf", printf_test{}, count, count, number );
 	fflush( stderr );
 	daw::benchmark( "daw::console_stream", console_stream_test{}, count, count,
-	                argc );
+	                number );
 	fflush( stderr );
+}
+
+int main( int argc, char ** ) {
+	std::ios_base::sync_with_stdio( false );
+	//constexpr size_t const count = 100'000;
+	size_t count = 10;
+	daw::con_out << "doubles\n";
+	do_bench( count, 0.1234 );
+	do_bench( count, 2.718281828459045 );
+	do_bench( count, 1.7976931348623157e308 );
 	return 0;
 }
