@@ -33,7 +33,7 @@ namespace daw {
 			FILE *m_file_handle;
 			using character_t = CharT;
 
-			constexpr console_stream( FILE *f ) noexcept
+			explicit constexpr console_stream( FILE *f ) noexcept
 			  : m_file_handle( f ) {}
 
 			inline auto operator( )( CharT c ) const noexcept {
@@ -67,10 +67,18 @@ namespace daw {
 		template<typename CharT>
 		struct supports_output_stream_interface<console_stream<CharT>>
 		  : std::true_type {};
-	} // namespace io
+
+		namespace impl {
+			template<typename CharT>
+			console_stream<CharT> *get_console_stream( FILE *f ) noexcept {
+				static auto const stream = std::make_unique<console_stream<CharT>>( f );
+				return stream.get( );
+			}
+		} // namespace impl
+	}   // namespace io
 
 #ifdef stdout
-	static auto const con_out = io::console_stream<char>( stdout );
+	static auto const con_out = io::impl::get_console_stream<char>( stdout );
 	static auto const con_wout = io::console_stream<wchar_t>( stdout );
 #endif
 #ifdef stderr
@@ -79,3 +87,32 @@ namespace daw {
 #endif
 
 } // namespace daw
+// Account for pointer to output streams
+template<typename CharT, size_t N,
+         std::enable_if_t<daw::traits::is_character_v<CharT>, std::nullptr_t> =
+           nullptr>
+constexpr daw::io::console_stream<CharT> *
+operator<<( daw::io::console_stream<CharT> *os, CharT const ( &str )[N] ) {
+
+	( *os )( str, N - 1 );
+	return os;
+}
+
+template<typename CharT, std::enable_if_t<daw::traits::is_character_v<CharT>,
+                                          std::nullptr_t> = nullptr>
+constexpr daw::io::console_stream<CharT> *
+operator<<( daw::io::console_stream<CharT> *os, CharT const *str ) {
+
+	( *os )( daw::basic_string_view<CharT>( str ) );
+	return os;
+}
+
+template<
+  typename CharT, typename T,
+  std::enable_if_t<!daw::traits::is_character_v<T>, std::nullptr_t> = nullptr>
+constexpr daw::io::console_stream<CharT> *
+operator<<( daw::io::console_stream<CharT> *os, T &&value ) {
+	using namespace daw::io;
+	operator<<( *os, std::forward<T>( value ) );
+	return os;
+}
