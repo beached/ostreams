@@ -30,10 +30,11 @@ namespace daw {
 	namespace io {
 		template<typename CharT>
 		struct console_stream {
-			FILE * m_file_handle;
+			FILE *m_file_handle;
 			using character_t = CharT;
 
-			constexpr console_stream( FILE * f ) noexcept: m_file_handle( f ) { }
+			constexpr console_stream( FILE *f ) noexcept
+			  : m_file_handle( f ) {}
 
 			inline auto operator( )( CharT c ) const noexcept {
 				return impl::write_char{}( c, m_file_handle );
@@ -55,11 +56,7 @@ namespace daw {
 				                 remove_cvref_t<decltype( *str.data( ) )>>,
 				  "String's data( ) character type must match that of output stream" );
 
-				auto ptr = str.data( );
-				auto const sz = str.size( );
-				for( size_t n = 0; n < sz; ++n ) {
-					impl::write_char{}( *ptr++, m_file_handle );
-				}
+				impl::write_char{}( str.data( ), str.size( ), m_file_handle );
 			}
 
 			constexpr FILE *native_handle( ) const {
@@ -73,11 +70,11 @@ namespace daw {
 	} // namespace io
 
 #ifdef stdout
-	static auto const con_out  = io::console_stream<char>( stdout );
+	static auto const con_out = io::console_stream<char>( stdout );
 	static auto const con_wout = io::console_stream<wchar_t>( stdout );
 #endif
 #ifdef stderr
-	static auto const con_err  = io::console_stream<char>( stderr );
+	static auto const con_err = io::console_stream<char>( stderr );
 	static auto const con_werr = io::console_stream<wchar_t>( stderr );
 #endif
 

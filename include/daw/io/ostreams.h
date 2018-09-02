@@ -160,8 +160,7 @@ namespace daw {
 		}
 
 		template<typename OutputStream, typename T,
-		         std::enable_if_t<(is_output_stream_v<OutputStream>),
-		                          std::nullptr_t> = nullptr>
+		         std::enable_if_t<is_output_stream_v<OutputStream>, std::nullptr_t> = nullptr>
 		constexpr OutputStream &operator<<( OutputStream &os, T &&value ) {
 			using CharT = typename OutputStream::character_t;
 			// Can type T be called with to_string
@@ -170,10 +169,6 @@ namespace daw {
 			// Is OutputStream callable with a single CharT
 			static_assert( impl::has_operator_parans_char_v<CharT, OutputStream>,
 			               "Missing operator( )( CharT ) member on OutputStream" );
-
-			// Is OutputStream callable with a String (has size( ) and data( ) member)
-			static_assert( impl::has_operator_parans_string_v<CharT, OutputStream>,
-			               "Missing operator( )( String ) member on OutputStream" );
 
 			using ::ostream_converters::to_string;
 			os( to_string<CharT>( std::forward<T>( value ) ) );

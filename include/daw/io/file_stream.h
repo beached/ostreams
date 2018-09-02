@@ -54,6 +54,14 @@ namespace daw {
 				inline auto operator( )( wchar_t const *ptr, FILE *f ) const noexcept {
 					return fputws( ptr, f );
 				}
+
+				template<typename CharT,
+				         std::enable_if_t<daw::traits::is_character_v<CharT>,
+				                          std::nullptr_t> = nullptr>
+				inline auto operator( )( CharT const *ptr, size_t len, FILE *f ) const
+				  noexcept {
+					return fwrite( ptr, sizeof( CharT ), len, f );
+				}
 			};
 		} // namespace impl
 
@@ -91,17 +99,13 @@ namespace daw {
 			         std::enable_if_t<( ::daw::impl::is_string_like_v<String> &&
 			                            !::daw::traits::is_character_v<String>),
 			                          std::nullptr_t> = nullptr>
-			constexpr void operator( )( String &&str ) const noexcept {
+			inline void operator( )( String &&str ) const noexcept {
 				static_assert(
 				  daw::is_same_v<remove_cvref_t<CharT>,
 				                 remove_cvref_t<decltype( *str.data( ) )>>,
 				  "String's data( ) character type must match that of output stream" );
 
-				auto ptr = str.data( );
-				auto const sz = str.size( );
-				for( size_t n = 0; n < sz; ++n ) {
-					impl::write_char{}( *ptr++, m_file_handle );
-				}
+				impl::write_char{}( str.data( ), str.size( ), m_file_handle );
 			}
 
 			inline explicit operator bool( ) const noexcept {
