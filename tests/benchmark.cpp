@@ -128,7 +128,7 @@ struct printf_test {
 
 template<typename Number>
 void do_bench( size_t count, Number number ) {
-	daw::con_out << "number: " << number << "\n\n";
+	std::cout << "\nnumber: " << number << std::endl;
 	do_not_optimize( number );
 	std::cout << "char buffer" << std::endl;
 	daw::benchmark( "std::string_stream", stringstream_test{}, count, count,
