@@ -155,5 +155,22 @@ int main( int argc, char ** ) {
 	do_bench( count, 0.1234 );
 	do_bench( count, 2.718281828459045 );
 	do_bench( count, 1.7976931348623157e308 );
+	do_bench( count, 123456.0435333 );
+	do_bench( count, 0.1 );
+	do_bench( count, 0.12 );
+	do_bench( count, 0.123 );
+	do_bench( count, 0.1234 );
+	do_bench( count, 1.2345 );
+	do_bench( count, 1.0 / 3.0 );
+	do_bench( count, 2.0 / 3.0 );
+	do_bench( count, 10.0 / 3.0 );
+	do_bench( count, 20.0 / 3.0 );
+	do_bench( count, std::numeric_limits<double>::min( ) );
+	do_bench( count, std::numeric_limits<double>::max( ) );
+	do_bench( count, std::numeric_limits<double>::denorm_min( ) );
+	do_bench( count, std::numeric_limits<double>::min( ) *
+	                   std::numeric_limits<double>::max( ) );
+	do_bench( count, std::numeric_limits<double>::max( ) -
+	                   ( std::numeric_limits<double>::max( ) / 2.0 ) );
 	return 0;
 }

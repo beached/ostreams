@@ -160,7 +160,8 @@ namespace daw {
 		}
 
 		template<typename OutputStream, typename T,
-		         std::enable_if_t<is_output_stream_v<OutputStream>, std::nullptr_t> = nullptr>
+		         std::enable_if_t<is_output_stream_v<OutputStream>,
+		                          std::nullptr_t> = nullptr>
 		constexpr OutputStream &operator<<( OutputStream &os, T &&value ) {
 			using CharT = typename OutputStream::character_t;
 			// Can type T be called with to_string
