@@ -56,19 +56,9 @@ namespace {
 		buffer.shrink_to_fit( );
 		return buffer;
 	}
-
-	template<typename CharT, typename Float>
-	constexpr auto test2( Float f ) {
-		using ostream_converters::to_string;
-		return to_string<CharT>( f );
-	}
 } // namespace
 
 static constexpr auto const test_result = test( 1234560.435333 );
-static constexpr auto const test_result2 =
-  test2<char>( std::numeric_limits<double>::max( ) );
-static constexpr auto const test_result3 =
-  test2<char>( std::numeric_limits<float>::max( ) );
 
 auto const &test2( ) {
 	return test_result;
