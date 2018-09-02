@@ -41,6 +41,8 @@ void VerifyValue( float f, double d, char const ( &str )[N] ) {
 }
 
 int main( int argc, char ** ) {
+	daw::string_view str = "Console test\n";
+	daw::con_out << str;
 	float const f = static_cast<float>( argc ) * 1.2334f;
 	daw::con_out << "The number is: " << f << ". " << argc << " times number is "
 	             << ( static_cast<float>( argc ) * f ) << '\n';

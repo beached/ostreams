@@ -1,6 +1,35 @@
 # ostreams
-A constexpr output stream.  See [tests](https://github.com/beached/ostreams/tree/master/tests) for example of usage
+A constexpr output stream implementation.  See [tests](https://github.com/beached/ostreams/tree/master/tests) for example of usage
 
+To create a formatted buffer
+
+```cpp
+daw::static_string_t<char, 100> buffer{};   // Uses a static string, but any contiguous memory area is fine
+
+buffer.resize(buffer.size( ));  // makes static string marked as fully used
+
+
+auto buff_stream = daw::io::make_memory_buffer_stream( buffer.data( ), buffer.size( ) );    // create stream
+
+buff_stream << "The meaning of life is " << 42 << '\n';
+
+buffer.shrink_to_fit( );    // reclaim unused space in buffer
+```
+Console output
+```cpp
+daw::con_out << "The meaning of life is " << 42 << '\n';
+```
+
+File output
+```cpp
+auto fs = daw::make_file_stream( "file_name" );
+if( !fs ) {
+    daw::con_err << "Error opening file\n";
+    exit( EXIT_FAILURE );
+}
+fs << "The meaining of life is " << 42 << '\n';
+fs.close( );    // or let it go out of scope
+```
 ## Initial Benchmarks
 Using a format string(or equivilent) of `"The asnwer to the meaning of life is %d %f\n"`
 

@@ -710,16 +710,6 @@ namespace ostream_converters {
 		template<typename Float>
 		constexpr static int max_fractional_digits =
 		  std::numeric_limits<Float>::min_exponent10 * -1;
-
-		template<typename CharT>
-		constexpr size_t strlen( CharT const *ptr ) noexcept {
-			size_t result = 0;
-			while( ptr[result] != '\0' ) {
-				++result;
-			}
-			return result;
-		}
-
 	} // namespace impl
 
 	// character pointer
@@ -727,7 +717,7 @@ namespace ostream_converters {
 	                                          std::nullptr_t> = nullptr>
 	constexpr daw::basic_string_view<CharT>
 	to_string( CharT const *str ) noexcept {
-		return daw::basic_string_view<CharT>( str, impl::strlen( str ) );
+		return daw::basic_string_view<CharT>( str );
 	}
 
 	// string_view
