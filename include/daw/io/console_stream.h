@@ -28,31 +28,40 @@
 
 namespace daw {
 	namespace io {
-		template<typename CharT>
+		enum class output_stream_type_destinations { output, error };
+
+		template<typename CharT, output_stream_type_destinations Dest>
 		struct console_stream {
-			FILE *m_file_handle;
 			using character_t = CharT;
 
-			explicit constexpr console_stream( FILE *f ) noexcept
-			  : m_file_handle( f ) {}
-
+		private:
+			inline static FILE *get_handle( ) noexcept {
+				switch( Dest ) {
+				case output_stream_type_destinations::error:
+					return stderr;
+				case output_stream_type_destinations::output:
+				default:
+					return stdout;
+				}
+			}
+		public:
 			inline auto operator( )( CharT c ) const noexcept {
-				return impl::write_char{}( c, m_file_handle );
+				return impl::write_char{}( c, get_handle( ) );
 			}
 
-			inline auto operator( )( ::daw::io::impl::accept_asciiz,
-			                         CharT const *ptr ) const noexcept {
-				return impl::write_char{}( ptr, m_file_handle );
+			inline auto operator( )(::daw::io::impl::accept_asciiz,
+			                        CharT const *ptr ) const noexcept {
+				return impl::write_char{}( ptr, get_handle( ) );
 			}
 
 			template<size_t N>
 			inline auto operator( )( CharT const ( &str )[N] ) const noexcept {
-				return impl::write_char{}( str, N - 1, m_file_handle );
+				return impl::write_char{}( str, N - 1, get_handle( ) );
 			}
 			// OutputStream Interface
 			template<typename String,
-			         std::enable_if_t<( ::daw::impl::is_string_like_v<String> &&
-			                            !::daw::traits::is_character_v<String>),
+			         std::enable_if_t<(::daw::impl::is_string_like_v<String> &&
+			                           !::daw::traits::is_character_v<String>),
 			                          std::nullptr_t> = nullptr>
 			void operator( )( String &&str ) const noexcept {
 				static_assert(
@@ -60,25 +69,14 @@ namespace daw {
 				                 remove_cvref_t<decltype( *str.data( ) )>>,
 				  "String's data( ) character type must match that of output stream" );
 
-				impl::write_char{}( str.data( ), str.size( ), m_file_handle );
-			}
-
-			constexpr FILE *native_handle( ) const {
-				return m_file_handle;
+				impl::write_char{}(
+				  str.data( ), str.size( ), get_handle( ) );
 			}
 		};
 
-		template<typename CharT>
-		struct supports_output_stream_interface<console_stream<CharT>>
+		template<typename CharT, output_stream_type_destinations Dest>
+		struct supports_output_stream_interface<console_stream<CharT, Dest>>
 		  : std::true_type {};
-
-		namespace impl {
-			template<typename CharT>
-			console_stream<CharT> *get_console_stream( FILE *f ) noexcept {
-				static auto const stream = std::make_unique<console_stream<CharT>>( f );
-				return stream.get( );
-			}
-		} // namespace impl
 
 		struct console_stdout_char_t {};
 		struct console_stderr_char_t {};
@@ -89,76 +87,84 @@ namespace daw {
 		template<size_t N>
 		constexpr console_stdout_char_t operator<<( console_stdout_char_t os,
 		                                            char const ( &str )[N] ) {
-			auto const cs = console_stream<char>( stdout );
+			constexpr auto cs =
+			  console_stream<char, output_stream_type_destinations::output>{};
 			cs( str );
 			return os;
 		}
 
 		template<typename T>
-		constexpr console_stdout_char_t operator<<( console_stdout_char_t os,
+		console_stdout_char_t operator<<( console_stdout_char_t os,
 		                                            T &&value ) {
-			auto cs = console_stream<char>( stdout );
+			constexpr auto const cs =
+			  console_stream<char, output_stream_type_destinations::output>{};
 			operator<<( cs, std::forward<T>( value ) );
 			return os;
 		}
 
 		template<size_t N>
-		constexpr console_stderr_char_t operator<<( console_stderr_char_t os,
+		console_stderr_char_t operator<<( console_stderr_char_t os,
 		                                            char const ( &str )[N] ) {
-			auto const cs = console_stream<char>( stderr );
+			constexpr auto const cs =
+			  console_stream<char, output_stream_type_destinations::error>{};
 			cs( *&str, N - 1 );
 			return os;
 		}
 
 		template<typename T>
-		constexpr console_stderr_char_t operator<<( console_stderr_char_t os,
+		console_stderr_char_t operator<<( console_stderr_char_t os,
 		                                            T &&value ) {
-			auto cs = console_stream<char>( stderr );
+			auto cs =
+			  console_stream<char, output_stream_type_destinations::error>{};
 			operator<<( cs, std::forward<T>( value ) );
 			return os;
 		}
 
 		// wchar_t
 		template<size_t N>
-		constexpr console_stdout_wchar_t operator<<( console_stdout_wchar_t os,
+		console_stdout_wchar_t operator<<( console_stdout_wchar_t os,
 		                                             wchar_t const ( &str )[N] ) {
-			auto const cs = console_stream<wchar_t>( stdout );
+			constexpr auto const cs =
+			  console_stream<wchar_t, output_stream_type_destinations::output>{};
 			cs( str );
 			return os;
 		}
 
 		template<typename T>
-		constexpr console_stdout_wchar_t operator<<( console_stdout_wchar_t os,
+		console_stdout_wchar_t operator<<( console_stdout_wchar_t os,
 		                                             T &&value ) {
-			auto cs = console_stream<wchar_t>( stdout );
+			auto cs =
+			  console_stream<wchar_t, output_stream_type_destinations::output>{};
 			operator<<( cs, std::forward<T>( value ) );
 			return os;
 		}
 
 		template<size_t N>
-		constexpr console_stderr_wchar_t operator<<( console_stderr_wchar_t os,
+		console_stderr_wchar_t operator<<( console_stderr_wchar_t os,
 		                                             wchar_t const ( &str )[N] ) {
-			auto const cs = console_stream<wchar_t>( stderr );
+			constexpr auto const cs =
+			  console_stream<wchar_t, output_stream_type_destinations::error>{};
 			cs( *&str, N - 1 );
 			return os;
 		}
 
 		template<typename T>
-		constexpr console_stderr_wchar_t operator<<( console_stderr_wchar_t os,
+		console_stderr_wchar_t operator<<( console_stderr_wchar_t os,
 		                                             T &&value ) {
-			auto cs = console_stream<wchar_t>( stderr );
+			auto cs =
+			  console_stream<wchar_t, output_stream_type_destinations::error>{};
 			operator<<( cs, std::forward<T>( value ) );
 			return os;
 		}
 	} // namespace io
 
 #ifdef stdout
-	static auto const con_out = io::console_stdout_char_t{};
-	static auto const con_wout = io::console_stdout_wchar_t{};
+	constexpr auto const con_out = io::console_stdout_char_t{};
+	constexpr auto const con_wout = io::console_stdout_wchar_t{};
 #endif
 #ifdef stderr
-	static auto const con_err = io::console_stderr_char_t{};
-	static auto const con_werr = io::console_stderr_wchar_t{};
+	constexpr auto const con_err = io::console_stderr_char_t{};
+	constexpr auto const con_werr = io::console_stderr_wchar_t{};
 #endif
 
 } // namespace daw

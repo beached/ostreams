@@ -145,6 +145,7 @@ namespace daw {
 			                 remove_cvref_t<CharT>>,
 			  "Character type in OutputStream does not match that of stirng" );
 			os( impl::accept_asciiz{}, str.data( ) );
+			return os;
 		}
 
 		template<typename OutputStream, typename T, typename CharT, size_t N,
@@ -157,6 +158,7 @@ namespace daw {
 			                 remove_cvref_t<CharT>>,
 			  "Character type in OutputStream does not match that of stirng" );
 			os( impl::accept_asciiz{}, str.data( ) );
+			return os;
 		}
 
 		template<typename OutputStream, typename T,
