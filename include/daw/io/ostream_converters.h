@@ -201,7 +201,7 @@ namespace ostream_converters {
 		  typename Result, typename Number,
 		  std::enable_if_t<daw::is_arithmetic_v<Number>, std::nullptr_t> = nullptr>
 		constexpr uint16_t whole_log10( Number positive_value ) noexcept {
-			Result	 result = 0;
+			Result result = 0;
 			while( positive_value >= 10 ) {
 				++result;
 				positive_value /= static_cast<Number>( 10 );

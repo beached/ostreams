@@ -156,6 +156,15 @@ int main( int argc, char ** ) {
 	do_bench( count, 2.718281828459045 );
 	do_bench( count, 1.7976931348623157e308 );
 	do_bench( count, 123456.0435333 );
+	{
+		double d = std::numeric_limits<double>::max( );
+		do_not_optimize( d );
+		for( size_t n = 0; n < 1'000'000; ++n ) {
+			d -= 0.00001;
+			do_not_optimize( d );
+		}
+		do_bench( count, d );
+	}
 	do_bench( count, 0.1 );
 	do_bench( count, 0.12 );
 	do_bench( count, 0.123 );
