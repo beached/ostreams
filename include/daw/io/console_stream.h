@@ -77,94 +77,15 @@ namespace daw {
 		template<typename CharT, output_stream_type_destinations Dest>
 		struct supports_output_stream_interface<console_stream<CharT, Dest>>
 		  : std::true_type {};
-
-		struct console_stdout_char_t {};
-		struct console_stderr_char_t {};
-		struct console_stdout_wchar_t {};
-		struct console_stderr_wchar_t {};
-
-		// Account for pointer to output streams
-		template<size_t N>
-		constexpr console_stdout_char_t operator<<( console_stdout_char_t os,
-		                                            char const ( &str )[N] ) {
-			constexpr auto cs =
-			  console_stream<char, output_stream_type_destinations::output>{};
-			cs( str );
-			return os;
-		}
-
-		template<typename T>
-		console_stdout_char_t operator<<( console_stdout_char_t os,
-		                                            T &&value ) {
-			constexpr auto const cs =
-			  console_stream<char, output_stream_type_destinations::output>{};
-			operator<<( cs, std::forward<T>( value ) );
-			return os;
-		}
-
-		template<size_t N>
-		console_stderr_char_t operator<<( console_stderr_char_t os,
-		                                            char const ( &str )[N] ) {
-			constexpr auto const cs =
-			  console_stream<char, output_stream_type_destinations::error>{};
-			cs( *&str, N - 1 );
-			return os;
-		}
-
-		template<typename T>
-		console_stderr_char_t operator<<( console_stderr_char_t os,
-		                                            T &&value ) {
-			auto cs =
-			  console_stream<char, output_stream_type_destinations::error>{};
-			operator<<( cs, std::forward<T>( value ) );
-			return os;
-		}
-
-		// wchar_t
-		template<size_t N>
-		console_stdout_wchar_t operator<<( console_stdout_wchar_t os,
-		                                             wchar_t const ( &str )[N] ) {
-			constexpr auto const cs =
-			  console_stream<wchar_t, output_stream_type_destinations::output>{};
-			cs( str );
-			return os;
-		}
-
-		template<typename T>
-		console_stdout_wchar_t operator<<( console_stdout_wchar_t os,
-		                                             T &&value ) {
-			auto cs =
-			  console_stream<wchar_t, output_stream_type_destinations::output>{};
-			operator<<( cs, std::forward<T>( value ) );
-			return os;
-		}
-
-		template<size_t N>
-		console_stderr_wchar_t operator<<( console_stderr_wchar_t os,
-		                                             wchar_t const ( &str )[N] ) {
-			constexpr auto const cs =
-			  console_stream<wchar_t, output_stream_type_destinations::error>{};
-			cs( *&str, N - 1 );
-			return os;
-		}
-
-		template<typename T>
-		console_stderr_wchar_t operator<<( console_stderr_wchar_t os,
-		                                             T &&value ) {
-			auto cs =
-			  console_stream<wchar_t, output_stream_type_destinations::error>{};
-			operator<<( cs, std::forward<T>( value ) );
-			return os;
-		}
 	} // namespace io
 
 #ifdef stdout
-	constexpr auto const con_out = io::console_stdout_char_t{};
-	constexpr auto const con_wout = io::console_stdout_wchar_t{};
+	constexpr auto con_out = io::console_stream<char, io::output_stream_type_destinations::output>{};
+	constexpr auto con_wout = io::console_stream<wchar_t, io::output_stream_type_destinations::output>{};
 #endif
 #ifdef stderr
-	constexpr auto const con_err = io::console_stderr_char_t{};
-	constexpr auto const con_werr = io::console_stderr_wchar_t{};
+	constexpr auto con_err = io::console_stream<char, io::output_stream_type_destinations::error>{};
+	constexpr auto con_werr = io::console_stream<wchar_t, io::output_stream_type_destinations::error>{};
 #endif
 
 } // namespace daw
