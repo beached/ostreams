@@ -47,6 +47,7 @@ set( HEADER_FILES
 add_executable( console_test ${HEADER_FILES} ${TEST_FOLDER}/console_test.cpp )
 add_executable( file_test ${HEADER_FILES} ${TEST_FOLDER}/file_test.cpp )
 add_executable( memory_test ${HEADER_FILES} ${TEST_FOLDER}/memory_test.cpp )
+add_executable( simple_console ${HEADER_FILES} ${TEST_FOLDER}/simple_console.cpp )
 add_executable( benchmark ${HEADER_FILES} ${TEST_FOLDER}/benchmark.h ${TEST_FOLDER}/benchmark.cpp )
 
 install( DIRECTORY ${HEADER_FOLDER}/daw DESTINATION include )

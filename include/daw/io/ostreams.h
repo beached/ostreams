@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include <tuple>
 #include <type_traits>
 
 #include <daw/daw_traits.h>
@@ -71,6 +72,7 @@ namespace daw {
 			template<typename CharT>
 			struct operator_parens_string_t {
 				CharT const *data( ) const;
+
 				size_t size( ) const;
 			};
 
@@ -192,6 +194,5 @@ namespace daw {
 			os( value );
 			return os;
 		}
-
 	} // namespace io
 } // namespace daw

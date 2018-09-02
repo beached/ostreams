@@ -21,8 +21,6 @@
 // SOFTWARE.
 
 #include "daw/io/console_stream.h"
-
-#include "daw/io/memory_stream.h"
 #include "daw/io/static_string.h"
 
 namespace {
@@ -36,45 +34,10 @@ namespace {
 		daw::static_string_t<CharT, 1> result = "A";
 		return result;
 	}
-
-	template<size_t BUFF_SIZE = 77, typename Float>
-	constexpr auto test( Float f ) {
-		// If buffer isn't large enough a buffer_full_exception will be thrown
-		daw::static_string_t<char, BUFF_SIZE> buffer{};
-
-		// Indicate we want to have the full size of static_string as in use, and
-		// do not default init the char's to 0
-		buffer.resize( buffer.capacity( ), false );
-
-		auto buff_os =
-		  ::daw::io::make_memory_buffer_stream( buffer.data( ), buffer.size( ) );
-
-		buff_os << A{} << " The number is: " << f << ". " << 5
-		        << " times number is " << ( static_cast<Float>( 5 ) * f ) << '\n';
-
-		// Reset static_string size to last non-zero item in array
-		buffer.shrink_to_fit( );
-		return buffer;
-	}
-
-	template<typename CharT, typename Float>
-	constexpr auto test2( Float f ) {
-		using ostream_converters::to_string;
-		return to_string<CharT>( f );
-	}
 } // namespace
 
-static constexpr auto const test_result = test( 1234560.435333 );
-static constexpr auto const test_result2 =
-  test2<char>( std::numeric_limits<double>::max( ) );
-static constexpr auto const test_result3 =
-  test2<char>( std::numeric_limits<float>::max( ) );
-
-auto const &test2( ) {
-	return test_result;
-}
-
 int main( int, char ** ) {
-	daw::con_out << test2( ) << '\n';
+	daw::con_out << A{} << " The number is: " << 1234560.435333 << ". " << 5
+	             << " times number is " << ( 5.0f * 1234560.435333f ) << '\n';
 	return 0;
 }

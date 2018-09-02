@@ -48,652 +48,165 @@ namespace ostream_converters {
 			}
 			return result;
 		}
-
-		template<typename Result, std::enable_if_t<daw::is_arithmetic_v<Result>,
-		                                           std::nullptr_t> = nullptr>
-		constexpr Result pow10( int16_t n ) noexcept {
-			daw::exception::dbg_precondition_check(
-			  n >= 0, "Only positive values of n supported" );
-
-			switch( n ) {
-			case 0:
-				return static_cast<Result>( 1e+0 );
-			case 1:
-				return static_cast<Result>( 1e+1 );
-			case 2:
-				return static_cast<Result>( 1e+2 );
-			case 3:
-				return static_cast<Result>( 1e+3 );
-			case 4:
-				return static_cast<Result>( 1e+4 );
-			case 5:
-				return static_cast<Result>( 1e+5 );
-			case 6:
-				return static_cast<Result>( 1e+6 );
-			case 7:
-				return static_cast<Result>( 1e+7 );
-			case 8:
-				return static_cast<Result>( 1e+8 );
-			case 9:
-				return static_cast<Result>( 1e+9 );
-			case 10:
-				return static_cast<Result>( 1e+10 );
-			case 11:
-				return static_cast<Result>( 1e+11 );
-			case 12:
-				return static_cast<Result>( 1e+12 );
-			case 13:
-				return static_cast<Result>( 1e+13 );
-			case 14:
-				return static_cast<Result>( 1e+14 );
-			case 15:
-				return static_cast<Result>( 1e+15 );
-			case 16:
-				return static_cast<Result>( 1e+16 );
-			case 17:
-				return static_cast<Result>( 1e+17 );
-			case 18:
-				return static_cast<Result>( 1e+18 );
-			case 19:
-				return static_cast<Result>( 1e+19 );
-			case 20:
-				return static_cast<Result>( 1e+20 );
-			case 21:
-				return static_cast<Result>( 1e+21 );
-			case 22:
-				return static_cast<Result>( 1e+22 );
-			case 23:
-				return static_cast<Result>( 1e+23 );
-			case 24:
-				return static_cast<Result>( 1e+24 );
-			case 25:
-				return static_cast<Result>( 1e+25 );
-			case 26:
-				return static_cast<Result>( 1e+26 );
-			case 27:
-				return static_cast<Result>( 1e+27 );
-			case 28:
-				return static_cast<Result>( 1e+28 );
-			case 29:
-				return static_cast<Result>( 1e+29 );
-			case 30:
-				return static_cast<Result>( 1e+30 );
-			case 31:
-				return static_cast<Result>( 1e+31 );
-			case 32:
-				return static_cast<Result>( 1e+32 );
-			case 33:
-				return static_cast<Result>( 1e+33 );
-			case 34:
-				return static_cast<Result>( 1e+34 );
-			case 35:
-				return static_cast<Result>( 1e+35 );
-			case 36:
-				return static_cast<Result>( 1e+36 );
-			case 37:
-				return static_cast<Result>( 1e+37 );
-			case 38:
-				return static_cast<Result>( 1e+38 );
-			case 39:
-				return static_cast<Result>( 1e+39 );
-			case 40:
-				return static_cast<Result>( 1e+40 );
-			case 41:
-				return static_cast<Result>( 1e+41 );
-			case 42:
-				return static_cast<Result>( 1e+42 );
-			case 43:
-				return static_cast<Result>( 1e+43 );
-			case 44:
-				return static_cast<Result>( 1e+44 );
-			case 45:
-				return static_cast<Result>( 1e+45 );
-			case 46:
-				return static_cast<Result>( 1e+46 );
-			case 47:
-				return static_cast<Result>( 1e+47 );
-			case 48:
-				return static_cast<Result>( 1e+48 );
-			case 49:
-				return static_cast<Result>( 1e+49 );
-			case 50:
-				return static_cast<Result>( 1e+50 );
-			case 51:
-				return static_cast<Result>( 1e+51 );
-			case 52:
-				return static_cast<Result>( 1e+52 );
-			case 53:
-				return static_cast<Result>( 1e+53 );
-			case 54:
-				return static_cast<Result>( 1e+54 );
-			case 55:
-				return static_cast<Result>( 1e+55 );
-			case 56:
-				return static_cast<Result>( 1e+56 );
-			case 57:
-				return static_cast<Result>( 1e+57 );
-			case 58:
-				return static_cast<Result>( 1e+58 );
-			case 59:
-				return static_cast<Result>( 1e+59 );
-			case 60:
-				return static_cast<Result>( 1e+60 );
-			case 61:
-				return static_cast<Result>( 1e+61 );
-			case 62:
-				return static_cast<Result>( 1e+62 );
-			case 63:
-				return static_cast<Result>( 1e+63 );
-			case 64:
-				return static_cast<Result>( 1e+64 );
-			case 65:
-				return static_cast<Result>( 1e+65 );
-			case 66:
-				return static_cast<Result>( 1e+66 );
-			case 67:
-				return static_cast<Result>( 1e+67 );
-			case 68:
-				return static_cast<Result>( 1e+68 );
-			case 69:
-				return static_cast<Result>( 1e+69 );
-			case 70:
-				return static_cast<Result>( 1e+70 );
-			case 71:
-				return static_cast<Result>( 1e+71 );
-			case 72:
-				return static_cast<Result>( 1e+72 );
-			case 73:
-				return static_cast<Result>( 1e+73 );
-			case 74:
-				return static_cast<Result>( 1e+74 );
-			case 75:
-				return static_cast<Result>( 1e+75 );
-			case 76:
-				return static_cast<Result>( 1e+76 );
-			case 77:
-				return static_cast<Result>( 1e+77 );
-			case 78:
-				return static_cast<Result>( 1e+78 );
-			case 79:
-				return static_cast<Result>( 1e+79 );
-			case 80:
-				return static_cast<Result>( 1e+80 );
-			case 81:
-				return static_cast<Result>( 1e+81 );
-			case 82:
-				return static_cast<Result>( 1e+82 );
-			case 83:
-				return static_cast<Result>( 1e+83 );
-			case 84:
-				return static_cast<Result>( 1e+84 );
-			case 85:
-				return static_cast<Result>( 1e+85 );
-			case 86:
-				return static_cast<Result>( 1e+86 );
-			case 87:
-				return static_cast<Result>( 1e+87 );
-			case 88:
-				return static_cast<Result>( 1e+88 );
-			case 89:
-				return static_cast<Result>( 1e+89 );
-			case 90:
-				return static_cast<Result>( 1e+90 );
-			case 91:
-				return static_cast<Result>( 1e+91 );
-			case 92:
-				return static_cast<Result>( 1e+92 );
-			case 93:
-				return static_cast<Result>( 1e+93 );
-			case 94:
-				return static_cast<Result>( 1e+94 );
-			case 95:
-				return static_cast<Result>( 1e+95 );
-			case 96:
-				return static_cast<Result>( 1e+96 );
-			case 97:
-				return static_cast<Result>( 1e+97 );
-			case 98:
-				return static_cast<Result>( 1e+98 );
-			case 99:
-				return static_cast<Result>( 1e+99 );
-			case 100:
-				return static_cast<Result>( 1e+100 );
-			case 101:
-				return static_cast<Result>( 1e+101 );
-			case 102:
-				return static_cast<Result>( 1e+102 );
-			case 103:
-				return static_cast<Result>( 1e+103 );
-			case 104:
-				return static_cast<Result>( 1e+104 );
-			case 105:
-				return static_cast<Result>( 1e+105 );
-			case 106:
-				return static_cast<Result>( 1e+106 );
-			case 107:
-				return static_cast<Result>( 1e+107 );
-			case 108:
-				return static_cast<Result>( 1e+108 );
-			case 109:
-				return static_cast<Result>( 1e+109 );
-			case 110:
-				return static_cast<Result>( 1e+110 );
-			case 111:
-				return static_cast<Result>( 1e+111 );
-			case 112:
-				return static_cast<Result>( 1e+112 );
-			case 113:
-				return static_cast<Result>( 1e+113 );
-			case 114:
-				return static_cast<Result>( 1e+114 );
-			case 115:
-				return static_cast<Result>( 1e+115 );
-			case 116:
-				return static_cast<Result>( 1e+116 );
-			case 117:
-				return static_cast<Result>( 1e+117 );
-			case 118:
-				return static_cast<Result>( 1e+118 );
-			case 119:
-				return static_cast<Result>( 1e+119 );
-			case 120:
-				return static_cast<Result>( 1e+120 );
-			case 121:
-				return static_cast<Result>( 1e+121 );
-			case 122:
-				return static_cast<Result>( 1e+122 );
-			case 123:
-				return static_cast<Result>( 1e+123 );
-			case 124:
-				return static_cast<Result>( 1e+124 );
-			case 125:
-				return static_cast<Result>( 1e+125 );
-			case 126:
-				return static_cast<Result>( 1e+126 );
-			case 127:
-				return static_cast<Result>( 1e+127 );
-			case 128:
-				return static_cast<Result>( 1e+128 );
-			case 129:
-				return static_cast<Result>( 1e+129 );
-			case 130:
-				return static_cast<Result>( 1e+130 );
-			case 131:
-				return static_cast<Result>( 1e+131 );
-			case 132:
-				return static_cast<Result>( 1e+132 );
-			case 133:
-				return static_cast<Result>( 1e+133 );
-			case 134:
-				return static_cast<Result>( 1e+134 );
-			case 135:
-				return static_cast<Result>( 1e+135 );
-			case 136:
-				return static_cast<Result>( 1e+136 );
-			case 137:
-				return static_cast<Result>( 1e+137 );
-			case 138:
-				return static_cast<Result>( 1e+138 );
-			case 139:
-				return static_cast<Result>( 1e+139 );
-			case 140:
-				return static_cast<Result>( 1e+140 );
-			case 141:
-				return static_cast<Result>( 1e+141 );
-			case 142:
-				return static_cast<Result>( 1e+142 );
-			case 143:
-				return static_cast<Result>( 1e+143 );
-			case 144:
-				return static_cast<Result>( 1e+144 );
-			case 145:
-				return static_cast<Result>( 1e+145 );
-			case 146:
-				return static_cast<Result>( 1e+146 );
-			case 147:
-				return static_cast<Result>( 1e+147 );
-			case 148:
-				return static_cast<Result>( 1e+148 );
-			case 149:
-				return static_cast<Result>( 1e+149 );
-			case 150:
-				return static_cast<Result>( 1e+150 );
-			case 151:
-				return static_cast<Result>( 1e+151 );
-			case 152:
-				return static_cast<Result>( 1e+152 );
-			case 153:
-				return static_cast<Result>( 1e+153 );
-			case 154:
-				return static_cast<Result>( 1e+154 );
-			case 155:
-				return static_cast<Result>( 1e+155 );
-			case 156:
-				return static_cast<Result>( 1e+156 );
-			case 157:
-				return static_cast<Result>( 1e+157 );
-			case 158:
-				return static_cast<Result>( 1e+158 );
-			case 159:
-				return static_cast<Result>( 1e+159 );
-			case 160:
-				return static_cast<Result>( 1e+160 );
-			case 161:
-				return static_cast<Result>( 1e+161 );
-			case 162:
-				return static_cast<Result>( 1e+162 );
-			case 163:
-				return static_cast<Result>( 1e+163 );
-			case 164:
-				return static_cast<Result>( 1e+164 );
-			case 165:
-				return static_cast<Result>( 1e+165 );
-			case 166:
-				return static_cast<Result>( 1e+166 );
-			case 167:
-				return static_cast<Result>( 1e+167 );
-			case 168:
-				return static_cast<Result>( 1e+168 );
-			case 169:
-				return static_cast<Result>( 1e+169 );
-			case 170:
-				return static_cast<Result>( 1e+170 );
-			case 171:
-				return static_cast<Result>( 1e+171 );
-			case 172:
-				return static_cast<Result>( 1e+172 );
-			case 173:
-				return static_cast<Result>( 1e+173 );
-			case 174:
-				return static_cast<Result>( 1e+174 );
-			case 175:
-				return static_cast<Result>( 1e+175 );
-			case 176:
-				return static_cast<Result>( 1e+176 );
-			case 177:
-				return static_cast<Result>( 1e+177 );
-			case 178:
-				return static_cast<Result>( 1e+178 );
-			case 179:
-				return static_cast<Result>( 1e+179 );
-			case 180:
-				return static_cast<Result>( 1e+180 );
-			case 181:
-				return static_cast<Result>( 1e+181 );
-			case 182:
-				return static_cast<Result>( 1e+182 );
-			case 183:
-				return static_cast<Result>( 1e+183 );
-			case 184:
-				return static_cast<Result>( 1e+184 );
-			case 185:
-				return static_cast<Result>( 1e+185 );
-			case 186:
-				return static_cast<Result>( 1e+186 );
-			case 187:
-				return static_cast<Result>( 1e+187 );
-			case 188:
-				return static_cast<Result>( 1e+188 );
-			case 189:
-				return static_cast<Result>( 1e+189 );
-			case 190:
-				return static_cast<Result>( 1e+190 );
-			case 191:
-				return static_cast<Result>( 1e+191 );
-			case 192:
-				return static_cast<Result>( 1e+192 );
-			case 193:
-				return static_cast<Result>( 1e+193 );
-			case 194:
-				return static_cast<Result>( 1e+194 );
-			case 195:
-				return static_cast<Result>( 1e+195 );
-			case 196:
-				return static_cast<Result>( 1e+196 );
-			case 197:
-				return static_cast<Result>( 1e+197 );
-			case 198:
-				return static_cast<Result>( 1e+198 );
-			case 199:
-				return static_cast<Result>( 1e+199 );
-			case 200:
-				return static_cast<Result>( 1e+200 );
-			case 201:
-				return static_cast<Result>( 1e+201 );
-			case 202:
-				return static_cast<Result>( 1e+202 );
-			case 203:
-				return static_cast<Result>( 1e+203 );
-			case 204:
-				return static_cast<Result>( 1e+204 );
-			case 205:
-				return static_cast<Result>( 1e+205 );
-			case 206:
-				return static_cast<Result>( 1e+206 );
-			case 207:
-				return static_cast<Result>( 1e+207 );
-			case 208:
-				return static_cast<Result>( 1e+208 );
-			case 209:
-				return static_cast<Result>( 1e+209 );
-			case 210:
-				return static_cast<Result>( 1e+210 );
-			case 211:
-				return static_cast<Result>( 1e+211 );
-			case 212:
-				return static_cast<Result>( 1e+212 );
-			case 213:
-				return static_cast<Result>( 1e+213 );
-			case 214:
-				return static_cast<Result>( 1e+214 );
-			case 215:
-				return static_cast<Result>( 1e+215 );
-			case 216:
-				return static_cast<Result>( 1e+216 );
-			case 217:
-				return static_cast<Result>( 1e+217 );
-			case 218:
-				return static_cast<Result>( 1e+218 );
-			case 219:
-				return static_cast<Result>( 1e+219 );
-			case 220:
-				return static_cast<Result>( 1e+220 );
-			case 221:
-				return static_cast<Result>( 1e+221 );
-			case 222:
-				return static_cast<Result>( 1e+222 );
-			case 223:
-				return static_cast<Result>( 1e+223 );
-			case 224:
-				return static_cast<Result>( 1e+224 );
-			case 225:
-				return static_cast<Result>( 1e+225 );
-			case 226:
-				return static_cast<Result>( 1e+226 );
-			case 227:
-				return static_cast<Result>( 1e+227 );
-			case 228:
-				return static_cast<Result>( 1e+228 );
-			case 229:
-				return static_cast<Result>( 1e+229 );
-			case 230:
-				return static_cast<Result>( 1e+230 );
-			case 231:
-				return static_cast<Result>( 1e+231 );
-			case 232:
-				return static_cast<Result>( 1e+232 );
-			case 233:
-				return static_cast<Result>( 1e+233 );
-			case 234:
-				return static_cast<Result>( 1e+234 );
-			case 235:
-				return static_cast<Result>( 1e+235 );
-			case 236:
-				return static_cast<Result>( 1e+236 );
-			case 237:
-				return static_cast<Result>( 1e+237 );
-			case 238:
-				return static_cast<Result>( 1e+238 );
-			case 239:
-				return static_cast<Result>( 1e+239 );
-			case 240:
-				return static_cast<Result>( 1e+240 );
-			case 241:
-				return static_cast<Result>( 1e+241 );
-			case 242:
-				return static_cast<Result>( 1e+242 );
-			case 243:
-				return static_cast<Result>( 1e+243 );
-			case 244:
-				return static_cast<Result>( 1e+244 );
-			case 245:
-				return static_cast<Result>( 1e+245 );
-			case 246:
-				return static_cast<Result>( 1e+246 );
-			case 247:
-				return static_cast<Result>( 1e+247 );
-			case 248:
-				return static_cast<Result>( 1e+248 );
-			case 249:
-				return static_cast<Result>( 1e+249 );
-			case 250:
-				return static_cast<Result>( 1e+250 );
-			case 251:
-				return static_cast<Result>( 1e+251 );
-			case 252:
-				return static_cast<Result>( 1e+252 );
-			case 253:
-				return static_cast<Result>( 1e+253 );
-			case 254:
-				return static_cast<Result>( 1e+254 );
-			case 255:
-				return static_cast<Result>( 1e+255 );
-			case 256:
-				return static_cast<Result>( 1e+256 );
-			case 257:
-				return static_cast<Result>( 1e+257 );
-			case 258:
-				return static_cast<Result>( 1e+258 );
-			case 259:
-				return static_cast<Result>( 1e+259 );
-			case 260:
-				return static_cast<Result>( 1e+260 );
-			case 261:
-				return static_cast<Result>( 1e+261 );
-			case 262:
-				return static_cast<Result>( 1e+262 );
-			case 263:
-				return static_cast<Result>( 1e+263 );
-			case 264:
-				return static_cast<Result>( 1e+264 );
-			case 265:
-				return static_cast<Result>( 1e+265 );
-			case 266:
-				return static_cast<Result>( 1e+266 );
-			case 267:
-				return static_cast<Result>( 1e+267 );
-			case 268:
-				return static_cast<Result>( 1e+268 );
-			case 269:
-				return static_cast<Result>( 1e+269 );
-			case 270:
-				return static_cast<Result>( 1e+270 );
-			case 271:
-				return static_cast<Result>( 1e+271 );
-			case 272:
-				return static_cast<Result>( 1e+272 );
-			case 273:
-				return static_cast<Result>( 1e+273 );
-			case 274:
-				return static_cast<Result>( 1e+274 );
-			case 275:
-				return static_cast<Result>( 1e+275 );
-			case 276:
-				return static_cast<Result>( 1e+276 );
-			case 277:
-				return static_cast<Result>( 1e+277 );
-			case 278:
-				return static_cast<Result>( 1e+278 );
-			case 279:
-				return static_cast<Result>( 1e+279 );
-			case 280:
-				return static_cast<Result>( 1e+280 );
-			case 281:
-				return static_cast<Result>( 1e+281 );
-			case 282:
-				return static_cast<Result>( 1e+282 );
-			case 283:
-				return static_cast<Result>( 1e+283 );
-			case 284:
-				return static_cast<Result>( 1e+284 );
-			case 285:
-				return static_cast<Result>( 1e+285 );
-			case 286:
-				return static_cast<Result>( 1e+286 );
-			case 287:
-				return static_cast<Result>( 1e+287 );
-			case 288:
-				return static_cast<Result>( 1e+288 );
-			case 289:
-				return static_cast<Result>( 1e+289 );
-			case 290:
-				return static_cast<Result>( 1e+290 );
-			case 291:
-				return static_cast<Result>( 1e+291 );
-			case 292:
-				return static_cast<Result>( 1e+292 );
-			case 293:
-				return static_cast<Result>( 1e+293 );
-			case 294:
-				return static_cast<Result>( 1e+294 );
-			case 295:
-				return static_cast<Result>( 1e+295 );
-			case 296:
-				return static_cast<Result>( 1e+296 );
-			case 297:
-				return static_cast<Result>( 1e+297 );
-			case 298:
-				return static_cast<Result>( 1e+298 );
-			case 299:
-				return static_cast<Result>( 1e+299 );
-			case 300:
-				return static_cast<Result>( 1e+300 );
-			case 301:
-				return static_cast<Result>( 1e+301 );
-			case 302:
-				return static_cast<Result>( 1e+302 );
-			case 303:
-				return static_cast<Result>( 1e+303 );
-			case 304:
-				return static_cast<Result>( 1e+304 );
-			case 305:
-				return static_cast<Result>( 1e+305 );
-			case 306:
-				return static_cast<Result>( 1e+306 );
-			case 307:
-				return static_cast<Result>( 1e+307 );
-			case 308:
-				return static_cast<Result>( 1e+308 );
-			}
-			n -= 308;
-			auto result = static_cast<Result>( 1e+308 );
-			while( n > 1 ) {
-				result *= static_cast<Result>( 10 );
-				--n;
-			}
-			return result;
+		template<
+		  typename Result, typename Int,
+		  std::enable_if_t<daw::is_same_v<Result, float>, std::nullptr_t> = nullptr>
+		constexpr float pow10( Int n ) noexcept {
+			daw::exception::dbg_precondition_check( n <= 38 );
+			float const vals[39] = {
+			  1e0f,  1e1f,  1e2f,  1e3f,  1e4f,  1e5f,  1e6f,  1e7f,  1e8f,  1e9f,
+			  1e10f, 1e11f, 1e12f, 1e13f, 1e14f, 1e15f, 1e16f, 1e17f, 1e18f, 1e19f,
+			  1e20f, 1e21f, 1e22f, 1e23f, 1e24f, 1e25f, 1e26f, 1e27f, 1e28f, 1e29f,
+			  1e30f, 1e31f, 1e32f, 1e33f, 1e34f, 1e35f, 1e36f, 1e37f, 1e38f};
+			return vals[n];
 		}
 
-		template<typename Number, std::enable_if_t<daw::is_arithmetic_v<Number>,
-		                                           std::nullptr_t> = nullptr>
-		constexpr int16_t whole_log10( Number positive_value ) noexcept {
-			for( int16_t n = std::numeric_limits<Number>::max_exponent10; n > 0;
-			     --n ) {
-				if( positive_value >= pow10<Number>( n ) ) {
-					return n;
-				}
+		template<typename Result, typename Int,
+		         std::enable_if_t<daw::is_same_v<Result, double>, std::nullptr_t> =
+		           nullptr>
+		constexpr double pow10( Int n ) noexcept {
+			daw::exception::dbg_precondition_check( n <= 308 );
+			double const vals[309] = {
+			  1e0,   1e1,   1e2,   1e3,   1e4,   1e5,   1e6,   1e7,   1e8,   1e9,
+			  1e10,  1e11,  1e12,  1e13,  1e14,  1e15,  1e16,  1e17,  1e18,  1e19,
+			  1e20,  1e21,  1e22,  1e23,  1e24,  1e25,  1e26,  1e27,  1e28,  1e29,
+			  1e30,  1e31,  1e32,  1e33,  1e34,  1e35,  1e36,  1e37,  1e38,  1e39,
+			  1e40,  1e41,  1e42,  1e43,  1e44,  1e45,  1e46,  1e47,  1e48,  1e49,
+			  1e50,  1e51,  1e52,  1e53,  1e54,  1e55,  1e56,  1e57,  1e58,  1e59,
+			  1e60,  1e61,  1e62,  1e63,  1e64,  1e65,  1e66,  1e67,  1e68,  1e69,
+			  1e70,  1e71,  1e72,  1e73,  1e74,  1e75,  1e76,  1e77,  1e78,  1e79,
+			  1e80,  1e81,  1e82,  1e83,  1e84,  1e85,  1e86,  1e87,  1e88,  1e89,
+			  1e90,  1e91,  1e92,  1e93,  1e94,  1e95,  1e96,  1e97,  1e98,  1e99,
+			  1e100, 1e101, 1e102, 1e103, 1e104, 1e105, 1e106, 1e107, 1e108, 1e109,
+			  1e110, 1e111, 1e112, 1e113, 1e114, 1e115, 1e116, 1e117, 1e118, 1e119,
+			  1e120, 1e121, 1e122, 1e123, 1e124, 1e125, 1e126, 1e127, 1e128, 1e129,
+			  1e130, 1e131, 1e132, 1e133, 1e134, 1e135, 1e136, 1e137, 1e138, 1e139,
+			  1e140, 1e141, 1e142, 1e143, 1e144, 1e145, 1e146, 1e147, 1e148, 1e149,
+			  1e150, 1e151, 1e152, 1e153, 1e154, 1e155, 1e156, 1e157, 1e158, 1e159,
+			  1e160, 1e161, 1e162, 1e163, 1e164, 1e165, 1e166, 1e167, 1e168, 1e169,
+			  1e170, 1e171, 1e172, 1e173, 1e174, 1e175, 1e176, 1e177, 1e178, 1e179,
+			  1e180, 1e181, 1e182, 1e183, 1e184, 1e185, 1e186, 1e187, 1e188, 1e189,
+			  1e190, 1e191, 1e192, 1e193, 1e194, 1e195, 1e196, 1e197, 1e198, 1e199,
+			  1e200, 1e201, 1e202, 1e203, 1e204, 1e205, 1e206, 1e207, 1e208, 1e209,
+			  1e210, 1e211, 1e212, 1e213, 1e214, 1e215, 1e216, 1e217, 1e218, 1e219,
+			  1e220, 1e221, 1e222, 1e223, 1e224, 1e225, 1e226, 1e227, 1e228, 1e229,
+			  1e230, 1e231, 1e232, 1e233, 1e234, 1e235, 1e236, 1e237, 1e238, 1e239,
+			  1e240, 1e241, 1e242, 1e243, 1e244, 1e245, 1e246, 1e247, 1e248, 1e249,
+			  1e250, 1e251, 1e252, 1e253, 1e254, 1e255, 1e256, 1e257, 1e258, 1e259,
+			  1e260, 1e261, 1e262, 1e263, 1e264, 1e265, 1e266, 1e267, 1e268, 1e269,
+			  1e270, 1e271, 1e272, 1e273, 1e274, 1e275, 1e276, 1e277, 1e278, 1e279,
+			  1e280, 1e281, 1e282, 1e283, 1e284, 1e285, 1e286, 1e287, 1e288, 1e289,
+			  1e290, 1e291, 1e292, 1e293, 1e294, 1e295, 1e296, 1e297, 1e298, 1e299,
+			  1e300, 1e301, 1e302, 1e303, 1e304, 1e305, 1e306, 1e307, 1e308};
+			return vals[n];
+		}
+
+		template<typename Result, typename Int,
+		         std::enable_if_t<daw::all_true_v<daw::is_integral_v<Result>,
+		                                          sizeof( Result ) == 1>,
+		                          std::nullptr_t> = nullptr>
+		constexpr Result pow10( Int n ) noexcept {
+			switch( n ) {
+			case 0:
+				return static_cast<Result>( 1 );
+			case 1:
+				return static_cast<Result>( 10 );
+			case 2:
+				return static_cast<Result>( 100 );
+			default:
+				abort( );
 			}
-			return 0;
+		}
+
+		template<typename Result, typename Int,
+		         std::enable_if_t<daw::all_true_v<daw::is_integral_v<Result>,
+		                                          sizeof( Result ) == 2>,
+		                          std::nullptr_t> = nullptr>
+		constexpr Result pow10( Int n ) noexcept {
+			switch( n ) {
+			case 3:
+				return static_cast<Result>( 1'000 );
+			case 4:
+				return static_cast<Result>( 10'000 );
+			default:
+				return static_cast<Result>( pow10<uint8_t>( n ) );
+			}
+		}
+
+		template<typename Result, typename Int,
+		         std::enable_if_t<daw::all_true_v<daw::is_integral_v<Result>,
+		                                          sizeof( Result ) == 4>,
+		                          std::nullptr_t> = nullptr>
+		constexpr Result pow10( Int n ) noexcept {
+			switch( n ) {
+			case 5:
+				return static_cast<Result>( 100'000UL );
+			case 6:
+				return static_cast<Result>( 1'000'000UL );
+			case 7:
+				return static_cast<Result>( 10'000'000UL );
+			case 8:
+				return static_cast<Result>( 100'000'000UL );
+			case 9:
+				return static_cast<Result>( 1'000'000'000UL );
+			default:
+				return static_cast<Result>( pow10<uint16_t>( n ) );
+			}
+		}
+
+		template<typename Result, typename Int,
+		         std::enable_if_t<
+		           daw::all_true_v<daw::is_integral_v<Result>,
+		                           sizeof( Result ) == 8, daw::is_signed_v<Result>>,
+		           std::nullptr_t> = nullptr>
+		constexpr Result pow10( Int n ) noexcept {
+			switch( n ) {
+			case 10:
+				return static_cast<Result>( 10'000'000'000LL );
+			case 11:
+				return static_cast<Result>( 100'000'000'000LL );
+			case 12:
+				return static_cast<Result>( 1'000'000'000'000LL );
+			case 13:
+				return static_cast<Result>( 10'000'000'000'000LL );
+			case 14:
+				return static_cast<Result>( 100'000'000'000'000LL );
+			case 15:
+				return static_cast<Result>( 1'000'000'000'000'000LL );
+			case 16:
+				return static_cast<Result>( 10'000'000'000'000'000LL );
+			case 17:
+				return static_cast<Result>( 100'000'000'000'000'000LL );
+			case 18:
+				return static_cast<Result>( 1'000'000'000'000'000'000LL );
+			default:
+				return static_cast<Result>( pow10<uint32_t>( n ) );
+			}
+		}
+
+		template<typename Result, typename Int,
+		         std::enable_if_t<daw::all_true_v<daw::is_integral_v<Result>,
+		                                          sizeof( Result ) == 8,
+		                                          !daw::is_signed_v<Result>>,
+		                          std::nullptr_t> = nullptr>
+		constexpr Result pow10( Int n ) noexcept {
+			switch( n ) {
+			case 19:
+				return static_cast<Result>( 10'000'000'000'000'000'000ULL );
+			default:
+				return static_cast<Result>( pow10<int64_t>( n ) );
+			}
+		}
+		template<
+		  typename Result, typename Number,
+		  std::enable_if_t<daw::is_arithmetic_v<Number>, std::nullptr_t> = nullptr>
+		constexpr uint16_t whole_log10( Number positive_value ) noexcept {
+			Result result = 0;
+			while( positive_value >= 10 ) {
+				++result;
+				positive_value /= static_cast<Number>( 10 );
+			}
+			return result;
 		}
 
 		template<typename F>
@@ -752,7 +265,8 @@ namespace ostream_converters {
 			result += daw::char_traits<CharT>::minus;
 			value *= -1;
 		}
-		for( auto pow10 = impl::pow10<Integer>( impl::whole_log10( value ) );
+		for( auto pow10 =
+		       impl::pow10<Integer>( impl::whole_log10<uint16_t>( value ) );
 		     pow10 >= 1; pow10 /= 10 ) {
 
 			auto const tmp = value / pow10;
@@ -794,8 +308,8 @@ namespace ostream_converters {
 		return daw::static_string_t<CharT, 5>( L"false" );
 	}
 
-	// Single character (char, wchar_t).  Need to be treated separately from other
-	// integers
+	// Single character (char, wchar_t).  Need to be treated separately from
+	// other integers
 	template<typename CharT,
 	         std::enable_if_t<::daw::traits::is_character_v<CharT>,
 	                          std::nullptr_t> = nullptr>
@@ -836,7 +350,7 @@ namespace ostream_converters {
 		}
 
 		// Whole numbers
-		auto const e = impl::whole_log10( value );
+		auto const e = impl::whole_log10<uint16_t>( value );
 		auto tmp_value = value;
 
 		auto const max_dig = static_cast<int16_t>( daw::max(
@@ -844,7 +358,7 @@ namespace ostream_converters {
 		       static_cast<int>( daw::min( std::numeric_limits<Float>::max_digits10,
 		                                   significant_digits ) ) ) );
 
-		for( int16_t ex = e; ex >= max_dig; --ex ) {
+		for( int ex = e; ex >= max_dig; --ex ) {
 			auto const p10 = impl::pow10<Float>( ex );
 			auto const digit = static_cast<char>( tmp_value / p10 );
 
@@ -911,7 +425,8 @@ namespace ostream_converters {
 	/*
 	  template<typename CharT, typename... Args>
 	  auto fmt( Args&&... args ) {
-	    auto strings = std::make_tuple( to_string<CharT>( std::forward<Args>( args
+	    auto strings = std::make_tuple( to_string<CharT>( std::forward<Args>(
+	  args
 	  )... ) );
 
 	  }*/

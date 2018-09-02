@@ -44,13 +44,14 @@ namespace daw {
 					return stdout;
 				}
 			}
+
 		public:
 			inline auto operator( )( CharT c ) const noexcept {
 				return impl::write_char{}( c, get_handle( ) );
 			}
 
-			inline auto operator( )(::daw::io::impl::accept_asciiz,
-			                        CharT const *ptr ) const noexcept {
+			inline auto operator( )( ::daw::io::impl::accept_asciiz,
+			                         CharT const *ptr ) const noexcept {
 				return impl::write_char{}( ptr, get_handle( ) );
 			}
 
@@ -60,8 +61,8 @@ namespace daw {
 			}
 			// OutputStream Interface
 			template<typename String,
-			         std::enable_if_t<(::daw::impl::is_string_like_v<String> &&
-			                           !::daw::traits::is_character_v<String>),
+			         std::enable_if_t<( ::daw::impl::is_string_like_v<String> &&
+			                            !::daw::traits::is_character_v<String>),
 			                          std::nullptr_t> = nullptr>
 			void operator( )( String &&str ) const noexcept {
 				static_assert(
@@ -69,8 +70,7 @@ namespace daw {
 				                 remove_cvref_t<decltype( *str.data( ) )>>,
 				  "String's data( ) character type must match that of output stream" );
 
-				impl::write_char{}(
-				  str.data( ), str.size( ), get_handle( ) );
+				impl::write_char{}( str.data( ), str.size( ), get_handle( ) );
 			}
 		};
 
@@ -80,12 +80,16 @@ namespace daw {
 	} // namespace io
 
 #ifdef stdout
-	constexpr auto con_out = io::console_stream<char, io::output_stream_type_destinations::output>{};
-	constexpr auto con_wout = io::console_stream<wchar_t, io::output_stream_type_destinations::output>{};
+	constexpr auto con_out =
+	  io::console_stream<char, io::output_stream_type_destinations::output>{};
+	constexpr auto con_wout =
+	  io::console_stream<wchar_t, io::output_stream_type_destinations::output>{};
 #endif
 #ifdef stderr
-	constexpr auto con_err = io::console_stream<char, io::output_stream_type_destinations::error>{};
-	constexpr auto con_werr = io::console_stream<wchar_t, io::output_stream_type_destinations::error>{};
+	constexpr auto con_err =
+	  io::console_stream<char, io::output_stream_type_destinations::error>{};
+	constexpr auto con_werr =
+	  io::console_stream<wchar_t, io::output_stream_type_destinations::error>{};
 #endif
 
 } // namespace daw
