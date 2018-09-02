@@ -52,7 +52,7 @@ namespace ostream_converters {
 		  typename Result, typename Int,
 		  std::enable_if_t<daw::is_same_v<Result, float>, std::nullptr_t> = nullptr>
 		constexpr float pow10( Int n ) noexcept {
-			daw::exception::dbg_precondition_check( n <= 38 );
+			daw::exception::dbg_precondition_check( n <= 38, "overflow" );
 			float const vals[39] = {
 			  1e0f,  1e1f,  1e2f,  1e3f,  1e4f,  1e5f,  1e6f,  1e7f,  1e8f,  1e9f,
 			  1e10f, 1e11f, 1e12f, 1e13f, 1e14f, 1e15f, 1e16f, 1e17f, 1e18f, 1e19f,
@@ -65,7 +65,7 @@ namespace ostream_converters {
 		         std::enable_if_t<daw::is_same_v<Result, double>, std::nullptr_t> =
 		           nullptr>
 		constexpr double pow10( Int n ) noexcept {
-			daw::exception::dbg_precondition_check( n <= 308 );
+			daw::exception::dbg_precondition_check( n <= 308, "overflow" );
 			double const vals[309] = {
 			  1e0,   1e1,   1e2,   1e3,   1e4,   1e5,   1e6,   1e7,   1e8,   1e9,
 			  1e10,  1e11,  1e12,  1e13,  1e14,  1e15,  1e16,  1e17,  1e18,  1e19,
