@@ -33,7 +33,7 @@ namespace daw {
 			FILE * m_file_handle;
 			using character_t = CharT;
 
-			inline console_stream( FILE * f ) noexcept: m_file_handle( f ) { }
+			constexpr console_stream( FILE * f ) noexcept: m_file_handle( f ) { }
 
 			inline auto operator( )( CharT c ) const noexcept {
 				return impl::write_char{}( c, m_file_handle );
@@ -73,12 +73,12 @@ namespace daw {
 	} // namespace io
 
 #ifdef stdout
-	auto const con_out  = io::console_stream<char>( stdout );
-	auto const con_wout = io::console_stream<wchar_t>( stdout );
+	static auto const con_out  = io::console_stream<char>( stdout );
+	static auto const con_wout = io::console_stream<wchar_t>( stdout );
 #endif
 #ifdef stderr
-	auto const con_err  = io::console_stream<char>( stderr );
-	auto const con_werr = io::console_stream<wchar_t>( stderr );
+	static auto const con_err  = io::console_stream<char>( stderr );
+	static auto const con_werr = io::console_stream<wchar_t>( stderr );
 #endif
 
 } // namespace daw
