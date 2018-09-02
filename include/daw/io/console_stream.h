@@ -45,6 +45,10 @@ namespace daw {
 				return impl::write_char{}( ptr, m_file_handle );
 			}
 
+			template<size_t N>
+			inline auto operator( )( CharT const ( &str )[N] ) const noexcept {
+				return impl::write_char{}( str, N - 1, m_file_handle );
+			}
 			// OutputStream Interface
 			template<typename String,
 			         std::enable_if_t<( ::daw::impl::is_string_like_v<String> &&
@@ -75,44 +79,86 @@ namespace daw {
 				return stream.get( );
 			}
 		} // namespace impl
-	}   // namespace io
+
+		struct console_stdout_char_t {};
+		struct console_stderr_char_t {};
+		struct console_stdout_wchar_t {};
+		struct console_stderr_wchar_t {};
+
+		// Account for pointer to output streams
+		template<size_t N>
+		constexpr console_stdout_char_t operator<<( console_stdout_char_t os,
+		                                            char const ( &str )[N] ) {
+			auto const cs = console_stream<char>( stdout );
+			cs( str );
+			return os;
+		}
+
+		template<typename T>
+		constexpr console_stdout_char_t operator<<( console_stdout_char_t os,
+		                                            T &&value ) {
+			auto cs = console_stream<char>( stdout );
+			operator<<( cs, std::forward<T>( value ) );
+			return os;
+		}
+
+		template<size_t N>
+		constexpr console_stderr_char_t operator<<( console_stderr_char_t os,
+		                                            char const ( &str )[N] ) {
+			auto const cs = console_stream<char>( stderr );
+			cs( *&str, N - 1 );
+			return os;
+		}
+
+		template<typename T>
+		constexpr console_stderr_char_t operator<<( console_stderr_char_t os,
+		                                            T &&value ) {
+			auto cs = console_stream<char>( stderr );
+			operator<<( cs, std::forward<T>( value ) );
+			return os;
+		}
+
+		// wchar_t
+		template<size_t N>
+		constexpr console_stdout_wchar_t operator<<( console_stdout_wchar_t os,
+		                                             wchar_t const ( &str )[N] ) {
+			auto const cs = console_stream<wchar_t>( stdout );
+			cs( str );
+			return os;
+		}
+
+		template<typename T>
+		constexpr console_stdout_wchar_t operator<<( console_stdout_wchar_t os,
+		                                             T &&value ) {
+			auto cs = console_stream<wchar_t>( stdout );
+			operator<<( cs, std::forward<T>( value ) );
+			return os;
+		}
+
+		template<size_t N>
+		constexpr console_stderr_wchar_t operator<<( console_stderr_wchar_t os,
+		                                             wchar_t const ( &str )[N] ) {
+			auto const cs = console_stream<wchar_t>( stderr );
+			cs( *&str, N - 1 );
+			return os;
+		}
+
+		template<typename T>
+		constexpr console_stderr_wchar_t operator<<( console_stderr_wchar_t os,
+		                                             T &&value ) {
+			auto cs = console_stream<wchar_t>( stderr );
+			operator<<( cs, std::forward<T>( value ) );
+			return os;
+		}
+	} // namespace io
 
 #ifdef stdout
-	static auto const con_out = io::impl::get_console_stream<char>( stdout );
-	static auto const con_wout = io::console_stream<wchar_t>( stdout );
+	static auto const con_out = io::console_stdout_char_t{};
+	static auto const con_wout = io::console_stdout_wchar_t{};
 #endif
 #ifdef stderr
-	static auto const con_err = io::console_stream<char>( stderr );
-	static auto const con_werr = io::console_stream<wchar_t>( stderr );
+	static auto const con_err = io::console_stderr_char_t{};
+	static auto const con_werr = io::console_stderr_wchar_t{};
 #endif
 
 } // namespace daw
-// Account for pointer to output streams
-template<typename CharT, size_t N,
-         std::enable_if_t<daw::traits::is_character_v<CharT>, std::nullptr_t> =
-           nullptr>
-constexpr daw::io::console_stream<CharT> *
-operator<<( daw::io::console_stream<CharT> *os, CharT const ( &str )[N] ) {
-
-	( *os )( str, N - 1 );
-	return os;
-}
-
-template<typename CharT, std::enable_if_t<daw::traits::is_character_v<CharT>,
-                                          std::nullptr_t> = nullptr>
-constexpr daw::io::console_stream<CharT> *
-operator<<( daw::io::console_stream<CharT> *os, CharT const *str ) {
-
-	( *os )( daw::basic_string_view<CharT>( str ) );
-	return os;
-}
-
-template<
-  typename CharT, typename T,
-  std::enable_if_t<!daw::traits::is_character_v<T>, std::nullptr_t> = nullptr>
-constexpr daw::io::console_stream<CharT> *
-operator<<( daw::io::console_stream<CharT> *os, T &&value ) {
-	using namespace daw::io;
-	operator<<( *os, std::forward<T>( value ) );
-	return os;
-}
