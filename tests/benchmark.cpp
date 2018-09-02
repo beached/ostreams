@@ -150,7 +150,7 @@ void do_bench( size_t count, Number number ) {
 int main( int argc, char ** ) {
 	std::ios_base::sync_with_stdio( false );
 	// constexpr size_t const count = 100'000;
-	size_t count = 10;
+	size_t count = 100'000;
 	daw::con_out << "doubles\n";
 	do_bench( count, 0.1234 );
 	do_bench( count, 2.718281828459045 );
