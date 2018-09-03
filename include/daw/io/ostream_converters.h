@@ -168,14 +168,14 @@ namespace ostream_converters {
 	template<typename CharT, std::enable_if_t<daw::traits::is_character_v<CharT>,
 	                                          std::nullptr_t> = nullptr>
 	constexpr daw::basic_string_view<CharT>
-	to_string( CharT const *str ) noexcept {
+	to_os_string( CharT const *str ) noexcept {
 		return daw::basic_string_view<CharT>( str );
 	}
 
 	// string_view
 	template<typename CharT>
 	constexpr daw::basic_string_view<CharT>
-	to_string( daw::basic_string_view<CharT> str ) noexcept {
+	to_os_string( daw::basic_string_view<CharT> str ) noexcept {
 		return str;
 	}
 
@@ -183,7 +183,7 @@ namespace ostream_converters {
 	// TODO add overload for the operator<< to use accepts_asciiz
 	template<typename CharT>
 	daw::basic_string_view<CharT>
-	to_string( std::basic_string<CharT> const &str ) noexcept {
+	to_os_string( std::basic_string<CharT> const &str ) noexcept {
 		return daw::basic_string_view<CharT>( str.data( ), str.size( ) );
 	}
 
@@ -263,7 +263,7 @@ namespace ostream_converters {
 	                    !daw::is_floating_point_v<daw::remove_cvref_t<Integer>>,
 	                    !daw::traits::is_character_v<Integer>>,
 	    std::nullptr_t> = nullptr>
-	static constexpr auto to_string( Integer value ) {
+	static constexpr auto to_os_string( Integer value ) {
 		daw::static_string_t<CharT, int_string_sizes::get<sizeof( Integer )>( )>
 		  result{};
 
@@ -298,7 +298,7 @@ namespace ostream_converters {
 	           daw::all_true_v<daw::is_same_v<bool, daw::remove_cvref_t<Bool>>,
 	                           daw::is_same_v<char, daw::remove_cvref_t<CharT>>>,
 	           std::nullptr_t> = nullptr>
-	constexpr auto to_string( Bool b ) noexcept {
+	constexpr auto to_os_string( Bool b ) noexcept {
 		if( b ) {
 			return daw::static_string_t<CharT, 5>( "true" );
 		}
@@ -311,7 +311,7 @@ namespace ostream_converters {
 	    daw::all_true_v<daw::is_same_v<bool, daw::remove_cvref_t<Bool>>,
 	                    daw::is_same_v<wchar_t, daw::remove_cvref_t<CharT>>>,
 	    std::nullptr_t> = nullptr>
-	constexpr auto to_string( Bool b ) noexcept {
+	constexpr auto to_os_string( Bool b ) noexcept {
 		if( b ) {
 			return daw::static_string_t<CharT, 5>( L"true" );
 		}
@@ -323,7 +323,7 @@ namespace ostream_converters {
 	template<typename CharT,
 	         std::enable_if_t<::daw::traits::is_character_v<CharT>,
 	                          std::nullptr_t> = nullptr>
-	constexpr auto to_string( CharT c ) noexcept {
+	constexpr auto to_os_string( CharT c ) noexcept {
 		daw::static_string_t<CharT, 1> result{};
 		result.push_back( c );
 		return result;
@@ -334,7 +334,7 @@ namespace ostream_converters {
 	  typename CharT, typename Float,
 	  std::enable_if_t<daw::is_floating_point_v<Float>, std::nullptr_t> = nullptr>
 	constexpr auto
-	to_string( Float value,
+	to_os_string( Float value,
 	           int significant_digits = std::numeric_limits<Float>::max_digits10,
 	           int precision = std::numeric_limits<Float>::max_digits10 ) {
 
@@ -428,27 +428,27 @@ namespace ostream_converters {
 
 	namespace impl {
 		template<typename T>
-		using has_tostring_detect2 =
-		  decltype( to_string( std::declval<T const &>( ) ) );
+		using has_to_os_string_detect2 =
+		  decltype( to_os_string( std::declval<T const &>( ) ) );
 
-		namespace to_string_detect {
-			using ::ostream_converters::to_string;
+		namespace to_os_string_detect {
+			using ::ostream_converters::to_os_string;
 			template<typename CharT, typename T>
-			using has_to_string_detect =
-			  decltype( to_string<CharT>( std::declval<T const &>( ) ) );
-		} // namespace to_string_detect
+			using has_to_os_string_detect =
+			  decltype( to_os_string<CharT>( std::declval<T const &>( ) ) );
+		} // namespace to_os_string_detect
 
 	} // namespace impl
 
 	template<typename CharT, typename T>
-	constexpr bool has_to_string_v =
-	  daw::is_detected_v<impl::to_string_detect::has_to_string_detect, CharT,
+	constexpr bool has_to_os_string_v =
+	  daw::is_detected_v<impl::to_os_string_detect::has_to_os_string_detect, CharT,
 	                     ::daw::remove_cvref_t<T>>;
 
 	/*
 	  template<typename CharT, typename... Args>
 	  auto fmt( Args&&... args ) {
-	    auto strings = std::make_tuple( to_string<CharT>( std::forward<Args>(
+	    auto strings = std::make_tuple( to_os_string<CharT>( std::forward<Args>(
 	  args
 	  )... ) );
 

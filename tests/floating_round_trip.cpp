@@ -41,8 +41,8 @@ inline Float conv( const char *str, char **end ) noexcept {
 template<size_t N, typename Float>
 void test_round_trip( char const ( &type )[N], Float f ) {
 	std::cout << type << ", " << f << ", ";
-	using ostream_converters::to_string;
-	auto str = to_string<char>( f );
+	using ostream_converters::to_os_string;
+	auto str = to_os_string<char>( f );
 	std::cout << str.data( ) << ", ";
 	char *end = nullptr;
 	Float f2 = conv<Float>( str.data( ), &end );

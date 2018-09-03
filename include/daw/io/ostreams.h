@@ -168,15 +168,15 @@ namespace daw {
 		                          std::nullptr_t> = nullptr>
 		constexpr OutputStream &operator<<( OutputStream &os, T &&value ) {
 			using CharT = typename OutputStream::character_t;
-			// Can type T be called with to_string
-			static_assert( ::ostream_converters::has_to_string_v<CharT, T>,
-			               "Could not find a valid to_string<CharT> overload" );
+			// Can type T be called with to_os_string
+			static_assert( ::ostream_converters::has_to_os_string_v<CharT, T>,
+			               "Could not find a valid to_os_string<CharT> overload" );
 			// Is OutputStream callable with a single CharT
 			static_assert( impl::has_operator_parans_char_v<CharT, OutputStream>,
 			               "Missing operator( )( CharT ) member on OutputStream" );
 
-			using ::ostream_converters::to_string;
-			os( to_string<CharT>( std::forward<T>( value ) ) );
+			using ::ostream_converters::to_os_string;
+			os( to_os_string<CharT>( std::forward<T>( value ) ) );
 			return os;
 		}
 

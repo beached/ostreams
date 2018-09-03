@@ -109,12 +109,12 @@ namespace daw {
 			}
 
 #ifndef NOSTRING
-			constexpr ::daw::basic_string_view<CharT> to_string_view( ) const
+			constexpr ::daw::basic_string_view<CharT> to_os_string_view( ) const
 			  noexcept {
 				return ::daw::basic_string_view<CharT>( data( ), size( ) );
 			}
 
-			std::basic_string<CharT> to_string( ) const {
+			std::basic_string<CharT> to_os_string( ) const {
 				return std::basic_string<CharT>( data( ), size( ) );
 			}
 		};

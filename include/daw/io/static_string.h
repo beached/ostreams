@@ -203,13 +203,13 @@ namespace daw {
 
 	template<typename CharT, size_t N>
 	constexpr static_string_t<CharT, N> const &
-	to_string( static_string_t<CharT, N> const &str ) noexcept {
+	to_os_string( static_string_t<CharT, N> const &str ) noexcept {
 		return str;
 	}
 
 	template<typename CharT, size_t N>
 	constexpr static_string_t<CharT, N> &&
-	to_string( static_string_t<CharT, N> &&str ) noexcept {
+	to_os_string( static_string_t<CharT, N> &&str ) noexcept {
 		return std::move( str );
 	}
 } // namespace daw
