@@ -133,8 +133,8 @@ struct stringstream_test {
 	template<typename Number>
 	void operator( )( size_t count, Number number ) const {
 		do_not_optimize( count );
+		std::stringstream ss{};
 		for( size_t n = 0; n < count; ++n ) {
-			std::stringstream ss{};
 			do_not_optimize( number );
 			ss << std::setprecision( std::numeric_limits<Number>::max_digits10 )
 			   << number;
@@ -147,15 +147,13 @@ struct snprintf_test {
 	template<typename Number, std::enable_if_t<daw::is_integral_v<Number>,
 	                                           std::nullptr_t> = nullptr>
 	void operator( )( size_t count, Number number ) const {
+		daw::static_string_t<char, 325> buffer{};
+		buffer.resize( buffer.capacity( ), false );
 		for( size_t n = 0; n < count; ++n ) {
-			daw::static_string_t<char, 325> buffer{};
-			buffer.resize( buffer.capacity( ), false );
 			do_not_optimize( number );
 
 			snprintf( buffer.data( ), buffer.capacity( ),
 			          get_format<Number>::get( ).buffer, number );
-
-			buffer.shrink_to_fit( );
 			do_not_optimize( buffer );
 		}
 	}
@@ -163,11 +161,10 @@ struct snprintf_test {
 	template<typename Number, std::enable_if_t<daw::is_floating_point_v<Number>,
 	                                           std::nullptr_t> = nullptr>
 	void operator( )( size_t count, Number number ) const {
+		daw::static_string_t<char, 325> buffer{};
+		buffer.resize( buffer.capacity( ), false );
 		for( size_t n = 0; n < count; ++n ) {
-			daw::static_string_t<char, 325> buffer{};
-			buffer.resize( buffer.capacity( ), false );
 			do_not_optimize( number );
-
 			snprintf( buffer.data( ), buffer.capacity( ),
 			          get_format<Number>::get( ).buffer,
 			          std::numeric_limits<Number>::max_digits10,
@@ -182,18 +179,16 @@ struct snprintf_test {
 struct memory_stream_test {
 	template<typename Number>
 	void operator( )( size_t count, Number number ) const {
+		daw::static_string_t<char, 325> buffer{};
+		buffer.resize( buffer.capacity( ), false );
 		for( size_t n = 0; n < count; ++n ) {
-			daw::static_string_t<char, 325> buffer{};
 			do_not_optimize( number );
-
-			buffer.resize( buffer.capacity( ), false );
 
 			auto ss =
 			  ::daw::io::make_memory_buffer_stream( buffer.data( ), buffer.size( ) );
 
 			ss << number;
 
-			buffer.shrink_to_fit( );
 			do_not_optimize( buffer );
 		}
 	}
