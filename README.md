@@ -44,23 +44,23 @@ The following are the results:
 
 | method             | count  | total time  | item time |
 |--------------------|--------|-------------|-----------|
-| std::string_stream | 100000 | 77.30ms     | 772.96ns  |
-| snprintf           | 100000 | 31.98ms     | 319.83ns  |
 | daw::memory_stream | 100000 | 13.90ms     | 138.99ns  |
-| std::cerr          | 100000 | 800.21ms    |   8.00us  |
+| snprintf           | 100000 | 31.98ms     | 319.83ns  |
+| std::string_stream | 100000 | 77.30ms     | 772.96ns  |
 | printf             | 100000 | 170.57ms    |   1.71us  |
 | daw::con_err       | 100000 | 573.81ms    |   5.74us  |
+| std::cerr          | 100000 | 800.21ms    |   8.00us  |
 
 #### Windows Intel i7-7500U	
 
 | method             | count  | total time  | item time |
 |--------------------|--------|-------------|-----------|
-| std::string_stream | 100000 |   127.61ms  |   1.28us  |
-| snprintf           | 100000 |    96.02ms  | 960.96ns  |
 | daw::memory_stream | 100000 |    21.70ms  | 217.00ns  |
+| snprintf           | 100000 |    96.02ms  | 960.96ns  |
+| std::string_stream | 100000 |   127.61ms  |   1.28us  |
+| daw::con_err       | 100000 |   326.27ms  |   3.26us  |
 | std::cerr          | 100000 |   842.78ms  |   8.43us  |
 | printf             | 100000 |      3.99s  |  39.86us  |
-| daw::con_err       | 100000 |   326.27ms  |   3.26us  |
 
 # Round trip errors
 Tested using strtod/strtof to return string to a double/float
