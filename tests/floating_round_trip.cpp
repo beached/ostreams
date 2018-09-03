@@ -54,10 +54,14 @@ void test_round_trip( char const ( &type )[N], Float f ) {
 }
 
 int main( ) {
-	std::cout << "double epsilon-> " << std::numeric_limits<double>::epsilon() << '\n';
-	std::cout << "double min    -> " << std::numeric_limits<double>::min() << '\n';
-	std::cout << "float epsilon -> " << std::numeric_limits<float>::epsilon() << '\n';
-	std::cout << "float min     -> " << std::numeric_limits<float>::min() << '\n';
+	std::cout << "double epsilon-> " << std::numeric_limits<double>::epsilon( )
+	          << '\n';
+	std::cout << "double min    -> " << std::numeric_limits<double>::min( )
+	          << '\n';
+	std::cout << "float epsilon -> " << std::numeric_limits<float>::epsilon( )
+	          << '\n';
+	std::cout << "float min     -> " << std::numeric_limits<float>::min( )
+	          << '\n';
 	test_round_trip( "double", 0.1 );
 	test_round_trip( "double", 0.12 );
 	test_round_trip( "double", 0.123 );

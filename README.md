@@ -37,21 +37,20 @@ Custom streams must provide operator() for characters and string like data.  The
 
 
 ## Initial Benchmarks
-Using a format string(or equivilent) of `"The asnwer to the meaning of life is %d %f\n"`
+Using a format string(or equivilent) of `"The asnwer to the meaning of life is %d %f\n"` with a double of 42.0
 
 The following are the results:
 
 #### Mac 2017 Macbook Air - 1.8 GHz Intel Core i5 
-#### char buffer
-* std::string_stream took 96.72ms to process 100000 items at 967.20ns per item
-* snprintf took 29.56ms to process 100000 items at 295.58ns per item
-* daw::memory_stream took 3.86ms to process 100000 items at 38.64ns per item
+### char buffer
+std::string_stream took 77.30ms to process 100000 items at 772.96ns per item
+snprintf took 31.98ms to process 100000 items at 319.83ns per item
+daw::memory_stream took 13.90ms to process 100000 items at 138.99ns per item
 
 ### console
-* srd::cerr took 809.98ms to process 100000 items at 8.10us per item
-* printf took 161.36ms to process 100000 items at 1.61us per item
-* daw::console_stream took 797.48ms to process 100000 items at 7.97us per item
-
+srd::cerr took 800.21ms to process 100000 items at 8.00us per item
+printf took 170.57ms to process 100000 items at 1.71us per item
+daw::console_stream took 573.81ms to process 100000 items at 5.74us per item
 
 #### Windows Intel i7-7500U	
 ### char buffer
@@ -65,6 +64,7 @@ The following are the results:
 * daw::console_stream took 430.69ms to process 100000 items at 4.31us per item
 
 # Round trip errors
+Tested using strtod/strtof to return string to a double/float
 | type   |  value          |  output                                                                                                                                                                                                                                                                                                                      |  difference    | 
 |--------|-----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------| 
 | double |  0.1            |  0.1                                                                                                                                                                                                                                                                                                                         |  0             | 
