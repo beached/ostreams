@@ -66,9 +66,9 @@ namespace daw {
 
 	template<typename Test, typename... Args>
 	void benchmark( std::string title, Test test_callable, size_t item_count,
-	                  Args &&... args ) noexcept {
+	                Args &&... args ) noexcept {
 		auto const start = std::chrono::high_resolution_clock::now( );
-		
+
 		test_callable( std::forward<Args>( args )... );
 
 		auto const finish = std::chrono::high_resolution_clock::now( );
@@ -102,6 +102,4 @@ namespace daw {
 		}
 	}
 
-
 } // namespace daw
-
