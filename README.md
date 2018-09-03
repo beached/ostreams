@@ -43,14 +43,14 @@ The following are the results:
 
 #### Mac 2017 Macbook Air - 1.8 GHz Intel Core i5 
 ### char buffer
-std::string_stream took 77.30ms to process 100000 items at 772.96ns per item
-snprintf took 31.98ms to process 100000 items at 319.83ns per item
-daw::memory_stream took 13.90ms to process 100000 items at 138.99ns per item
+* std::string_stream took 77.30ms to process 100000 items at 772.96ns per item
+* snprintf took 31.98ms to process 100000 items at 319.83ns per item
+* daw::memory_stream took 13.90ms to process 100000 items at 138.99ns per item
 
 ### console
-srd::cerr took 800.21ms to process 100000 items at 8.00us per item
-printf took 170.57ms to process 100000 items at 1.71us per item
-daw::console_stream took 573.81ms to process 100000 items at 5.74us per item
+* std::cerr took 800.21ms to process 100000 items at 8.00us per item
+* printf took 170.57ms to process 100000 items at 1.71us per item
+* daw::console_stream took 573.81ms to process 100000 items at 5.74us per item
 
 #### Windows Intel i7-7500U	
 ### char buffer

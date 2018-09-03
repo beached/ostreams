@@ -135,7 +135,7 @@ void do_bench( char const ( &str )[N], size_t count, double number ) {
 	                number );
 
 	std::cout << "\nconsole" << std::endl;
-	daw::benchmark( "srd::cerr", cerr_test{}, count, count, number );
+	daw::benchmark( "std::cerr", cerr_test{}, count, count, number );
 	std::cerr << std::flush;
 	daw::benchmark( "printf", printf_test{}, count, count, number );
 	fflush( stderr );
