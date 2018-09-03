@@ -36,7 +36,7 @@ Add a function in your classes namespace that returns a type that is string like
 Custom streams must provide operator() for characters and string like data.  They must also specialize daw::io::supports_output_stream_interface<T> to inherit from std::true_type
 
 
-## Initial Benchmarks
+## Benchmarks
 Using a format string(or equivilent) of `"The asnwer to the meaning of life is %d %f\n"` with a double of 42.0
 
 The following are the results:
@@ -53,15 +53,16 @@ The following are the results:
 * daw::console_stream took 573.81ms to process 100000 items at 5.74us per item
 
 #### Windows Intel i7-7500U	
+
 ### char buffer
-* std::string_stream took 163.26ms to process 100000 items at 1.63us per item
-* snprintf took 95.73ms to process 100000 items at 957.26ns per item
-* daw::memory_stream took 9.63ms to process 100000 items at 96.29ns per item
+* std::string_stream took 127.61ms to process 100000 items at 1.28us per item
+* snprintf took 96.02ms to process 100000 items at 960.18ns per item
+* daw::memory_stream took 21.70ms to process 100000 items at 217.00ns per item
 
 ### console
-* srd::cerr took 574.13ms to process 100000 items at 5.74us per item
-* printf took 2.92s to process 100000 items at 29.16us per item
-* daw::console_stream took 430.69ms to process 100000 items at 4.31us per item
+* std::cerr took 842.78ms to process 100000 items at 8.43us per item
+* printf took 3.99s to process 100000 items at 39.86us per item
+* daw::console_stream took 326.27ms to process 100000 items at 3.26us per item
 
 # Round trip errors
 Tested using strtod/strtof to return string to a double/float
