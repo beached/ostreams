@@ -31,11 +31,11 @@ fs << "The meaining of life is " << 42 << '\n';
 fs.close( );    // or let it go out of scope
 ```
 ## Extending to your classes
-Add a function to_os_string<CharT>( ClassType ) in your classes namespace that returns a type that is string like(has a data( ) and size( ) method).  If you want constexpr formatting this function must be constexpr.  The provided static_string_t can help or a string_view may work too.
+Add a function ``` to_os_string<CharT>( ClassType ) ``` in your classes namespace that returns a type that is string like(has ``` data( ) ``` and ``` size( ) ```methods).  If you want constexpr formatting this function must be constexpr.  The provided ``` static_string_t<CharT> ``` can help or a ``` string_view ``` may work too.
 
-Custom streams must provide operator() for characters and string like data.  They must also specialize daw::io::supports_output_stream_interface<T> to inherit from std::true_type
+Custom streams must provide ``` operator() ``` for character and string like data.  They must also specialize ``` daw::io::supports_output_stream_interface<T> ``` to inherit from ``` std::true_type ```
 
-Otherwise, for composite classes you would overload operator<< like in C++ iostreams.  The requirement being that it is a template and uses SFINAE to only allow when ``` daw::io::is_output_stream_v<OutputStream> == true ```.
+Otherwise, for composite classes you would overload ``` operator<< ``` like in C++ iostreams.  The requirement being that it is a template and uses SFINAE to only allow when ``` daw::io::is_output_stream_v<OutputStream> == true ```.
 ## Benchmarks
 Using a format string(or equivilent) of `"The asnwer to the meaning of life is %d %f\n"` with a double of 42.0
 
