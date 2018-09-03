@@ -73,6 +73,13 @@ int main( int argc, char ** ) {
 	verify_value( 20.0f / 3.0f, 20.0 / 3.0, "20.0/3.0" );
 	verify_value( std::numeric_limits<float>::min( ),
 	              std::numeric_limits<double>::min( ), "min( )" );
+	verify_value( std::numeric_limits<float>::min( ) * 2.0f,
+	              std::numeric_limits<double>::min( ) * 2.0, "min( )*2" );
+	verify_value( std::numeric_limits<float>::min( ) +
+	                ( std::numeric_limits<float>::min( ) * 10.0f ),
+	              std::numeric_limits<double>::min( ) +
+	                ( std::numeric_limits<double>::min( ) * 10.0 ),
+	              "min( )+(min( )*10)" );
 	verify_value( std::numeric_limits<float>::max( ),
 	              std::numeric_limits<double>::max( ), "max( )" );
 	verify_value( std::numeric_limits<float>::denorm_min( ),

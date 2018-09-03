@@ -338,11 +338,13 @@ namespace ostream_converters {
 	           int significant_digits = std::numeric_limits<Float>::max_digits10,
 	           int precision = std::numeric_limits<Float>::max_digits10 ) {
 
-		size_t const buff_size = std::numeric_limits<Float>::max_exponent10 + 2;
+		size_t const buff_size = std::numeric_limits<Float>::max_exponent10 + 2 - std::numeric_limits<Float>::min_exponent10;
 		daw::static_string_t<CharT, buff_size> result{};
 
-		if( value == static_cast<Float>( 0 ) ||
-		    value == static_cast<Float>( -0.0 ) ) {
+		if( ( value == static_cast<Float>( 0 ) &&
+		      value != std::numeric_limits<Float>::min( ) ) ||
+		    ( value == static_cast<Float>( -0.0 ) &&
+		      value != -std::numeric_limits<Float>::min( ) ) ) {
 			result += daw::char_traits<CharT>::get_char_digit( 0 );
 			return result;
 		}
@@ -384,19 +386,30 @@ namespace ostream_converters {
 		}
 		if( e >= std::numeric_limits<Float>::max_digits10 ||
 		    e >= significant_digits ||
-		    tmp_value <= std::numeric_limits<Float>::min( ) ) {
+		    tmp_value < std::numeric_limits<Float>::min( ) ) {
 			return result;
 		}
-
 		// Fractional Part
 		result += daw::char_traits<CharT>::decimal_point;
+
+		if( e == 0 && value < static_cast<Float>( 1 ) &&
+		    value >= std::numeric_limits<Float>::min( ) ) {
+			// We have no significant digits previously.
+			// Output zeros
+			auto digit = static_cast<char>( tmp_value * static_cast<Float>( 10 ) );
+			while( digit == 0 ) {
+				result += daw::char_traits<CharT>::get_char_digit( 0 );
+				tmp_value *= static_cast<Float>( 10 );
+				digit = static_cast<char>( tmp_value * static_cast<Float>( 10 ) );
+			}
+		}
 
 		auto const num_dec_digits =
 		  daw::min( daw::min( precision, impl::max_fractional_digits<Float> ),
 		            std::numeric_limits<Float>::max_digits10 - e );
 
 		for( int n = 0;
-		     n < num_dec_digits && tmp_value > std::numeric_limits<Float>::min( );
+		     n < num_dec_digits && tmp_value >= std::numeric_limits<Float>::min( );
 		     ++n ) {
 			auto const digit =
 			  static_cast<char>( tmp_value * static_cast<Float>( 10 ) );
