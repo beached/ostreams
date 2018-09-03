@@ -40,29 +40,27 @@ Custom streams must provide operator() for characters and string like data.  The
 Using a format string(or equivilent) of `"The asnwer to the meaning of life is %d %f\n"` with a double of 42.0
 
 The following are the results:
-
 #### Mac 2017 Macbook Air - 1.8 GHz Intel Core i5 
-### char buffer
-* std::string_stream took 77.30ms to process 100000 items at 772.96ns per item
-* snprintf took 31.98ms to process 100000 items at 319.83ns per item
-* daw::memory_stream took 13.90ms to process 100000 items at 138.99ns per item
 
-### console
-* std::cerr took 800.21ms to process 100000 items at 8.00us per item
-* printf took 170.57ms to process 100000 items at 1.71us per item
-* daw::console_stream took 573.81ms to process 100000 items at 5.74us per item
+| method             | count  | total time  | item time |
+|--------------------|--------|-------------|-----------|
+| std::string_stream | 100000 | 77.30ms     | 772.96ns  |
+| snprintf           | 100000 | 31.98ms     | 319.83ns  |
+| daw::memory_stream | 100000 | 13.90ms     | 138.99ns  |
+| std::cerr          | 100000 | 800.21ms    |   8.00us  |
+| printf             | 100000 | 170.57ms    |   1.71us  |
+| daw::con_err       | 100000 | 573.81ms    |   5.74us  |
 
 #### Windows Intel i7-7500U	
 
-### char buffer
-* std::string_stream took 127.61ms to process 100000 items at 1.28us per item
-* snprintf took 96.02ms to process 100000 items at 960.18ns per item
-* daw::memory_stream took 21.70ms to process 100000 items at 217.00ns per item
-
-### console
-* std::cerr took 842.78ms to process 100000 items at 8.43us per item
-* printf took 3.99s to process 100000 items at 39.86us per item
-* daw::console_stream took 326.27ms to process 100000 items at 3.26us per item
+| method             | count  | total time  | item time |
+|--------------------|--------|-------------|-----------|
+| std::string_stream | 100000 |   127.61ms  |   1.28us  |
+| snprintf           | 100000 |    96.02ms  | 960.96ns  |
+| daw::memory_stream | 100000 |    21.70ms  | 217.00ns  |
+| std::cerr          | 100000 |   842.78ms  |   8.43us  |
+| printf             | 100000 |      3.99s  |  39.86us  |
+| daw::con_err       | 100000 |   326.27ms  |   3.26us  |
 
 # Round trip errors
 Tested using strtod/strtof to return string to a double/float
