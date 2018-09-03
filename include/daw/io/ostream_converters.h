@@ -115,102 +115,27 @@ namespace ostream_converters {
 			return result;
 		}
 #endif
-		template<typename Result, typename Int,
-		         std::enable_if_t<daw::all_true_v<daw::is_integral_v<Result>,
-		                                          sizeof( Result ) == 1>,
-		                          std::nullptr_t> = nullptr>
+
+		template<
+		  typename Result, typename Int,
+		  std::enable_if_t<daw::is_integral_v<Result>, std::nullptr_t> = nullptr>
 		constexpr Result pow10( Int n ) noexcept {
-			switch( n ) {
-			case 0:
-				return static_cast<Result>( 1 );
-			case 1:
-				return static_cast<Result>( 10 );
-			case 2:
-				return static_cast<Result>( 100 );
-			default:
-				abort( );
+			uint64_t const vals[10] = {1ULL,
+			                           100ULL,
+			                           10000ULL,
+			                           1000000ULL,
+			                           100000000ULL,
+			                           10000000000ULL,
+			                           1000000000000ULL,
+			                           100000000000000ULL,
+			                           10000000000000000ULL,
+			                           1000000000000000000ULL};
+			if( n % 2 == 0 ) {
+				return static_cast<Result>( vals[n / 2] );
 			}
+			return static_cast<Result>( vals[n / 2] * 10ULL );
 		}
 
-		template<typename Result, typename Int,
-		         std::enable_if_t<daw::all_true_v<daw::is_integral_v<Result>,
-		                                          sizeof( Result ) == 2>,
-		                          std::nullptr_t> = nullptr>
-		constexpr Result pow10( Int n ) noexcept {
-			switch( n ) {
-			case 3:
-				return static_cast<Result>( 1'000 );
-			case 4:
-				return static_cast<Result>( 10'000 );
-			default:
-				return static_cast<Result>( pow10<uint8_t>( n ) );
-			}
-		}
-
-		template<typename Result, typename Int,
-		         std::enable_if_t<daw::all_true_v<daw::is_integral_v<Result>,
-		                                          sizeof( Result ) == 4>,
-		                          std::nullptr_t> = nullptr>
-		constexpr Result pow10( Int n ) noexcept {
-			switch( n ) {
-			case 5:
-				return static_cast<Result>( 100'000UL );
-			case 6:
-				return static_cast<Result>( 1'000'000UL );
-			case 7:
-				return static_cast<Result>( 10'000'000UL );
-			case 8:
-				return static_cast<Result>( 100'000'000UL );
-			case 9:
-				return static_cast<Result>( 1'000'000'000UL );
-			default:
-				return static_cast<Result>( pow10<uint16_t>( n ) );
-			}
-		}
-
-		template<typename Result, typename Int,
-		         std::enable_if_t<
-		           daw::all_true_v<daw::is_integral_v<Result>,
-		                           sizeof( Result ) == 8, daw::is_signed_v<Result>>,
-		           std::nullptr_t> = nullptr>
-		constexpr Result pow10( Int n ) noexcept {
-			switch( n ) {
-			case 10:
-				return static_cast<Result>( 10'000'000'000LL );
-			case 11:
-				return static_cast<Result>( 100'000'000'000LL );
-			case 12:
-				return static_cast<Result>( 1'000'000'000'000LL );
-			case 13:
-				return static_cast<Result>( 10'000'000'000'000LL );
-			case 14:
-				return static_cast<Result>( 100'000'000'000'000LL );
-			case 15:
-				return static_cast<Result>( 1'000'000'000'000'000LL );
-			case 16:
-				return static_cast<Result>( 10'000'000'000'000'000LL );
-			case 17:
-				return static_cast<Result>( 100'000'000'000'000'000LL );
-			case 18:
-				return static_cast<Result>( 1'000'000'000'000'000'000LL );
-			default:
-				return static_cast<Result>( pow10<uint32_t>( n ) );
-			}
-		}
-
-		template<typename Result, typename Int,
-		         std::enable_if_t<daw::all_true_v<daw::is_integral_v<Result>,
-		                                          sizeof( Result ) == 8,
-		                                          !daw::is_signed_v<Result>>,
-		                          std::nullptr_t> = nullptr>
-		constexpr Result pow10( Int n ) noexcept {
-			switch( n ) {
-			case 19:
-				return static_cast<Result>( 10'000'000'000'000'000'000ULL );
-			default:
-				return static_cast<Result>( pow10<int64_t>( n ) );
-			}
-		}
 		template<
 		  typename Result, typename Number,
 		  std::enable_if_t<daw::is_arithmetic_v<Number>, std::nullptr_t> = nullptr>
@@ -262,6 +187,66 @@ namespace ostream_converters {
 		return daw::basic_string_view<CharT>( str.data( ), str.size( ) );
 	}
 
+	namespace int_string_sizes {
+		template<size_t N>
+		constexpr size_t get( ) noexcept {
+			return 0;
+		}
+
+		template<>
+		constexpr size_t get<1>( ) noexcept {
+			return 5;
+		}
+
+		template<>
+		constexpr size_t get<2>( ) noexcept {
+			return 7;
+		}
+
+		template<>
+		constexpr size_t get<4>( ) noexcept {
+			return 11;
+		}
+
+		template<>
+		constexpr size_t get<8>( ) noexcept {
+			return 21;
+		}
+	} // namespace int_string_sizes
+	namespace min_strings {
+		constexpr auto get( char, std::integral_constant<size_t, 1> ) noexcept {
+			return daw::static_string_t<char, int_string_sizes::get<1>( )>( "-128" );
+		}
+
+		constexpr auto get( wchar_t, std::integral_constant<size_t, 1> ) noexcept {
+			return daw::static_string_t<wchar_t, int_string_sizes::get<1>( )>( L"-128" );
+		}
+
+		constexpr auto get( char, std::integral_constant<size_t, 2> ) noexcept {
+			return daw::static_string_t<char, int_string_sizes::get<2>( )>( "-32768" );
+		}
+
+		constexpr auto get( wchar_t, std::integral_constant<size_t, 2> ) noexcept {
+			return daw::static_string_t<wchar_t, int_string_sizes::get<2>( )>( L"-32768" );
+		}
+
+		constexpr auto get( char, std::integral_constant<size_t, 4> ) noexcept {
+			return daw::static_string_t<char, int_string_sizes::get<4>( )>( "-2147483648" );
+		}
+
+		constexpr auto get( wchar_t, std::integral_constant<size_t, 4> ) noexcept {
+			return daw::static_string_t<wchar_t, int_string_sizes::get<4>( )>( L"-2147483648" );
+		}
+
+		constexpr auto get( char, std::integral_constant<size_t, 8> ) noexcept {
+			return daw::static_string_t<char, int_string_sizes::get<8>( )>( "-9223372036854775808" );
+		}
+
+		constexpr auto get( wchar_t, std::integral_constant<size_t, 8> ) noexcept {
+			return daw::static_string_t<wchar_t, int_string_sizes::get<8>( )>( L"-9223372036854775808" );
+		}
+	} // namespace min_strings
+
 	// Integer numbers
 	template<
 	  typename CharT, typename Integer,
@@ -272,16 +257,19 @@ namespace ostream_converters {
 	                    !daw::traits::is_character_v<Integer>>,
 	    std::nullptr_t> = nullptr>
 	static constexpr auto to_string( Integer value ) {
-		size_t const buff_size = std::numeric_limits<Integer>::digits10;
-		daw::static_string_t<CharT, buff_size> result{};
+		daw::static_string_t<CharT, int_string_sizes::get<sizeof(Integer)>( )> result{};
 
 		if( value < 0 ) {
+			if( value == std::numeric_limits<Integer>::min( ) ) {
+				return min_strings::get(
+				  CharT{}, std::integral_constant<size_t, sizeof( Integer )>{} );
+			}
 			result += daw::char_traits<CharT>::minus;
-			value *= -1;
+			value = -value;
 		}
 		for( auto pow10 =
 		       impl::pow10<Integer>( impl::whole_log10<uint16_t>( value ) );
-		     pow10 >= 1; pow10 /= 10 ) {
+		     pow10 >= 1; pow10 /= static_cast<Integer>( 10 ) ) {
 
 			auto const tmp = value / pow10;
 
@@ -291,7 +279,7 @@ namespace ostream_converters {
 
 			result += daw::char_traits<CharT>::get_char_digit( tmp );
 
-			value -= tmp * 10;
+			value -= tmp * pow10;
 		}
 		return result;
 	}

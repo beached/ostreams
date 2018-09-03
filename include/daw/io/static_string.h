@@ -30,7 +30,7 @@
 
 namespace daw {
 	template<typename CharT, size_t Capacity>
-	class static_string_t {
+	struct static_string_t {
 		CharT buffer[Capacity + 1] = {0};
 		size_t len = 0;
 

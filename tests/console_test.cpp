@@ -26,7 +26,7 @@
 #include <limits>
 
 template<size_t N>
-void VerifyValue( float f, double d, char const ( &str )[N] ) {
+void verify_value( float f, double d, char const ( &str )[N] ) {
 	daw::con_out << "number: " << str << '\n' << "con_out f: " << f << '\n';
 	std::cout << "cout    f: "
 	          << std::setprecision( std::numeric_limits<float>::max_digits10 )
@@ -40,6 +40,14 @@ void VerifyValue( float f, double d, char const ( &str )[N] ) {
 	          << '\n';
 }
 
+template<size_t N, size_t N2, typename Number>
+void verify_value( char const ( &type_name )[N], char const ( &value )[N2],
+                   Number n ) {
+	daw::con_out << "number: " << value << " " << type_name << '\n';
+	std::cout <<    "cout   -> " << static_cast<std::conditional_t<sizeof(Number)==1, int, Number>>( n ) << '\n';
+	daw::con_out << "con_out-> " << n << '\n';
+}
+
 int main( int argc, char ** ) {
 	daw::string_view str = "Console test\n";
 	daw::con_out << str;
@@ -50,33 +58,64 @@ int main( int argc, char ** ) {
 	double const d = static_cast<double>( argc ) * 1.2334;
 	daw::con_out << "The number is: " << d << ". " << argc << " times number is "
 	             << ( static_cast<double>( argc ) * d ) << '\n';
-	VerifyValue( 123456.0435333f, 123456.0435333, "123456.0435333" );
-	VerifyValue( 0.1f, 0.1, "0.1" );
-	VerifyValue( 0.12f, 0.12, "0.12" );
-	VerifyValue( 0.123f, 0.123, "0.123" );
-	VerifyValue( 0.1234f, 0.1234, "0.1234" );
-	VerifyValue( 1.2345f, 1.2345, "1.2345" );
-	VerifyValue( 1.0f / 3.0f, 1.0 / 3.0, "1.0/3.0" );
-	VerifyValue( 2.0f / 3.0f, 2.0 / 3.0, "2.0/3.0" );
-	VerifyValue( 10.0f / 3.0f, 10.0 / 3.0, "10.0/3.0" );
-	VerifyValue( 20.0f / 3.0f, 20.0 / 3.0, "20.0/3.0" );
-	VerifyValue( std::numeric_limits<float>::min( ),
-	             std::numeric_limits<double>::min( ), "min( )" );
-	VerifyValue( std::numeric_limits<float>::max( ),
-	             std::numeric_limits<double>::max( ), "max( )" );
-	VerifyValue( std::numeric_limits<float>::denorm_min( ),
-	             std::numeric_limits<double>::denorm_min( ), "denorm_min( )" );
+	verify_value( 123456.0435333f, 123456.0435333, "123456.0435333" );
+	verify_value( 0.1f, 0.1, "0.1" );
+	verify_value( 0.12f, 0.12, "0.12" );
+	verify_value( 0.123f, 0.123, "0.123" );
+	verify_value( 0.1234f, 0.1234, "0.1234" );
+	verify_value( 1.2345f, 1.2345, "1.2345" );
+	verify_value( 1.0f / 3.0f, 1.0 / 3.0, "1.0/3.0" );
+	verify_value( 2.0f / 3.0f, 2.0 / 3.0, "2.0/3.0" );
+	verify_value( 10.0f / 3.0f, 10.0 / 3.0, "10.0/3.0" );
+	verify_value( 20.0f / 3.0f, 20.0 / 3.0, "20.0/3.0" );
+	verify_value( std::numeric_limits<float>::min( ),
+	              std::numeric_limits<double>::min( ), "min( )" );
+	verify_value( std::numeric_limits<float>::max( ),
+	              std::numeric_limits<double>::max( ), "max( )" );
+	verify_value( std::numeric_limits<float>::denorm_min( ),
+	              std::numeric_limits<double>::denorm_min( ), "denorm_min( )" );
 
-	VerifyValue(
+	verify_value(
 	  std::numeric_limits<float>::min( ) * std::numeric_limits<float>::max( ),
 	  std::numeric_limits<double>::min( ) * std::numeric_limits<double>::max( ),
 	  "min( )*max( )" );
-	VerifyValue( std::numeric_limits<float>::max( ) -
-	               ( std::numeric_limits<float>::max( ) / 2.0f ),
-	             std::numeric_limits<double>::max( ) -
-	               ( std::numeric_limits<double>::max( ) / 2.0 ),
-	             "max( )-(max( )/2.0)" );
+	verify_value( std::numeric_limits<float>::max( ) -
+	                ( std::numeric_limits<float>::max( ) / 2.0f ),
+	              std::numeric_limits<double>::max( ) -
+	                ( std::numeric_limits<double>::max( ) / 2.0 ),
+	              "max( )-(max( )/2.0)" );
 	daw::con_out << '\n';
+	verify_value( "uint64_t", "min", std::numeric_limits<uint64_t>::min( ) );
+	verify_value( "uint64_t", "max", std::numeric_limits<uint64_t>::max( ) );
+	verify_value( "uint64_t", "0", 0ULL );
+
+	verify_value( "int64_t", "min", std::numeric_limits<int64_t>::min( ) );
+	verify_value( "int64_t", "max", std::numeric_limits<int64_t>::max( ) );
+	verify_value( "int64_t", "0", 0LL );
+
+	verify_value( "uint32_t", "min", std::numeric_limits<uint32_t>::min( ) );
+	verify_value( "uint32_t", "max", std::numeric_limits<uint32_t>::max( ) );
+	verify_value( "uint32_t", "0", 0UL );
+
+	verify_value( "int32_t", "min", std::numeric_limits<int32_t>::min( ) );
+	verify_value( "int32_t", "max", std::numeric_limits<int32_t>::max( ) );
+	verify_value( "int32_t", "0", 0L );
+
+	verify_value( "uint16_t", "min", std::numeric_limits<uint16_t>::min( ) );
+	verify_value( "uint16_t", "max", std::numeric_limits<uint16_t>::max( ) );
+	verify_value( "uint16_t", "0", static_cast<uint16_t>( 0 ) );
+
+	verify_value( "int16_t", "min", std::numeric_limits<int16_t>::min( ) );
+	verify_value( "int16_t", "max", std::numeric_limits<int16_t>::max( ) );
+	verify_value( "int16_t", "0", static_cast<int16_t>( 0 ) );
+
+	verify_value( "uint8_t", "min", std::numeric_limits<uint8_t>::min( ) );
+	verify_value( "uint8_t", "max", std::numeric_limits<uint8_t>::max( ) );
+	verify_value( "uint8_t", "0", static_cast<uint8_t>( 0 ) );
+
+	verify_value( "int8_t", "min", std::numeric_limits<int8_t>::min( ) );
+	verify_value( "int8_t", "max", std::numeric_limits<int8_t>::max( ) );
+	verify_value( "int8_t", "0", static_cast<int8_t>( 0 ) );
 
 	return 0;
 }
