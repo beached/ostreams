@@ -59,12 +59,17 @@ namespace {
 } // namespace
 
 static constexpr auto const test_result = test( 1234560.435333 );
+static constexpr auto const test_result2 = test( 1234560.435333f );
 
 auto const &test2( ) {
 	return test_result;
 }
 
+auto const &test3( ) {
+	return test_result2;
+}
+
 int main( int, char ** ) {
-	daw::con_out << test2( ) << '\n';
+	daw::con_out << test2( ) << ' ' << test3( ) << '\n';
 	return 0;
 }
