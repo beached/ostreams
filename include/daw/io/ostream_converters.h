@@ -67,7 +67,7 @@ namespace ostream_converters {
 		         std::enable_if_t<daw::is_same_v<Result, double>, std::nullptr_t> =
 		           nullptr>
 		constexpr double pow10( Int n ) noexcept {
-			daw::exception::dbg_precondition_check( 0 <= 0 && n <= 308, "overflow" );
+			daw::exception::dbg_precondition_check( 0 <= n && n <= 308, "overflow" );
 			double const vals[155] = {
 			  1e0,   1e2,   1e4,   1e6,   1e8,   1e10,  1e12,  1e14,  1e16,  1e18,
 			  1e20,  1e22,  1e24,  1e26,  1e28,  1e30,  1e32,  1e34,  1e36,  1e38,
