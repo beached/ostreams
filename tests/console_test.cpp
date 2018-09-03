@@ -44,7 +44,10 @@ template<size_t N, size_t N2, typename Number>
 void verify_value( char const ( &type_name )[N], char const ( &value )[N2],
                    Number n ) {
 	daw::con_out << "number: " << value << " " << type_name << '\n';
-	std::cout <<    "cout   -> " << static_cast<std::conditional_t<sizeof(Number)==1, int, Number>>( n ) << '\n';
+	std::cout
+	  << "cout   -> "
+	  << static_cast<std::conditional_t<sizeof( Number ) == 1, int, Number>>( n )
+	  << '\n';
 	daw::con_out << "con_out-> " << n << '\n';
 }
 

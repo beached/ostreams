@@ -49,5 +49,6 @@ add_executable( file_test ${HEADER_FILES} ${TEST_FOLDER}/file_test.cpp )
 add_executable( memory_test ${HEADER_FILES} ${TEST_FOLDER}/memory_test.cpp )
 add_executable( simple_console ${HEADER_FILES} ${TEST_FOLDER}/simple_console.cpp )
 add_executable( benchmark ${HEADER_FILES} ${TEST_FOLDER}/benchmark.h ${TEST_FOLDER}/benchmark.cpp )
+add_executable( floating_round_trip ${HEADER_FILES} ${TEST_FOLDER}/floating_round_trip.cpp )
 
 install( DIRECTORY ${HEADER_FOLDER}/daw DESTINATION include )

@@ -219,31 +219,38 @@ namespace ostream_converters {
 		}
 
 		constexpr auto get( wchar_t, std::integral_constant<size_t, 1> ) noexcept {
-			return daw::static_string_t<wchar_t, int_string_sizes::get<1>( )>( L"-128" );
+			return daw::static_string_t<wchar_t, int_string_sizes::get<1>( )>(
+			  L"-128" );
 		}
 
 		constexpr auto get( char, std::integral_constant<size_t, 2> ) noexcept {
-			return daw::static_string_t<char, int_string_sizes::get<2>( )>( "-32768" );
+			return daw::static_string_t<char, int_string_sizes::get<2>( )>(
+			  "-32768" );
 		}
 
 		constexpr auto get( wchar_t, std::integral_constant<size_t, 2> ) noexcept {
-			return daw::static_string_t<wchar_t, int_string_sizes::get<2>( )>( L"-32768" );
+			return daw::static_string_t<wchar_t, int_string_sizes::get<2>( )>(
+			  L"-32768" );
 		}
 
 		constexpr auto get( char, std::integral_constant<size_t, 4> ) noexcept {
-			return daw::static_string_t<char, int_string_sizes::get<4>( )>( "-2147483648" );
+			return daw::static_string_t<char, int_string_sizes::get<4>( )>(
+			  "-2147483648" );
 		}
 
 		constexpr auto get( wchar_t, std::integral_constant<size_t, 4> ) noexcept {
-			return daw::static_string_t<wchar_t, int_string_sizes::get<4>( )>( L"-2147483648" );
+			return daw::static_string_t<wchar_t, int_string_sizes::get<4>( )>(
+			  L"-2147483648" );
 		}
 
 		constexpr auto get( char, std::integral_constant<size_t, 8> ) noexcept {
-			return daw::static_string_t<char, int_string_sizes::get<8>( )>( "-9223372036854775808" );
+			return daw::static_string_t<char, int_string_sizes::get<8>( )>(
+			  "-9223372036854775808" );
 		}
 
 		constexpr auto get( wchar_t, std::integral_constant<size_t, 8> ) noexcept {
-			return daw::static_string_t<wchar_t, int_string_sizes::get<8>( )>( L"-9223372036854775808" );
+			return daw::static_string_t<wchar_t, int_string_sizes::get<8>( )>(
+			  L"-9223372036854775808" );
 		}
 	} // namespace min_strings
 
@@ -257,7 +264,8 @@ namespace ostream_converters {
 	                    !daw::traits::is_character_v<Integer>>,
 	    std::nullptr_t> = nullptr>
 	static constexpr auto to_string( Integer value ) {
-		daw::static_string_t<CharT, int_string_sizes::get<sizeof(Integer)>( )> result{};
+		daw::static_string_t<CharT, int_string_sizes::get<sizeof( Integer )>( )>
+		  result{};
 
 		if( value < 0 ) {
 			if( value == std::numeric_limits<Integer>::min( ) ) {
