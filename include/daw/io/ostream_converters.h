@@ -256,7 +256,7 @@ namespace ostream_converters {
 
 	// Integer numbers
 	template<
-	  typename CharT, typename Integer,
+	  typename CharT, typename Integer, typename Traits = daw::char_traits<CharT>,
 	  std::enable_if_t<
 	    daw::all_true_v<daw::is_integral_v<daw::remove_cvref_t<Integer>>,
 	                    !daw::is_same_v<bool, daw::remove_cvref_t<Integer>>,
@@ -272,7 +272,7 @@ namespace ostream_converters {
 				return min_strings::get(
 				  CharT{}, std::integral_constant<size_t, sizeof( Integer )>{} );
 			}
-			result += daw::char_traits<CharT>::minus;
+			result += Traits::minus;
 			value = -value;
 		}
 		for( auto pow10 =
@@ -285,7 +285,7 @@ namespace ostream_converters {
 			  tmp >= 0 && tmp < 10,
 			  "There should only ever be a single digit positive number" );
 
-			result += daw::char_traits<CharT>::get_char_digit( tmp );
+			result += Traits::get_char_digit( tmp );
 
 			value -= tmp * pow10;
 		}
@@ -331,7 +331,7 @@ namespace ostream_converters {
 
 	// Floating point numbers
 	template<
-	  typename CharT, typename Float,
+	  typename CharT, typename Float, typename Traits = daw::char_traits<CharT>,
 	  std::enable_if_t<daw::is_floating_point_v<Float>, std::nullptr_t> = nullptr>
 	constexpr auto
 	to_os_string( Float value,
@@ -345,19 +345,19 @@ namespace ostream_converters {
 		      value != std::numeric_limits<Float>::min( ) ) ||
 		    ( value == static_cast<Float>( -0.0 ) &&
 		      value != -std::numeric_limits<Float>::min( ) ) ) {
-			result += daw::char_traits<CharT>::get_char_digit( 0 );
+			result += Traits::get_char_digit( 0 );
 			return result;
 		}
 		if( impl::is_nan( value ) ) {
-			result += daw::char_traits<CharT>::nan( );
+			result += Traits::nan( );
 			return result;
 		}
 		if( value < 0 ) {
-			result += daw::char_traits<CharT>::minus;
+			result += Traits::minus;
 			value = -value;
 		}
 		if( impl::is_inf( value ) ) {
-			result += daw::char_traits<CharT>::inf( );
+			result += Traits::inf( );
 			return result;
 		}
 
@@ -377,12 +377,12 @@ namespace ostream_converters {
 			daw::exception::dbg_precondition_check<impl::unexpected_state>(
 			  digit >= 0 && digit <= 10 );
 
-			result += daw::char_traits<CharT>::get_char_digit( digit );
+			result += Traits::get_char_digit( digit );
 
 			tmp_value -= static_cast<Float>( digit ) * p10;
 		}
 		for( int16_t ex = max_dig; ex > 0; --ex ) {
-			result += daw::char_traits<CharT>::get_char_digit( 0 );
+			result += Traits::get_char_digit( 0 );
 		}
 		if( e >= std::numeric_limits<Float>::max_digits10 ||
 		    e >= significant_digits ||
@@ -390,7 +390,7 @@ namespace ostream_converters {
 			return result;
 		}
 		// Fractional Part
-		result += daw::char_traits<CharT>::decimal_point;
+		result += Traits::decimal_point;
 
 		if( e == 0 && value < static_cast<Float>( 1 ) &&
 		    value >= std::numeric_limits<Float>::min( ) ) {
@@ -398,7 +398,7 @@ namespace ostream_converters {
 			// Output zeros
 			auto digit = static_cast<char>( tmp_value * static_cast<Float>( 10 ) );
 			while( digit == 0 ) {
-				result += daw::char_traits<CharT>::get_char_digit( 0 );
+				result += Traits::get_char_digit( 0 );
 				tmp_value *= static_cast<Float>( 10 );
 				digit = static_cast<char>( tmp_value * static_cast<Float>( 10 ) );
 			}
@@ -414,13 +414,13 @@ namespace ostream_converters {
 			auto const digit =
 			  static_cast<char>( tmp_value * static_cast<Float>( 10 ) );
 
-			result += daw::char_traits<CharT>::get_char_digit( digit );
+			result += Traits::get_char_digit( digit );
 			tmp_value -= static_cast<Float>( digit ) / static_cast<Float>( 10 );
 			tmp_value *= static_cast<Float>( 10 );
 		}
 		while( result[result.size( ) - 2] !=
-		         daw::char_traits<CharT>::decimal_point &&
-		       result.back( ) == daw::char_traits<CharT>::zero ) {
+		         Traits::decimal_point &&
+		       result.back( ) == Traits::zero ) {
 			result.resize( result.size( ) - 1, false );
 		}
 		return result;
