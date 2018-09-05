@@ -179,7 +179,7 @@ struct snprintf_test {
 struct memory_stream_test {
 	template<typename Number>
 	void operator( )( size_t count, Number number ) const {
-		daw::static_string_t<char, 325> buffer{};
+		daw::static_string_t<char, 425> buffer{};
 		buffer.resize( buffer.capacity( ), false );
 		for( size_t n = 0; n < count; ++n ) {
 			do_not_optimize( number );
@@ -265,6 +265,7 @@ int main( int argc, char ** ) {
 	// constexpr size_t const count = 100'000;
 	size_t count = 100'000;
 	daw::con_out << "doubles\n";
+	/*
 	do_bench( "double", count, 0.1234 );
 	do_bench( "double", count, 2.718281828459045 );
 	do_bench( "double", count, 1.7976931348623157e308 );
@@ -287,7 +288,8 @@ int main( int argc, char ** ) {
 	do_bench( "double", count, 2.0 / 3.0 );
 	do_bench( "double", count, 10.0 / 3.0 );
 	do_bench( "double", count, 20.0 / 3.0 );
-	do_bench( "double", count, std::numeric_limits<double>::min( ) );
+	 */
+	do_bench( "double", 100/* count*/, std::numeric_limits<double>::min( ) );
 	do_bench( "double", count, std::numeric_limits<double>::max( ) );
 	do_bench( "double", count, std::numeric_limits<double>::denorm_min( ) );
 	do_bench( "double", count,
