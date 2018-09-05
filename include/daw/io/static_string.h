@@ -29,6 +29,29 @@
 #include "ostream_helpers.h"
 
 namespace daw {
+	namespace impl {
+		template<typename CharT>
+		constexpr int strncmp( CharT const * lhs, CharT const * rhs, size_t sz ) noexcept {
+			while( sz > 0 && *lhs == *rhs ) {
+				--sz;
+			}
+			if( sz > 0 ) {
+				if( *lhs < *rhs ) {
+					return -1;
+				}
+				return 1;
+			}
+			return 0;
+		}
+
+		template<typename CharT>
+		constexpr CharT * copy_to( CharT const * src, CharT * dst, size_t count ) noexcept {
+			while( count > 0 ) {
+				*dst = *src;
+			}
+
+		}
+	}
 	template<typename CharT, size_t Capacity>
 	struct static_string_t {
 		CharT buffer[Capacity + 1] = {0};
@@ -199,7 +222,85 @@ namespace daw {
 		constexpr reference back( ) noexcept {
 			return buffer[size( ) - 1];
 		}
+
+		template<size_t rhs_size>
+		constexpr int compare( static_string_t<CharT, rhs_size> const & rhs ) const noexcept {
+			auto result = impl::strncmp( buffer, rhs.buffer, daw::min( size( ), rhs.size( ) ) );
+			if( result != 0 ) { return result; }
+			if( size( ) < rhs.size( ) ) {
+				return -1;
+			}
+			if( size( ) > rhs.size( ) ) {
+				return 1;
+			}
+			return 0;
+		}
+
+		template<size_t N>
+		constexpr int compare( CharT const (&rhs)[N] ) const noexcept {
+			auto const rhs_size = N-1;
+			auto result = impl::strncmp( buffer, rhs, daw::min( size( ), rhs_size ) );
+			if( result != 0 ) { return result; }
+			if( size( ) < rhs_size ) {
+				return -1;
+			}
+			if( size( ) > rhs_size ) {
+				return 1;
+			}
+			return 0;
+		}
 	};
+
+	template<typename>
+  struct is_static_string_t: std::false_type {};
+
+	template<typename CharT, size_t N>
+	struct is_static_string_t<static_string_t<CharT, N>>: std::true_type {};
+
+	template<typename StaticString>
+	constexpr bool is_static_string_v = is_static_string_t<StaticString>::value;
+
+	namespace impl {
+		template<typename CharT, size_t N, typename StaticString, std::enable_if_t<is_static_string_v<StaticString>, std::nullptr_t> = nullptr>
+		constexpr int compare( CharT const (& lhs)[N], StaticString && rhs ) noexcept {
+			auto const lhs_size = N - 1;
+			auto result = impl::strncmp( lhs, rhs.data( ), daw::min( lhs_size, rhs.size( ) ) );
+			if( result != 0 ) { return result; }
+			if( lhs_size < rhs.size( ) ) {
+				return -1;
+			}
+			if( lhs_size > rhs.size( ) ) {
+				return 1;
+			}
+			return 0;
+		}
+	}
+
+	// Using SFINAE as some compilers(clang 5/Apple Clang) have issues in constexpr
+	// if the argument is const
+	// https://gcc.godbolt.org/z/40xZFh
+	template<typename LhsString, typename RhsString, std::enable_if_t<daw::all_true_v<is_static_string_v<LhsString>, is_static_string_v<RhsString>>, std::nullptr_t> = nullptr>
+	constexpr bool operator==( LhsString && lhs, RhsString && rhs ) noexcept {
+		return lhs.compare( rhs ) == 0;
+	}
+
+	template<typename CharT, size_t N, typename LhsString, std::enable_if_t<is_static_string_v<LhsString>, std::nullptr_t> = nullptr>
+	constexpr bool operator==( LhsString && lhs, CharT const (&rhs)[N] ) noexcept {
+		return lhs.compare( rhs ) == 0;
+	}
+
+	template<typename CharT, size_t N, typename RhsString, std::enable_if_t<is_static_string_v<RhsString>, std::nullptr_t> = nullptr>
+	constexpr bool operator==( CharT const (&lhs)[N], RhsString && rhs ) noexcept {
+		return impl::compare( lhs, std::forward<RhsString>( rhs ) );
+	}
+
+
+
+	template<typename CharT, size_t lhs_size, size_t rhs_size>
+	constexpr bool operator==( daw::static_string_t<CharT, lhs_size> const & lhs, CharT const (&rhs)[rhs_size] ) noexcept {
+		return lhs.compare( rhs ) == 0;
+	}
+
 
 	template<typename CharT, size_t N>
 	constexpr static_string_t<CharT, N> const &

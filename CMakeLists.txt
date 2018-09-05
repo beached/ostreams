@@ -51,5 +51,6 @@ add_executable( simple_console ${HEADER_FILES} ${TEST_FOLDER}/simple_console.cpp
 add_executable( benchmark ${HEADER_FILES} ${TEST_FOLDER}/benchmark.h ${TEST_FOLDER}/benchmark.cpp )
 add_executable( double_benchmark ${HEADER_FILES} ${TEST_FOLDER}/benchmark.h ${TEST_FOLDER}/double_benchmark.cpp )
 add_executable( floating_round_trip ${HEADER_FILES} ${TEST_FOLDER}/floating_round_trip.cpp )
+add_executable( to_os_string_test ${HEADER_FILES} ${TEST_FOLDER}/to_os_string_test.cpp )
 
 install( DIRECTORY ${HEADER_FOLDER}/daw DESTINATION include )
