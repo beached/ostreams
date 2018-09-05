@@ -279,6 +279,7 @@ namespace daw {
 	// Using SFINAE as some compilers(clang 5/Apple Clang) have issues in constexpr
 	// if the argument is const
 	// https://gcc.godbolt.org/z/40xZFh
+	// Operator==
 	template<typename LhsString, typename RhsString, std::enable_if_t<daw::all_true_v<is_static_string_v<LhsString>, is_static_string_v<RhsString>>, std::nullptr_t> = nullptr>
 	constexpr bool operator==( LhsString && lhs, RhsString && rhs ) noexcept {
 		return lhs.compare( rhs ) == 0;
@@ -291,14 +292,112 @@ namespace daw {
 
 	template<typename CharT, size_t N, typename RhsString, std::enable_if_t<is_static_string_v<RhsString>, std::nullptr_t> = nullptr>
 	constexpr bool operator==( CharT const (&lhs)[N], RhsString && rhs ) noexcept {
-		return impl::compare( lhs, std::forward<RhsString>( rhs ) );
+		return impl::compare( lhs, std::forward<RhsString>( rhs ) ) == 0;
 	}
-
-
 
 	template<typename CharT, size_t lhs_size, size_t rhs_size>
 	constexpr bool operator==( daw::static_string_t<CharT, lhs_size> const & lhs, CharT const (&rhs)[rhs_size] ) noexcept {
 		return lhs.compare( rhs ) == 0;
+	}
+	// Operator!=
+	template<typename LhsString, typename RhsString, std::enable_if_t<daw::all_true_v<is_static_string_v<LhsString>, is_static_string_v<RhsString>>, std::nullptr_t> = nullptr>
+	constexpr bool operator!=( LhsString && lhs, RhsString && rhs ) noexcept {
+		return lhs.compare( rhs ) != 0;
+	}
+
+	template<typename CharT, size_t N, typename LhsString, std::enable_if_t<is_static_string_v<LhsString>, std::nullptr_t> = nullptr>
+	constexpr bool operator!=( LhsString && lhs, CharT const (&rhs)[N] ) noexcept {
+		return lhs.compare( rhs ) != 0;
+	}
+
+	template<typename CharT, size_t N, typename RhsString, std::enable_if_t<is_static_string_v<RhsString>, std::nullptr_t> = nullptr>
+	constexpr bool operator!=( CharT const (&lhs)[N], RhsString && rhs ) noexcept {
+		return impl::compare( lhs, std::forward<RhsString>( rhs ) ) != 0;
+	}
+
+	template<typename CharT, size_t lhs_size, size_t rhs_size>
+	constexpr bool operator!=( daw::static_string_t<CharT, lhs_size> const & lhs, CharT const (&rhs)[rhs_size] ) noexcept {
+		return lhs.compare( rhs ) != 0;
+	}
+	// Operator <
+	template<typename LhsString, typename RhsString, std::enable_if_t<daw::all_true_v<is_static_string_v<LhsString>, is_static_string_v<RhsString>>, std::nullptr_t> = nullptr>
+	constexpr bool operator<( LhsString && lhs, RhsString && rhs ) noexcept {
+		return lhs.compare( rhs ) < 0;
+	}
+
+	template<typename CharT, size_t N, typename LhsString, std::enable_if_t<is_static_string_v<LhsString>, std::nullptr_t> = nullptr>
+	constexpr bool operator<( LhsString && lhs, CharT const (&rhs)[N] ) noexcept {
+		return lhs.compare( rhs ) < 0;
+	}
+
+	template<typename CharT, size_t N, typename RhsString, std::enable_if_t<is_static_string_v<RhsString>, std::nullptr_t> = nullptr>
+	constexpr bool operator<( CharT const (&lhs)[N], RhsString && rhs ) noexcept {
+		return impl::compare( lhs, std::forward<RhsString>( rhs ) ) < 0;
+	}
+
+	template<typename CharT, size_t lhs_size, size_t rhs_size>
+	constexpr bool operator<( daw::static_string_t<CharT, lhs_size> const & lhs, CharT const (&rhs)[rhs_size] ) noexcept {
+		return lhs.compare( rhs ) < 0;
+	}
+	// Operator>
+	template<typename LhsString, typename RhsString, std::enable_if_t<daw::all_true_v<is_static_string_v<LhsString>, is_static_string_v<RhsString>>, std::nullptr_t> = nullptr>
+	constexpr bool operator>( LhsString && lhs, RhsString && rhs ) noexcept {
+		return lhs.compare( rhs ) > 0;
+	}
+
+	template<typename CharT, size_t N, typename LhsString, std::enable_if_t<is_static_string_v<LhsString>, std::nullptr_t> = nullptr>
+	constexpr bool operator>( LhsString && lhs, CharT const (&rhs)[N] ) noexcept {
+		return lhs.compare( rhs ) > 0;
+	}
+
+	template<typename CharT, size_t N, typename RhsString, std::enable_if_t<is_static_string_v<RhsString>, std::nullptr_t> = nullptr>
+	constexpr bool operator>( CharT const (&lhs)[N], RhsString && rhs ) noexcept {
+		return impl::compare( lhs, std::forward<RhsString>( rhs ) ) > 0;
+	}
+
+	template<typename CharT, size_t lhs_size, size_t rhs_size>
+	constexpr bool operator>( daw::static_string_t<CharT, lhs_size> const & lhs, CharT const (&rhs)[rhs_size] ) noexcept {
+		return lhs.compare( rhs ) > 0;
+	}
+	// Operator>=
+	template<typename LhsString, typename RhsString, std::enable_if_t<daw::all_true_v<is_static_string_v<LhsString>, is_static_string_v<RhsString>>, std::nullptr_t> = nullptr>
+	constexpr bool operator>=( LhsString && lhs, RhsString && rhs ) noexcept {
+		return lhs.compare( rhs ) >= 0;
+	}
+
+	template<typename CharT, size_t N, typename LhsString, std::enable_if_t<is_static_string_v<LhsString>, std::nullptr_t> = nullptr>
+	constexpr bool operator>=( LhsString && lhs, CharT const (&rhs)[N] ) noexcept {
+		return lhs.compare( rhs ) >= 0;
+	}
+
+	template<typename CharT, size_t N, typename RhsString, std::enable_if_t<is_static_string_v<RhsString>, std::nullptr_t> = nullptr>
+	constexpr bool operator>=( CharT const (&lhs)[N], RhsString && rhs ) noexcept {
+		return impl::compare( lhs, std::forward<RhsString>( rhs ) ) >= 0;
+	}
+
+	template<typename CharT, size_t lhs_size, size_t rhs_size>
+	constexpr bool operator>=( daw::static_string_t<CharT, lhs_size> const & lhs, CharT const (&rhs)[rhs_size] ) noexcept {
+		return lhs.compare( rhs ) >= 0;
+	}
+	// Operator<=
+	template<typename LhsString, typename RhsString, std::enable_if_t<daw::all_true_v<is_static_string_v<LhsString>, is_static_string_v<RhsString>>, std::nullptr_t> = nullptr>
+	constexpr bool operator<=( LhsString && lhs, RhsString && rhs ) noexcept {
+		return lhs.compare( rhs ) <= 0;
+	}
+
+	template<typename CharT, size_t N, typename LhsString, std::enable_if_t<is_static_string_v<LhsString>, std::nullptr_t> = nullptr>
+	constexpr bool operator<=( LhsString && lhs, CharT const (&rhs)[N] ) noexcept {
+		return lhs.compare( rhs ) <= 0;
+	}
+
+	template<typename CharT, size_t N, typename RhsString, std::enable_if_t<is_static_string_v<RhsString>, std::nullptr_t> = nullptr>
+	constexpr bool operator<=( CharT const (&lhs)[N], RhsString && rhs ) noexcept {
+		return impl::compare( lhs, std::forward<RhsString>( rhs ) ) <= 0;
+	}
+
+	template<typename CharT, size_t lhs_size, size_t rhs_size>
+	constexpr bool operator<=( daw::static_string_t<CharT, lhs_size> const & lhs, CharT const (&rhs)[rhs_size] ) noexcept {
+		return lhs.compare( rhs ) <= 0;
 	}
 
 

@@ -25,6 +25,68 @@
 
 using ostream_converters::to_os_string;
 
+
+// static_string comparison
+// ==
+static_assert( "10" == daw::static_string_t<char, 2>( "10" ), "" );
+static_assert( daw::static_string_t<char, 2>( "20" ) == "20", "" );
+static_assert( daw::static_string_t<char, 2>( "30" ) == daw::static_string_t<char, 2>( "30" ), "" );
+
+static_assert( L"10" == daw::static_string_t<wchar_t, 2>( L"10" ), "" );
+static_assert( daw::static_string_t<wchar_t, 2>( L"20" ) == L"20", "" );
+static_assert( daw::static_string_t<wchar_t, 2>( L"30" ) == daw::static_string_t<wchar_t, 2>( L"30" ), "" );
+
+// !=
+static_assert( "10" != daw::static_string_t<char, 2>( "20" ), "" );
+static_assert( daw::static_string_t<char, 2>( "20" ) != "10", "" );
+static_assert( daw::static_string_t<char, 2>( "20" ) != daw::static_string_t<char, 2>( "30" ), "" );
+static_assert( daw::static_string_t<char, 2>( "20" ) != "afkdfjskdfjsdlkfj10", "" );
+
+static_assert( L"10" != daw::static_string_t<wchar_t, 2>( L"20" ), "" );
+static_assert( daw::static_string_t<wchar_t, 2>( L"10" ) != L"20", "" );
+static_assert( daw::static_string_t<wchar_t, 2>( L"20" ) != daw::static_string_t<wchar_t, 2>( L"30" ), "" );
+static_assert( daw::static_string_t<wchar_t, 2>( L"10" ) != L"afkdfjskdfjsdlkfj10", "" );
+// <
+static_assert( "10" < daw::static_string_t<char, 2>( "20" ), "" );
+static_assert( daw::static_string_t<char, 2>( "20" ) < "30", "" );
+static_assert( daw::static_string_t<char, 2>( "20" ) < daw::static_string_t<char, 2>( "30" ), "" );
+static_assert( daw::static_string_t<char, 2>( "20" ) < "afkdfjskdfjsdlkfj10", "" );
+
+static_assert( L"10" < daw::static_string_t<wchar_t, 2>( L"20" ), "" );
+static_assert( daw::static_string_t<wchar_t, 2>( L"10" ) < L"20", "" );
+static_assert( daw::static_string_t<wchar_t, 2>( L"20" ) < daw::static_string_t<wchar_t, 2>( L"30" ), "" );
+static_assert( daw::static_string_t<wchar_t, 2>( L"10" ) < L"afkdfjskdfjsdlkfj10", "" );
+// >
+static_assert( "50" > daw::static_string_t<char, 2>( "20" ), "" );
+static_assert( daw::static_string_t<char, 2>( "20" ) > "10", "" );
+static_assert( daw::static_string_t<char, 2>( "AA" ) > daw::static_string_t<char, 2>( "30" ), "" );
+static_assert( daw::static_string_t<char, 2>( "z0" ) > "afkdfjskdfjsdlkfj10", "" );
+
+static_assert( L"R3" > daw::static_string_t<wchar_t, 2>( L"20" ), "" );
+static_assert( daw::static_string_t<wchar_t, 2>( L"a0" ) > L"20", "" );
+static_assert( daw::static_string_t<wchar_t, 2>( L"a0" ) > daw::static_string_t<wchar_t, 2>( L"30" ), "" );
+static_assert( daw::static_string_t<wchar_t, 2>( L"z0" ) > L"afkdfjskdfjsdlkfj10", "" );
+// >=
+static_assert( "Ra" >= daw::static_string_t<char, 2>( "20" ), "" );
+static_assert( daw::static_string_t<char, 2>( "20" ) >= "10", "" );
+static_assert( daw::static_string_t<char, 2>( "30" ) >= daw::static_string_t<char, 2>( "30" ), "" );
+static_assert( daw::static_string_t<char, 2>( "99" ) >= "01kdfjskdfjsdlkfj10", "" );
+
+static_assert( L"a0" >= daw::static_string_t<wchar_t, 2>( L"20" ), "" );
+static_assert( daw::static_string_t<wchar_t, 2>( L"a0" ) >= L"20", "" );
+static_assert( daw::static_string_t<wchar_t, 2>( L"a0" ) >= daw::static_string_t<wchar_t, 2>( L"30" ), "" );
+static_assert( daw::static_string_t<wchar_t, 2>( L"z0" ) >= L"afkdfjskdfjsdlkfj10", "" );
+// <=
+static_assert( "10" <= daw::static_string_t<char, 2>( "20" ), "" );
+static_assert( daw::static_string_t<char, 2>( "10" ) <= "10", "" );
+static_assert( daw::static_string_t<char, 2>( "20" ) <= daw::static_string_t<char, 2>( "30" ), "" );
+static_assert( daw::static_string_t<char, 2>( "20" ) <= "afkdfjskdfjsdlkfj10", "" );
+
+static_assert( L"10" <= daw::static_string_t<wchar_t, 2>( L"20" ), "" );
+static_assert( daw::static_string_t<wchar_t, 2>( L"10" ) <= L"20", "" );
+static_assert( daw::static_string_t<wchar_t, 2>( L"20" ) <= daw::static_string_t<wchar_t, 2>( L"30" ), "" );
+static_assert( daw::static_string_t<wchar_t, 2>( L"10" ) <= L"afkdfjskdfjsdlkfj10", "" );
+
 // Integral Conversions
 static_assert( to_os_string<char>( 5 ) == "5", "" );
 
