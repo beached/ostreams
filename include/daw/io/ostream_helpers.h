@@ -41,6 +41,34 @@ namespace daw {
 		  daw::is_detected_v<has_size_member_detect, remove_cvref_t<String>>>;
 
 	} // namespace impl
+
+	template<typename T>
+	struct as_int_t {
+		T value;
+
+		constexpr operator T const &( ) const noexcept {
+			return value;
+		}
+
+		constexpr operator T &( ) noexcept {
+			return value;
+		}
+	};
+
+	template<typename Integer>
+	constexpr as_int_t<Integer> as_int( Integer &&i ) noexcept {
+		return {std::forward<Integer>( i )};
+	}
+
+	template<typename>
+	struct is_asint_t : std::false_type {};
+
+	template<typename Integer>
+	struct is_asint_t<as_int_t<Integer>> : std::true_type {};
+
+	template<typename T>
+	constexpr bool is_asint_v = is_asint_t<T>::value;
+
 	template<typename>
 	struct char_traits;
 

@@ -136,7 +136,46 @@ namespace ostream_converters {
 		}
 	} // namespace min_strings
 
-	// Integer numbers
+	namespace impl {
+		// Integer numbers
+		template<
+		  typename CharT, typename Integer,
+		  typename Traits = daw::char_traits<CharT>,
+		  std::enable_if_t<
+		    daw::all_true_v<daw::is_integral_v<daw::remove_cvref_t<Integer>>,
+		                    !daw::is_same_v<bool, daw::remove_cvref_t<Integer>>,
+		                    !daw::is_floating_point_v<daw::remove_cvref_t<Integer>>,
+		                    !daw::traits::is_character_v<Integer>>,
+		    std::nullptr_t> = nullptr>
+		constexpr auto to_os_string( Integer value, daw::tag<int> ) {
+			daw::static_string_t<CharT, int_string_sizes::get<sizeof( Integer )>( )>
+			  result{};
+
+			if( value < 0 ) {
+				if( value == std::numeric_limits<Integer>::min( ) ) {
+					return min_strings::get(
+					  CharT{}, std::integral_constant<size_t, sizeof( Integer )>{} );
+				}
+				result += Traits::minus;
+				value = -value;
+			}
+			for( auto pow10 =
+			       impl::pow10<Integer>( impl::whole_log10<uint16_t>( value ) );
+			     pow10 >= 1; pow10 /= static_cast<Integer>( 10 ) ) {
+
+				auto const tmp = value / pow10;
+
+				daw::exception::dbg_precondition_check(
+				  tmp >= 0 && tmp < 10,
+				  "There should only ever be a single digit positive number" );
+
+				result += Traits::get_char_digit( tmp );
+
+				value -= tmp * pow10;
+			}
+			return result;
+		}
+	} // namespace impl
 	template<
 	  typename CharT, typename Integer, typename Traits = daw::char_traits<CharT>,
 	  std::enable_if_t<
@@ -145,32 +184,13 @@ namespace ostream_converters {
 	                    !daw::is_floating_point_v<daw::remove_cvref_t<Integer>>,
 	                    !daw::traits::is_character_v<Integer>>,
 	    std::nullptr_t> = nullptr>
-	static constexpr auto to_os_string( Integer value ) {
-		daw::static_string_t<CharT, int_string_sizes::get<sizeof( Integer )>( )>
-		  result{};
+	constexpr auto to_os_string( Integer value ) {
+		return impl::to_os_string<CharT>( value, daw::tag<int>{} );
+	}
 
-		if( value < 0 ) {
-			if( value == std::numeric_limits<Integer>::min( ) ) {
-				return min_strings::get(
-				  CharT{}, std::integral_constant<size_t, sizeof( Integer )>{} );
-			}
-			result += Traits::minus;
-			value = -value;
-		}
-		for( auto pow10 =
-		       impl::pow10<Integer>( impl::whole_log10<uint16_t>( value ) );
-		     pow10 >= 1; pow10 /= static_cast<Integer>( 10 ) ) {
-
-			auto const tmp = value / pow10;
-
-			daw::exception::dbg_precondition_check(
-			  tmp >= 0 && tmp < 10,
-			  "There should only ever be a single digit positive number" );
-
-			result += Traits::get_char_digit( tmp );
-
-			value -= tmp * pow10;
-		}
-		return result;
+	template<typename CharT, typename Integer,
+	         typename Traits = daw::char_traits<CharT>>
+	constexpr auto to_os_string( daw::as_int_t<Integer> value ) {
+		return impl::to_os_string<CharT>( value.value, daw::tag<int>{} );
 	}
 } // namespace ostream_converters

@@ -126,7 +126,7 @@ namespace ostream_converters {
 	  int significant_digits = std::numeric_limits<Float>::max_digits10,
 	  int precision = std::numeric_limits<Float>::max_digits10 ) {
 
-		size_t const buff_size = std::numeric_limits<Float>::max_exponent10+ 2;
+		size_t const buff_size = std::numeric_limits<Float>::max_exponent10 + 2;
 
 		daw::static_string_t<CharT, buff_size> result{};
 
@@ -173,8 +173,8 @@ namespace ostream_converters {
 		for( int16_t ex = max_dig; ex > 0; --ex ) {
 			result += Traits::get_char_digit( 0 );
 			result += result.back( );
-			for( size_t n=result.size( )-2; n>0; --n ) {
-				result[n] = result[n-1];
+			for( size_t n = result.size( ) - 2; n > 0; --n ) {
+				result[n] = result[n - 1];
 			}
 			result[1] = Traits::get_char( '.' );
 			result += Traits::get_char( 'e' );
@@ -201,8 +201,14 @@ namespace ostream_converters {
 				digit = static_cast<char>( tmp_value * static_cast<Float>( 10 ) );
 			}
 			if( neg_exp > 4 ) {
-				result.resize( 0 );
+				if( result[0] == Traits::get_char( '-' ) ) {
+					result.resize( 1 );
+				} else {
+					result.resize( 0 );
+				}
 				result += Traits::get_char_digit( digit );
+				tmp_value *= static_cast<Float>( 10 );
+				tmp_value -= static_cast<Float>( digit );
 				result += Traits::get_char( '.' );
 			} else {
 				neg_exp = 0;
