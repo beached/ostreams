@@ -40,6 +40,9 @@ set( HEADER_FILES
 	${HEADER_FOLDER}/daw/io/memory_stream.h
 	${HEADER_FOLDER}/daw/io/ostreams.h
 	${HEADER_FOLDER}/daw/io/ostream_converters.h
+	${HEADER_FOLDER}/daw/io/ostream_converters_float.h
+	${HEADER_FOLDER}/daw/io/ostream_converters_impl.h
+	${HEADER_FOLDER}/daw/io/ostream_converters_int.h
 	${HEADER_FOLDER}/daw/io/ostream_helpers.h
 	${HEADER_FOLDER}/daw/io/static_string.h
 )

@@ -47,7 +47,6 @@ namespace daw {
 	template<>
 	struct char_traits<char> {
 		static constexpr char const decimal_point = '.';
-		static constexpr char const zero = '0';
 		static constexpr char const minus = '-';
 
 		static constexpr daw::basic_string_view<char> nan( ) {
@@ -59,15 +58,20 @@ namespace daw {
 		}
 
 		template<typename T>
-		static constexpr char get_char_digit( T value ) {
-			return zero + static_cast<char>( value );
+		static constexpr char get_char_digit( T value ) noexcept {
+			daw::exception::dbg_precondition_check(
+			  0 <= value && value <= 9, "Only valid single digit numbers" );
+			return '0' + static_cast<char>( value );
+		}
+
+		static constexpr char get_char( char c ) noexcept {
+			return c;
 		}
 	};
 
 	template<>
 	struct char_traits<wchar_t> {
 		static constexpr wchar_t const decimal_point = L'.';
-		static constexpr wchar_t const zero = L'0';
 		static constexpr wchar_t const minus = L'-';
 
 		static constexpr daw::basic_string_view<wchar_t> nan( ) {
@@ -80,7 +84,11 @@ namespace daw {
 
 		template<typename T>
 		static constexpr wchar_t get_char_digit( T value ) {
-			return zero + static_cast<wchar_t>( value );
+			return L'0' + static_cast<wchar_t>( value );
+		}
+
+		static constexpr wchar_t get_char( char c ) noexcept {
+			return L'\0' + c;
 		}
 	};
 } // namespace daw

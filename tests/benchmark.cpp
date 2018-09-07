@@ -271,13 +271,13 @@ int main( int argc, char ** ) {
 	do_bench( "double", count, 1.7976931348623157e308 );
 	do_bench( "double", count, 123456.0435333 );
 	{
-		double d = std::numeric_limits<double>::max( );
-		do_not_optimize( d );
-		for( size_t n = 0; n < 1'000'000; ++n ) {
-			d -= 0.00001;
-			do_not_optimize( d );
-		}
-		do_bench( "double", count, d );
+	  double d = std::numeric_limits<double>::max( );
+	  do_not_optimize( d );
+	  for( size_t n = 0; n < 1'000'000; ++n ) {
+	    d -= 0.00001;
+	    do_not_optimize( d );
+	  }
+	  do_bench( "double", count, d );
 	}
 	do_bench( "double", count, 0.1 );
 	do_bench( "double", count, 0.12 );
@@ -289,7 +289,7 @@ int main( int argc, char ** ) {
 	do_bench( "double", count, 10.0 / 3.0 );
 	do_bench( "double", count, 20.0 / 3.0 );
 	 */
-	do_bench( "double", 100/* count*/, std::numeric_limits<double>::min( ) );
+	do_bench( "double", 100 /* count*/, std::numeric_limits<double>::min( ) );
 	do_bench( "double", count, std::numeric_limits<double>::max( ) );
 	do_bench( "double", count, std::numeric_limits<double>::denorm_min( ) );
 	do_bench( "double", count,

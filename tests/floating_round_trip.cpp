@@ -63,6 +63,7 @@ int main( ) {
 	std::cout << "float min     -> " << std::numeric_limits<float>::min( )
 	          << '\n';
 	std::cout << "\"type\", \"value\", \"str value\", \"difference\"\n";
+	test_round_trip( "double", std::numeric_limits<double>::max( ) );
 	test_round_trip( "double", 0.1 );
 	test_round_trip( "double", 0.12 );
 	test_round_trip( "double", 0.123 );
@@ -74,7 +75,6 @@ int main( ) {
 	test_round_trip( "double", 20.0 / 3.0 );
 	test_round_trip( "double", std::numeric_limits<double>::min( ) );
 	test_round_trip( "double", -std::numeric_limits<double>::min( ) );
-	test_round_trip( "double", std::numeric_limits<double>::max( ) );
 	test_round_trip( "double", std::numeric_limits<double>::denorm_min( ) );
 	test_round_trip( "double", std::numeric_limits<double>::min( ) *
 	                             std::numeric_limits<double>::max( ) );
