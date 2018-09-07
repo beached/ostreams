@@ -121,12 +121,25 @@ int main( int argc, char ** ) {
 
 	verify_value( "uint8_t", "min",
 	              daw::as_int( std::numeric_limits<uint8_t>::min( ) ) );
+	verify_value( "uint8_t", "max",
+	              daw::as_int( std::numeric_limits<uint8_t>::max( ) ) );
+	verify_value( "uint8_t", "0", daw::as_int( static_cast<uint8_t>( 0 ) ) );
+
+	verify_value( "int8_t", "min",
+	              daw::as_int( std::numeric_limits<int8_t>::min( ) ) );
+	verify_value( "int8_t", "max",
+	              daw::as_int( std::numeric_limits<int8_t>::max( ) ) );
+	verify_value( "int8_t", "0", daw::as_int( static_cast<int8_t>( 0 ) ) );
+
+	verify_value( "uint8_t", "min", std::numeric_limits<uint8_t>::min( ) );
 	verify_value( "uint8_t", "max", std::numeric_limits<uint8_t>::max( ) );
 	verify_value( "uint8_t", "0", static_cast<uint8_t>( 0 ) );
+	verify_value( "uint8_t", "97", static_cast<uint8_t>( 97 ) );
 
 	verify_value( "int8_t", "min", std::numeric_limits<int8_t>::min( ) );
 	verify_value( "int8_t", "max", std::numeric_limits<int8_t>::max( ) );
 	verify_value( "int8_t", "0", static_cast<int8_t>( 0 ) );
+	verify_value( "int8_t", "97", static_cast<int8_t>( 97 ) );
 
 	return 0;
 }

@@ -81,7 +81,7 @@ int main( ) {
 	test_round_trip( "double", std::numeric_limits<double>::max( ) -
 	                             ( std::numeric_limits<double>::max( ) / 2.0 ) );
 	test_round_trip( "double", std::numeric_limits<double>::min( ) +
-														( std::numeric_limits<double>::min( ) * 10.0 ) );
+	                             ( std::numeric_limits<double>::min( ) * 10.0 ) );
 
 	test_round_trip( "float", 0.1f );
 	test_round_trip( "float", 0.12f );
