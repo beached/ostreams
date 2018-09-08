@@ -28,63 +28,6 @@
 #include <sstream>
 
 namespace daw {
-	namespace utility {
-		template<typename T>
-		std::string format_seconds( T t, size_t prec = 0 ) {
-			std::stringstream ss;
-			ss << std::setprecision( static_cast<int>( prec ) ) << std::fixed;
-			auto val = static_cast<double>( t ) * 1000000000000000.0;
-			if( val < 1000 ) {
-				ss << val << "fs";
-				return ss.str( );
-			}
-			val /= 1000.0;
-			if( val < 1000 ) {
-				ss << val << "ps";
-				return ss.str( );
-			}
-			val /= 1000.0;
-			if( val < 1000 ) {
-				ss << val << "ns";
-				return ss.str( );
-			}
-			val /= 1000.0;
-			if( val < 1000 ) {
-				ss << val << "us";
-				return ss.str( );
-			}
-			val /= 1000.0;
-			if( val < 1000 ) {
-				ss << val << "ms";
-				return ss.str( );
-			}
-			val /= 1000.0;
-			ss << val << "s";
-			return ss.str( );
-		}
-	} // namespace utility
-
-	template<typename Test, typename... Args>
-	void benchmark( std::string title, Test test_callable, size_t item_count,
-	                Args &&... args ) noexcept {
-		auto const start = std::chrono::high_resolution_clock::now( );
-
-		test_callable( std::forward<Args>( args )... );
-
-		auto const finish = std::chrono::high_resolution_clock::now( );
-		std::chrono::duration<double> const duration = finish - start;
-		std::cout << title << " took "
-		          << utility::format_seconds( duration.count( ), 2 );
-		if( item_count > 1 ) {
-			std::cout << " to process " << item_count << " items at "
-			          << utility::format_seconds( ( duration / item_count ).count( ),
-			                                      2 )
-			          << " per item\n";
-		} else {
-			std::cout << '\n';
-		}
-	}
-
 	// Borrowed from https://www.youtube.com/watch?v=dO-j3qp7DWw
 	template<typename T>
 	void force_evaluation_ms( T &&x ) {
@@ -101,5 +44,83 @@ namespace daw {
 			std::abort( );
 		}
 	}
+	template<typename T>
+	inline void DoNotOptimize( T &&t ) noexcept {
+#ifdef _MSC_VER
+		force_evaluation_ms( std::forward<T>( t ) );
+#else
+		force_evaluation( std::forward<T>( t ) );
+#endif
+	}
 
+	template<typename Number, size_t N, typename Test>
+	void do_bench( char const ( &type_str )[N], size_t const &count,
+	               Number const &number, Test &&t ) {
+		DoNotOptimize( count );
+		DoNotOptimize( number );
+		auto const t_stringstream =
+		  daw::benchmark( [&]( ) { t.stringstream_test( count, number ); } );
+		auto const t_snprintf =
+		  daw::benchmark( [&]( ) { t.snprintf_test( count, number ); } );
+		auto const t_memory_stream =
+		  daw::benchmark( [&]( ) { t.memory_stream_test( count, number ); } );
+		std::cerr << std::flush;
+		fflush( stderr );
+		auto const t_cerr =
+		  daw::benchmark( [&]( ) { t.cerr_test( count, number ); } );
+		std::cerr << std::flush;
+		fflush( stderr );
+		auto const t_printf =
+		  daw::benchmark( [&]( ) { t.printf_test( count, number ); } );
+		std::cerr << std::flush;
+		fflush( stderr );
+		auto const t_console_stream =
+		  daw::benchmark( [&]( ) { t.console_stream_test( count, number ); } );
+		std::cerr << std::flush;
+		fflush( stderr );
+
+		std::cout << "\"" << type_str << "\", " << count << ", " << number;
+		std::cout << ',' << daw::utility::format_seconds( t_stringstream );
+		std::cout << ',' << daw::utility::format_seconds( t_snprintf );
+		std::cout << ',' << daw::utility::format_seconds( t_memory_stream );
+		std::cout << ',' << daw::utility::format_seconds( t_cerr );
+		std::cout << ',' << daw::utility::format_seconds( t_printf );
+		std::cout << ',' << daw::utility::format_seconds( t_console_stream );
+		std::cout << ','
+		          << daw::utility::format_seconds( t_stringstream /
+		                                           static_cast<double>( count ) );
+		std::cout << ','
+		          << daw::utility::format_seconds( t_snprintf /
+		                                           static_cast<double>( count ) );
+		std::cout << ','
+		          << daw::utility::format_seconds( t_memory_stream /
+		                                           static_cast<double>( count ) );
+		std::cout << ','
+		          << daw::utility::format_seconds( t_cerr /
+		                                           static_cast<double>( count ) );
+		std::cout << ','
+		          << daw::utility::format_seconds( t_printf /
+		                                           static_cast<double>( count ) );
+		std::cout << ','
+		          << daw::utility::format_seconds( t_console_stream /
+		                                           static_cast<double>( count ) );
+		std::cout << std::endl;
+	}
+
+	inline void do_bench_header( ) {
+		std::cout << "\"type\",\"count\",\"number\"";
+		std::cout << ",\"std::string_stream(all)\"";
+		std::cout << ",\"snprintf(all)\"";
+		std::cout << ",\"memory stream(all)\"";
+		std::cout << ",\"cerr(all)\"";
+		std::cout << ",\"printf(all)\"";
+		std::cout << ",\"console stream(all)\"";
+		std::cout << ",\"std::string_stream(1)\"";
+		std::cout << ",\"snprintf(1)\"";
+		std::cout << ",\"memory stream(1)\"";
+		std::cout << ",\"cerr(1)\"";
+		std::cout << ",\"printf(1)\"";
+		std::cout << ",\"console stream(1)\"";
+		std::cout << '\n' << std::flush;
+	}
 } // namespace daw

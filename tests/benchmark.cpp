@@ -28,6 +28,7 @@
 #ifndef _MSC_VER
 #include <daw/daw_utility.h>
 #endif
+#include <daw/daw_benchmark.h>
 
 #include "./benchmark.h"
 #include "daw/io/console_stream.h"
@@ -120,118 +121,99 @@ struct get_format<uint64_t> {
 	}
 };
 
-template<typename T>
-inline void do_not_optimize( T &&t ) noexcept {
-#ifdef _MSC_VER
-	daw::force_evaluation_ms( std::forward<T>( t ) );
-#else
-	daw::force_evaluation( std::forward<T>( t ) );
-#endif
-}
-
-struct stringstream_test {
+struct test_t {
 	template<typename Number>
-	void operator( )( size_t count, Number number ) const {
-		do_not_optimize( count );
+	void stringstream_test( size_t count, Number number ) const {
+		daw::DoNotOptimize( count );
 		std::stringstream ss{};
 		for( size_t n = 0; n < count; ++n ) {
-			do_not_optimize( number );
+			daw::DoNotOptimize( number );
 			ss << std::setprecision( std::numeric_limits<Number>::max_digits10 )
 			   << number;
-			do_not_optimize( ss );
+			daw::DoNotOptimize( ss );
 		}
 	}
-};
 
-struct snprintf_test {
 	template<typename Number, std::enable_if_t<daw::is_integral_v<Number>,
 	                                           std::nullptr_t> = nullptr>
-	void operator( )( size_t count, Number number ) const {
+	void snprintf_test( size_t count, Number number ) const {
 		daw::static_string_t<char, 325> buffer{};
 		buffer.resize( buffer.capacity( ), false );
 		for( size_t n = 0; n < count; ++n ) {
-			do_not_optimize( number );
+			daw::DoNotOptimize( number );
 
 			snprintf( buffer.data( ), buffer.capacity( ),
 			          get_format<Number>::get( ).buffer, number );
-			do_not_optimize( buffer );
+			daw::DoNotOptimize( buffer );
 		}
 	}
 
 	template<typename Number, std::enable_if_t<daw::is_floating_point_v<Number>,
 	                                           std::nullptr_t> = nullptr>
-	void operator( )( size_t count, Number number ) const {
+	void snprintf_test( size_t count, Number number ) const {
 		daw::static_string_t<char, 325> buffer{};
 		buffer.resize( buffer.capacity( ), false );
 		for( size_t n = 0; n < count; ++n ) {
-			do_not_optimize( number );
+			daw::DoNotOptimize( number );
 			snprintf( buffer.data( ), buffer.capacity( ),
 			          get_format<Number>::get( ).buffer,
 			          std::numeric_limits<Number>::max_digits10,
 			          static_cast<double>( number ) );
 
 			buffer.shrink_to_fit( );
-			do_not_optimize( buffer );
+			daw::DoNotOptimize( buffer );
 		}
 	}
-};
 
-struct memory_stream_test {
 	template<typename Number>
-	void operator( )( size_t count, Number number ) const {
+	void memory_stream_test( size_t count, Number number ) const {
 		daw::static_string_t<char, 425> buffer{};
 		buffer.resize( buffer.capacity( ), false );
 		for( size_t n = 0; n < count; ++n ) {
-			do_not_optimize( number );
+			daw::DoNotOptimize( number );
 
 			auto ss =
 			  ::daw::io::make_memory_buffer_stream( buffer.data( ), buffer.size( ) );
 
 			ss << number;
 
-			do_not_optimize( buffer );
+			daw::DoNotOptimize( buffer );
 		}
 	}
-};
 
-struct cerr_test {
 	template<typename Number>
-	void operator( )( size_t count, Number number ) const {
-		do_not_optimize( count );
+	void cerr_test( size_t count, Number number ) const {
+		daw::DoNotOptimize( count );
 		for( size_t n = 0; n < count; ++n ) {
-			do_not_optimize( number );
+			daw::DoNotOptimize( number );
 			std::cerr << std::setprecision(
 			               std::numeric_limits<Number>::max_digits10 )
 			          << number;
 		}
 	}
-};
 
-struct console_stream_test {
 	template<typename Number>
-	void operator( )( size_t count, Number number ) const {
+	void console_stream_test( size_t count, Number number ) const {
 		for( size_t n = 0; n < count; ++n ) {
-			do_not_optimize( number );
+			daw::DoNotOptimize( number );
 			daw::con_err << number;
 		}
 	}
-};
 
-struct printf_test {
 	template<typename Number, std::enable_if_t<daw::is_integral_v<Number>,
 	                                           std::nullptr_t> = nullptr>
-	void operator( )( size_t count, Number number ) const {
+	void printf_test( size_t count, Number number ) const {
 		for( size_t n = 0; n < count; ++n ) {
-			do_not_optimize( number );
+			daw::DoNotOptimize( number );
 			fprintf( stderr, get_format<Number>::get( ).buffer, number );
 		}
 	}
 
 	template<typename Number, std::enable_if_t<daw::is_floating_point_v<Number>,
 	                                           std::nullptr_t> = nullptr>
-	void operator( )( size_t count, Number number ) const {
+	void printf_test( size_t count, Number number ) const {
 		for( size_t n = 0; n < count; ++n ) {
-			do_not_optimize( number );
+			daw::DoNotOptimize( number );
 			fprintf( stderr, get_format<Number>::get( ).buffer,
 			         std::numeric_limits<Number>::max_digits10,
 			         static_cast<double>( number ) );
@@ -239,130 +221,132 @@ struct printf_test {
 	}
 };
 
-template<typename Number, size_t N>
-void do_bench( char const ( &str )[N], size_t count, Number number ) {
-	std::cout << "\nnumber: " << number << ' ' << str << std::endl;
-	do_not_optimize( number );
-	std::cout << "char buffer" << std::endl;
-	daw::benchmark( "std::string_stream", stringstream_test{}, count, count,
-	                number );
-	daw::benchmark( "snprintf", snprintf_test{}, count, count, number );
-	daw::benchmark( "daw::memory_stream", memory_stream_test{}, count, count,
-	                number );
-
-	std::cout << "\nconsole" << std::endl;
-	daw::benchmark( "srd::cerr", cerr_test{}, count, count, number );
-	std::cerr << std::flush;
-	daw::benchmark( "printf", printf_test{}, count, count, number );
-	fflush( stderr );
-	daw::benchmark( "daw::console_stream", console_stream_test{}, count, count,
-	                number );
-	fflush( stderr );
-}
-
 int main( int argc, char ** ) {
 	std::ios_base::sync_with_stdio( false );
 	// constexpr size_t const count = 100'000;
 	size_t count = 100'000;
-	daw::con_out << "doubles\n";
-	/*
-	do_bench( "double", count, 0.1234 );
-	do_bench( "double", count, 2.718281828459045 );
-	do_bench( "double", count, 1.7976931348623157e308 );
-	do_bench( "double", count, 123456.0435333 );
-	{
-	  double d = std::numeric_limits<double>::max( );
-	  do_not_optimize( d );
-	  for( size_t n = 0; n < 1'000'000; ++n ) {
-	    d -= 0.00001;
-	    do_not_optimize( d );
-	  }
-	  do_bench( "double", count, d );
-	}
-	do_bench( "double", count, 0.1 );
-	do_bench( "double", count, 0.12 );
-	do_bench( "double", count, 0.123 );
-	do_bench( "double", count, 0.1234 );
-	do_bench( "double", count, 1.2345 );
-	do_bench( "double", count, 1.0 / 3.0 );
-	do_bench( "double", count, 2.0 / 3.0 );
-	do_bench( "double", count, 10.0 / 3.0 );
-	do_bench( "double", count, 20.0 / 3.0 );
-	 */
-	do_bench( "double", 100 /* count*/, std::numeric_limits<double>::min( ) );
-	do_bench( "double", count, std::numeric_limits<double>::max( ) );
-	do_bench( "double", count, std::numeric_limits<double>::denorm_min( ) );
-	do_bench( "double", count,
-	          std::numeric_limits<double>::min( ) *
-	            std::numeric_limits<double>::max( ) );
-	do_bench( "double", count,
-	          std::numeric_limits<double>::max( ) -
-	            ( std::numeric_limits<double>::max( ) / 2.0 ) );
+	daw::do_bench_header( );
 
-	daw::con_out << "floats\n";
-	do_bench( "float", count, 0.1234f );
-	do_bench( "float", count, 2.718281828459045f );
-	do_bench( "float", count, 1.7976931348623157e38f );
-	do_bench( "float", count, 123456.0435333f );
+	daw::do_bench( "double", count, 0.1234, test_t{} );
+	daw::do_bench( "double", count, 2.718281828459045, test_t{} );
+	daw::do_bench( "double", count, 1.7976931348623157e308, test_t{} );
+	daw::do_bench( "double", count, 123456.0435333, test_t{} );
+	{
+		double d = std::numeric_limits<double>::max( );
+		daw::DoNotOptimize( d );
+		for( size_t n = 0; n < 1'000'000; ++n ) {
+			d -= 0.00001;
+			daw::DoNotOptimize( d );
+		}
+		daw::do_bench( "double", count, d, test_t{} );
+	}
+	daw::do_bench( "double", count, 0.1, test_t{} );
+	daw::do_bench( "double", count, 0.12, test_t{} );
+	daw::do_bench( "double", count, 0.123, test_t{} );
+	daw::do_bench( "double", count, 0.1234, test_t{} );
+	daw::do_bench( "double", count, 1.2345, test_t{} );
+	daw::do_bench( "double", count, 1.0 / 3.0, test_t{} );
+	daw::do_bench( "double", count, 2.0 / 3.0, test_t{} );
+	daw::do_bench( "double", count, 10.0 / 3.0, test_t{} );
+	daw::do_bench( "double", count, 20.0 / 3.0, test_t{} );
+
+	daw::do_bench( "double", 100 /* count*/, std::numeric_limits<double>::min( ),
+	               test_t{} );
+	daw::do_bench( "double", count, std::numeric_limits<double>::max( ),
+	               test_t{} );
+	daw::do_bench( "double", count, std::numeric_limits<double>::denorm_min( ),
+	               test_t{} );
+	daw::do_bench( "double", count,
+	               std::numeric_limits<double>::min( ) *
+	                 std::numeric_limits<double>::max( ),
+	               test_t{} );
+	daw::do_bench( "double", count,
+	               std::numeric_limits<double>::max( ) -
+	                 ( std::numeric_limits<double>::max( ) / 2.0 ),
+	               test_t{} );
+
+	daw::do_bench( "float", count, 0.1234f, test_t{} );
+	daw::do_bench( "float", count, 2.718281828459045f, test_t{} );
+	daw::do_bench( "float", count, 1.7976931348623157e38f, test_t{} );
+	daw::do_bench( "float", count, 123456.0435333f, test_t{} );
 	{
 		float d = std::numeric_limits<float>::max( );
-		do_not_optimize( d );
+		daw::DoNotOptimize( d );
 		for( size_t n = 0; n < 1'000'000; ++n ) {
 			d -= 0.00001f;
-			do_not_optimize( d );
+			daw::DoNotOptimize( d );
 		}
-		do_bench( "float", count, d );
+		daw::do_bench( "float", count, d, test_t{} );
 	}
-	do_bench( "float", count, 0.1f );
-	do_bench( "float", count, 0.12f );
-	do_bench( "float", count, 0.123f );
-	do_bench( "float", count, 0.1234f );
-	do_bench( "float", count, 1.2345f );
-	do_bench( "float", count, 1.0f / 3.0f );
-	do_bench( "float", count, 2.0f / 3.0f );
-	do_bench( "float", count, 10.0f / 3.0f );
-	do_bench( "float", count, 20.0f / 3.0f );
-	do_bench( "float", count, std::numeric_limits<float>::min( ) );
-	do_bench( "float", count, std::numeric_limits<float>::max( ) );
-	do_bench( "float", count, std::numeric_limits<float>::denorm_min( ) );
-	do_bench( "float", count,
-	          std::numeric_limits<float>::min( ) *
-	            std::numeric_limits<float>::max( ) );
-	do_bench( "float", count,
-	          std::numeric_limits<float>::max( ) -
-	            ( std::numeric_limits<float>::max( ) / 2.0f ) );
+	daw::do_bench( "float", count, 0.1f, test_t{} );
+	daw::do_bench( "float", count, 0.12f, test_t{} );
+	daw::do_bench( "float", count, 0.123f, test_t{} );
+	daw::do_bench( "float", count, 0.1234f, test_t{} );
+	daw::do_bench( "float", count, 1.2345f, test_t{} );
+	daw::do_bench( "float", count, 1.0f / 3.0f, test_t{} );
+	daw::do_bench( "float", count, 2.0f / 3.0f, test_t{} );
+	daw::do_bench( "float", count, 10.0f / 3.0f, test_t{} );
+	daw::do_bench( "float", count, 20.0f / 3.0f, test_t{} );
+	daw::do_bench( "float", count, std::numeric_limits<float>::min( ), test_t{} );
+	daw::do_bench( "float", count, std::numeric_limits<float>::max( ), test_t{} );
+	daw::do_bench( "float", count, std::numeric_limits<float>::denorm_min( ),
+	               test_t{} );
+	daw::do_bench( "float", count,
+	               std::numeric_limits<float>::min( ) *
+	                 std::numeric_limits<float>::max( ),
+	               test_t{} );
+	daw::do_bench( "float", count,
+	               std::numeric_limits<float>::max( ) -
+	                 ( std::numeric_limits<float>::max( ) / 2.0f ),
+	               test_t{} );
 
-	do_bench( "uint64_t", count, std::numeric_limits<uint64_t>::min( ) );
-	do_bench( "uint64_t", count, std::numeric_limits<uint64_t>::max( ) );
-	do_bench( "uint64_t", count, 0ULL );
+	daw::do_bench( "uint64_t", count, std::numeric_limits<uint64_t>::min( ),
+	               test_t{} );
+	daw::do_bench( "uint64_t", count, std::numeric_limits<uint64_t>::max( ),
+	               test_t{} );
+	daw::do_bench( "uint64_t", count, 0ULL, test_t{} );
 
-	do_bench( "int64_t", count, std::numeric_limits<int64_t>::min( ) );
-	do_bench( "int64_t", count, std::numeric_limits<int64_t>::max( ) );
-	do_bench( "int64_t", count, 0LL );
+	daw::do_bench( "int64_t", count, std::numeric_limits<int64_t>::min( ),
+	               test_t{} );
+	daw::do_bench( "int64_t", count, std::numeric_limits<int64_t>::max( ),
+	               test_t{} );
+	daw::do_bench( "int64_t", count, 0LL, test_t{} );
 
-	do_bench( "uint32_t", count, std::numeric_limits<uint32_t>::min( ) );
-	do_bench( "uint32_t", count, std::numeric_limits<uint32_t>::max( ) );
-	do_bench( "uint32_t", count, 0UL );
+	daw::do_bench( "uint32_t", count, std::numeric_limits<uint32_t>::min( ),
+	               test_t{} );
+	daw::do_bench( "uint32_t", count, std::numeric_limits<uint32_t>::max( ),
+	               test_t{} );
+	daw::do_bench( "uint32_t", count, 0UL, test_t{} );
 
-	do_bench( "int32_t", count, std::numeric_limits<int32_t>::min( ) );
-	do_bench( "int32_t", count, std::numeric_limits<int32_t>::max( ) );
-	do_bench( "int32_t", count, 0L );
+	daw::do_bench( "int32_t", count, std::numeric_limits<int32_t>::min( ),
+	               test_t{} );
+	daw::do_bench( "int32_t", count, std::numeric_limits<int32_t>::max( ),
+	               test_t{} );
+	daw::do_bench( "int32_t", count, 0L, test_t{} );
 
-	do_bench( "uint16_t", count, std::numeric_limits<uint16_t>::min( ) );
-	do_bench( "uint16_t", count, std::numeric_limits<uint16_t>::max( ) );
-	do_bench( "uint16_t", count, static_cast<uint16_t>( 0 ) );
+	daw::do_bench( "uint16_t", count, std::numeric_limits<uint16_t>::min( ),
+	               test_t{} );
+	daw::do_bench( "uint16_t", count, std::numeric_limits<uint16_t>::max( ),
+	               test_t{} );
+	daw::do_bench( "uint16_t", count, static_cast<uint16_t>( 0 ), test_t{} );
 
-	do_bench( "int16_t", count, std::numeric_limits<int16_t>::min( ) );
-	do_bench( "int16_t", count, std::numeric_limits<int16_t>::max( ) );
-	do_bench( "int16_t", count, static_cast<int16_t>( 0 ) );
+	daw::do_bench( "int16_t", count, std::numeric_limits<int16_t>::min( ),
+	               test_t{} );
+	daw::do_bench( "int16_t", count, std::numeric_limits<int16_t>::max( ),
+	               test_t{} );
+	daw::do_bench( "int16_t", count, static_cast<int16_t>( 0 ), test_t{} );
 
-	do_bench( "uint8_t", count, std::numeric_limits<uint8_t>::min( ) );
-	do_bench( "uint8_t", count, std::numeric_limits<uint8_t>::max( ) );
-	do_bench( "uint8_t", count, static_cast<uint8_t>( 0 ) );
+	daw::do_bench( "uint8_t", count, std::numeric_limits<uint8_t>::min( ),
+	               test_t{} );
+	daw::do_bench( "uint8_t", count, std::numeric_limits<uint8_t>::max( ),
+	               test_t{} );
+	daw::do_bench( "uint8_t", count, static_cast<uint8_t>( 0 ), test_t{} );
 
-	do_bench( "int8_t", count, std::numeric_limits<int8_t>::min( ) );
-	do_bench( "int8_t", count, std::numeric_limits<int8_t>::max( ) );
-	do_bench( "int8_t", count, static_cast<int8_t>( 0 ) );
+	daw::do_bench( "int8_t", count, std::numeric_limits<int8_t>::min( ),
+	               test_t{} );
+	daw::do_bench( "int8_t", count, std::numeric_limits<int8_t>::max( ),
+	               test_t{} );
+	daw::do_bench( "int8_t", count, static_cast<int8_t>( 0 ), test_t{} );
 
 	return 0;
 }

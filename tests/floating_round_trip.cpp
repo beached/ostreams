@@ -45,7 +45,7 @@ void test_round_trip( char const ( &type )[N], Float f ) {
 	auto str = to_os_string<char>( f );
 	std::cout << str.data( ) << ", ";
 	char *end = nullptr;
-	Float f2 = conv<Float>( str.data( ), &end );
+	auto f2 = conv<Float>( str.data( ), &end );
 	if( f == 0 && end == str.data( ) ) {
 		std::cout << "error\n";
 		return;

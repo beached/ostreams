@@ -53,6 +53,7 @@ namespace daw {
 			}
 		}
 	} // namespace impl
+
 	template<typename CharT, size_t Capacity>
 	struct static_string_t {
 		CharT buffer[Capacity + 1] = {0};
