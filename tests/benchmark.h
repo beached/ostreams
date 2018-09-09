@@ -27,6 +27,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <daw/daw_traits.h>
+
 namespace daw {
 	// Borrowed from https://www.youtube.com/watch?v=dO-j3qp7DWw
 	template<typename T>
@@ -79,7 +81,7 @@ namespace daw {
 		std::cerr << std::flush;
 		fflush( stderr );
 
-		std::cout << "\"" << type_str << "\", " << count << ", " << number;
+		std::cout << '"' << type_str << "\"," << count << ',' << number;
 		std::cout << ',' << daw::utility::format_seconds( t_stringstream );
 		std::cout << ',' << daw::utility::format_seconds( t_snprintf );
 		std::cout << ',' << daw::utility::format_seconds( t_memory_stream );

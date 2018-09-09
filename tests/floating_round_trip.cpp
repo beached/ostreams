@@ -38,19 +38,39 @@ inline Float conv( const char *str, char **end ) noexcept {
 	return strtod( str, end );
 }
 
-template<size_t N, typename Float>
-void test_round_trip( char const ( &type )[N], Float f ) {
-	std::cout << type << "," << f << ",";
-	using ostream_converters::to_os_string;
-	auto str = to_os_string<char>( f );
-	std::cout << str.data( ) << ",";
+template<typename Float, typename StaticString>
+Float str_to_float( StaticString && str ) noexcept {
 	char *end = nullptr;
 	auto f2 = conv<Float>( str.data( ), &end );
-	if( f == 0 && end == str.data( ) ) {
+	if( f2 == 0 && end == str.data( ) ) {
+		std::cout << "error\n";
+	}
+	return f2;
+}
+
+template<size_t N, typename Float>
+void test_round_trip( char const ( &type )[N], Float f, bool show_all = true ) {
+	using ostream_converters::to_os_string;
+	auto str = to_os_string<char>( f );
+	char *end = nullptr;
+	auto f2 = conv<Float>( str.data( ), &end );
+	if( f2 == 0 && end == str.data( ) ) {
 		std::cout << "error\n";
 		return;
 	}
-	std::cout << ( f2 - f ) << '\n';
+	if( show_all || f2 != f ) {
+		std::cout << str.data( ) << ",";
+		std::cout << type << "," << f << ",";
+		std::cout << (f2 - f) << '\n';
+	}
+}
+
+void t2( ) {
+	double d_orig = 0.00012208391547875944; // Known bad starting point
+	for( size_t i = 1; i <= 10000000000; ++i ) {
+		test_round_trip( "double", d_orig, false );
+		d_orig += 0.00012208391547875944;
+	}
 }
 
 int main( ) {
@@ -58,18 +78,19 @@ int main( ) {
 	          << '\n';
 	std::cout << "double min       -> " << std::numeric_limits<double>::min( )
 	          << '\n';
-	std::cout << "double denorm min-> " << std::numeric_limits<double>::denorm_min( )
-						<< '\n';
+	std::cout << "double denorm min-> "
+	          << std::numeric_limits<double>::denorm_min( ) << '\n';
 	std::cout << "float epsilon    -> " << std::numeric_limits<float>::epsilon( )
 	          << '\n';
 	std::cout << "float min        -> " << std::numeric_limits<float>::min( )
-						<< '\n';
-	std::cout << "float denorm min -> " << std::numeric_limits<float>::denorm_min( )
-	          << "\n\n";
+	          << '\n';
+	std::cout << "float denorm min -> "
+	          << std::numeric_limits<float>::denorm_min( ) << "\n\n";
 	std::cout << "\"type\",\"value\",\"str value\",\"difference\"\n";
 	test_round_trip( "double", std::numeric_limits<double>::max( ) );
 	test_round_trip( "double", 0.1 );
 	test_round_trip( "double", 0.12 );
+	test_round_trip( "double", 0.67e3 );
 	test_round_trip( "double", 0.123 );
 	test_round_trip( "double", 0.1234 );
 	test_round_trip( "double", 1.2345 );
@@ -89,6 +110,7 @@ int main( ) {
 
 	test_round_trip( "float", 0.1f );
 	test_round_trip( "float", 0.12f );
+	test_round_trip( "float", 0.67e3f );
 	test_round_trip( "float", 0.123f );
 	test_round_trip( "float", 0.1234f );
 	test_round_trip( "float", 1.2345f );
@@ -106,5 +128,7 @@ int main( ) {
 	test_round_trip( "float", std::numeric_limits<float>::min( ) +
 	                            ( std::numeric_limits<float>::min( ) * 10.0f ) );
 
+	// testing potential bad range
+	t2( );
 	return 0;
 }

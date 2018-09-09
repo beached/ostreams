@@ -125,19 +125,19 @@ namespace ostream_converters {
 	  Float value,
 	  int significant_digits = std::numeric_limits<Float>::max_digits10,
 	  int precision = std::numeric_limits<Float>::max_digits10 ) {
-		auto const min_value = std::numeric_limits<Float>::is_iec559 ? std::numeric_limits<Float>::denorm_min( ) : std::numeric_limits<Float>::min( );
+		auto const min_value = std::numeric_limits<Float>::is_iec559
+		                         ? std::numeric_limits<Float>::denorm_min( )
+		                         : std::numeric_limits<Float>::min( );
 
 		size_t const buff_size = std::numeric_limits<Float>::max_digits10 + 8;
 
 		daw::static_string_t<CharT, buff_size> result{};
 
-		if( ( value == static_cast<Float>( 0 ) &&
-		      value != min_value ) ||
-		    ( value == static_cast<Float>( -0.0 ) &&
-		      value != -min_value ) ) {
+		if( ( value == static_cast<Float>( 0 ) && value != min_value ) ||
+		    ( value == static_cast<Float>( -0.0 ) && value != -min_value ) ) {
 
-				result += Traits::get_char_digit( 0 );
-				return result;
+			result += Traits::get_char_digit( 0 );
+			return result;
 		}
 		if( impl::is_nan( value ) ) {
 			result += Traits::nan( );
@@ -184,15 +184,13 @@ namespace ostream_converters {
 			return result;
 		}
 		if( e >= std::numeric_limits<Float>::max_digits10 ||
-		    e >= significant_digits ||
-		    tmp_value < min_value ) {
+		    e >= significant_digits || tmp_value < min_value ) {
 			return result;
 		}
 		// Fractional Part
 		intmax_t neg_exp = -1;
 		result += Traits::decimal_point;
-		if( e == 0 && value < static_cast<Float>( 1 ) &&
-		    value >= min_value ) {
+		if( e == 0 && value < static_cast<Float>( 1 ) && value >= min_value ) {
 			neg_exp = 0;
 			// We have no significant digits previously.
 			// Output zeros
@@ -221,9 +219,7 @@ namespace ostream_converters {
 		  daw::min( daw::min( precision, impl::max_fractional_digits<Float> ),
 		            std::numeric_limits<Float>::max_digits10 - e );
 
-		for( int n = 0;
-		     n < num_dec_digits && tmp_value >= min_value;
-		     ++n ) {
+		for( int n = 0; n < num_dec_digits && tmp_value >= min_value; ++n ) {
 			auto const digit =
 			  static_cast<char>( tmp_value * static_cast<Float>( 10 ) );
 

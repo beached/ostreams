@@ -42,6 +42,6 @@ int main( int, char ** ) {
 	             << " times number is " << ( 5.0f * 1234560.435333f ) << '\n';
 
 	daw::con_wout << A{} << L" The number is: " << 1234560.435333 << L". " << 5
-	             << L" times number is " << ( 5.0f * 1234560.435333f ) << '\n';
+	              << L" times number is " << ( 5.0f * 1234560.435333f ) << '\n';
 	return 0;
 }
