@@ -125,24 +125,26 @@ namespace ostream_converters {
 	  Float value,
 	  int significant_digits = std::numeric_limits<Float>::max_digits10,
 	  int precision = std::numeric_limits<Float>::max_digits10 ) {
+		auto const min_value = std::numeric_limits<Float>::is_iec559 ? std::numeric_limits<Float>::denorm_min( ) : std::numeric_limits<Float>::min( );
 
 		size_t const buff_size = std::numeric_limits<Float>::max_digits10 + 8;
 
 		daw::static_string_t<CharT, buff_size> result{};
 
 		if( ( value == static_cast<Float>( 0 ) &&
-		      value != std::numeric_limits<Float>::min( ) ) ||
+		      value != min_value ) ||
 		    ( value == static_cast<Float>( -0.0 ) &&
-		      value != -std::numeric_limits<Float>::min( ) ) ) {
-			result += Traits::get_char_digit( 0 );
-			return result;
+		      value != -min_value ) ) {
+
+				result += Traits::get_char_digit( 0 );
+				return result;
 		}
 		if( impl::is_nan( value ) ) {
 			result += Traits::nan( );
 			return result;
 		}
 		if( value < 0 ) {
-			result += Traits::minus;
+			result += static_cast<CharT>( '-' );
 			value = -value;
 		}
 		if( impl::is_inf( value ) ) {
@@ -176,21 +178,21 @@ namespace ostream_converters {
 			for( size_t n = result.size( ) - 2; n > 0; --n ) {
 				result[n] = result[n - 1];
 			}
-			result[1] = Traits::get_char( '.' );
-			result += Traits::get_char( 'e' );
+			result[1] = Traits::decimal_point;
+			result += 'e';
 			result += to_os_string<CharT>( e );
 			return result;
 		}
 		if( e >= std::numeric_limits<Float>::max_digits10 ||
 		    e >= significant_digits ||
-		    tmp_value < std::numeric_limits<Float>::min( ) ) {
+		    tmp_value < min_value ) {
 			return result;
 		}
 		// Fractional Part
 		intmax_t neg_exp = -1;
 		result += Traits::decimal_point;
 		if( e == 0 && value < static_cast<Float>( 1 ) &&
-		    value >= std::numeric_limits<Float>::min( ) ) {
+		    value >= min_value ) {
 			neg_exp = 0;
 			// We have no significant digits previously.
 			// Output zeros
@@ -201,7 +203,7 @@ namespace ostream_converters {
 				digit = static_cast<char>( tmp_value * static_cast<Float>( 10 ) );
 			}
 			if( neg_exp > 3 && result.size( ) > 0 ) {
-				if( result[0] == Traits::get_char( '-' ) ) {
+				if( result[0] == static_cast<CharT>( '-' ) ) {
 					result.resize( 1, false );
 				} else {
 					result.resize( 0, false );
@@ -209,7 +211,7 @@ namespace ostream_converters {
 				result += Traits::get_char_digit( digit );
 				tmp_value *= static_cast<Float>( 10 );
 				tmp_value -= static_cast<Float>( digit );
-				result += Traits::get_char( '.' );
+				result += Traits::decimal_point;
 			} else {
 				neg_exp = -1;
 			}
@@ -220,7 +222,7 @@ namespace ostream_converters {
 		            std::numeric_limits<Float>::max_digits10 - e );
 
 		for( int n = 0;
-		     n < num_dec_digits && tmp_value >= std::numeric_limits<Float>::min( );
+		     n < num_dec_digits && tmp_value >= min_value;
 		     ++n ) {
 			auto const digit =
 			  static_cast<char>( tmp_value * static_cast<Float>( 10 ) );
@@ -234,8 +236,8 @@ namespace ostream_converters {
 			result.resize( result.size( ) - 1, false );
 		}
 		if( neg_exp >= 0 ) {
-			result += Traits::get_char( 'e' );
-			result += Traits::get_char( '-' );
+			result += static_cast<CharT>( 'e' );
+			result += static_cast<CharT>( '-' );
 			result += to_os_string<CharT>( neg_exp + 1 );
 		}
 		return result;

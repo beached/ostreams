@@ -49,9 +49,9 @@ namespace ostream_converters {
 		}
 
 		template<
-		  typename Result, typename Int,
+		  typename Result, typename Integer,
 		  std::enable_if_t<daw::is_integral_v<Result>, std::nullptr_t> = nullptr>
-		constexpr Result pow10( Int n ) noexcept {
+		constexpr Result pow10( Integer n ) noexcept {
 			uint64_t const vals[10] = {1ULL,
 			                           100ULL,
 			                           10000ULL,
@@ -156,7 +156,7 @@ namespace ostream_converters {
 					return min_strings::get(
 					  CharT{}, std::integral_constant<size_t, sizeof( Integer )>{} );
 				}
-				result += Traits::minus;
+				result += static_cast<CharT>( '-' );
 				value = -value;
 			}
 			for( auto pow10 =

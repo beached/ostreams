@@ -40,10 +40,10 @@ inline Float conv( const char *str, char **end ) noexcept {
 
 template<size_t N, typename Float>
 void test_round_trip( char const ( &type )[N], Float f ) {
-	std::cout << type << ", " << f << ", ";
+	std::cout << type << "," << f << ",";
 	using ostream_converters::to_os_string;
 	auto str = to_os_string<char>( f );
-	std::cout << str.data( ) << ", ";
+	std::cout << str.data( ) << ",";
 	char *end = nullptr;
 	auto f2 = conv<Float>( str.data( ), &end );
 	if( f == 0 && end == str.data( ) ) {
@@ -54,15 +54,19 @@ void test_round_trip( char const ( &type )[N], Float f ) {
 }
 
 int main( ) {
-	std::cout << "double epsilon-> " << std::numeric_limits<double>::epsilon( )
+	std::cout << "double epsilon   -> " << std::numeric_limits<double>::epsilon( )
 	          << '\n';
-	std::cout << "double min    -> " << std::numeric_limits<double>::min( )
+	std::cout << "double min       -> " << std::numeric_limits<double>::min( )
 	          << '\n';
-	std::cout << "float epsilon -> " << std::numeric_limits<float>::epsilon( )
+	std::cout << "double denorm min-> " << std::numeric_limits<double>::denorm_min( )
+						<< '\n';
+	std::cout << "float epsilon    -> " << std::numeric_limits<float>::epsilon( )
 	          << '\n';
-	std::cout << "float min     -> " << std::numeric_limits<float>::min( )
-	          << '\n';
-	std::cout << "\"type\", \"value\", \"str value\", \"difference\"\n";
+	std::cout << "float min        -> " << std::numeric_limits<float>::min( )
+						<< '\n';
+	std::cout << "float denorm min -> " << std::numeric_limits<float>::denorm_min( )
+	          << "\n\n";
+	std::cout << "\"type\",\"value\",\"str value\",\"difference\"\n";
 	test_round_trip( "double", std::numeric_limits<double>::max( ) );
 	test_round_trip( "double", 0.1 );
 	test_round_trip( "double", 0.12 );
