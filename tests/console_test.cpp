@@ -20,10 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "daw/io/console_stream.h"
 #include <iomanip>
 #include <iostream>
 #include <limits>
+
+#include "daw/io/console_stream.h"
 
 template<size_t N>
 void verify_value( float f, double d, char const ( &str )[N] ) {
@@ -52,6 +53,7 @@ void verify_value( char const ( &type_name )[N], char const ( &value )[N2],
 }
 
 int main( int argc, char ** ) {
+
 	daw::string_view str = "Console test\n";
 	daw::con_out << str;
 	float const f = static_cast<float>( argc ) * 1.2334f;
@@ -140,6 +142,5 @@ int main( int argc, char ** ) {
 	verify_value( "int8_t", "max", std::numeric_limits<int8_t>::max( ) );
 	verify_value( "int8_t", "0", static_cast<int8_t>( 0 ) );
 	verify_value( "int8_t", "97", static_cast<int8_t>( 97 ) );
-
 	return 0;
 }

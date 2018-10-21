@@ -39,7 +39,7 @@ inline Float conv( const char *str, char **end ) noexcept {
 }
 
 template<typename Float, typename StaticString>
-Float str_to_float( StaticString && str ) noexcept {
+Float str_to_float( StaticString &&str ) noexcept {
 	char *end = nullptr;
 	auto f2 = conv<Float>( str.data( ), &end );
 	if( f2 == 0 && end == str.data( ) ) {
@@ -61,7 +61,7 @@ void test_round_trip( char const ( &type )[N], Float f, bool show_all = true ) {
 	if( show_all || f2 != f ) {
 		std::cout << str.data( ) << ",";
 		std::cout << type << "," << f << ",";
-		std::cout << (f2 - f) << '\n';
+		std::cout << ( f2 - f ) << '\n';
 	}
 }
 

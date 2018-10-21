@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project( ostreams )
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 if( ${CMAKE_CXX_COMPILER_ID} STREQUAL 'MSVC' )
 	add_definitions( -DNOMINMAX -DD_WIN32_WINNT=0x0601 )
@@ -35,6 +35,7 @@ set( TEST_FOLDER "tests" )
 include_directories( ${HEADER_FOLDER} )
 
 set( HEADER_FILES
+	${HEADER_FOLDER}/daw/io/bigint.h
 	${HEADER_FOLDER}/daw/io/console_stream.h
 	${HEADER_FOLDER}/daw/io/file_stream.h
 	${HEADER_FOLDER}/daw/io/memory_stream.h
@@ -55,5 +56,6 @@ add_executable( benchmark ${HEADER_FILES} ${TEST_FOLDER}/benchmark.h ${TEST_FOLD
 add_executable( double_benchmark ${HEADER_FILES} ${TEST_FOLDER}/benchmark.h ${TEST_FOLDER}/double_benchmark.cpp )
 add_executable( floating_round_trip ${HEADER_FILES} ${TEST_FOLDER}/floating_round_trip.cpp )
 add_executable( to_os_string_test ${HEADER_FILES} ${TEST_FOLDER}/to_os_string_test.cpp )
+add_executable( bigint_test ${HEADER_FILES} ${TEST_FOLDER}/bigint_test.cpp )
 
 install( DIRECTORY ${HEADER_FOLDER}/daw DESTINATION include )
