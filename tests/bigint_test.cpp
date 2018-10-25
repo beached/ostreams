@@ -31,8 +31,8 @@ static_assert(
   daw::is_same_v<daw::bigint_digits_t<1000>, daw::bigint_t<3322>> );
 
 template<typename Integer>
-constexpr daw::bigint_t<104> mul_test( ) {
-	daw::bigint_t<104> result( "91844674407370955161634534534543" );
+daw::bigint_t<113> mul_test( ) {
+	auto result = daw::bigint_t<113>( "91844674407370955161634534534543" );
 	result = result * static_cast<Integer>( 100 );
 	return result;
 }
@@ -51,14 +51,14 @@ bool test_004( ) {
 
 constexpr void test( bool ) {}
 
-//#define static_assert test
-
 void test_001( ) {
 	constexpr daw::bigint_t<100> m( "18446744073709551616" );
 	static_assert( m[0] == 0 );
 	static_assert( m[1] == 0 );
 	static_assert( m[2] == 1 );
 }
+
+//#define static_assert test
 
 void test_002( ) {
 	constexpr daw::bigint_t<104> m1( "1844674407370955161634534534543" );
@@ -68,54 +68,58 @@ void test_002( ) {
 	static_assert( m1[3] == 0x0000'0017 );
 }
 
-void test_003( ) {
-	constexpr daw::bigint_t<104> m2( "9184467440737095516163453453454300" );
-	static_assert( mul_test<int>( ) == m2 );
-	static_assert( mul_test<unsigned int>( ) == m2 );
+#define static_assert test
 
+void test_003( ) {
+	auto m2 = daw::bigint_t<113>( "9184467440737095516163453453454300" );
+	auto m_test = mul_test<int>( );
+	auto is_eq = m_test == m2;
+	static_assert( is_eq );
+	static_assert( mul_test<unsigned int>( ) == m2 );
 	auto m3 = mul_test2( );
-	// static_assert( mul_test2( ) == 8589934592ULL );
+	auto m_test2 = mul_test2( );
+	//	static_assert( mul_test2( ) == 8589934592ULL );
 }
 
+#undef static_assert
+
+static_assert( daw::bigint_t<32>( std::numeric_limits<int32_t>::min( ) ) ==
+               daw::bigint_t<32>( "-2147483648" ) );
+
+static_assert( static_cast<intmax_t>( daw::bigint_t<32>(
+                 std::numeric_limits<int32_t>::min( ) ) ) == -2'147'483'648LL );
+
+static_assert( daw::bigint_t<64>( std::numeric_limits<int64_t>::min( ) ) ==
+               daw::bigint_t<64>( "-9223372036854775808" ) );
+
+static_assert( daw::bigint_t<64>( std::numeric_limits<int64_t>::min( ) ) ==
+               std::numeric_limits<int64_t>::min( ) );
+
+static_assert( daw::bigint_t<daw::bsizeof<uint8_t>>( ) == 0 );
+static_assert( daw::bigint_t<daw::bsizeof<uint8_t>>( 5 ) == 5 );
+static_assert( daw::bigint_t<daw::bsizeof<uint8_t>>( -5 ) == -5 );
+
+static_assert( -5'000'000'000LL == static_cast<intmax_t>(
+                                     daw::bigint_t<100>( -5'000'000'000LL ) ) );
+
+static_assert( 5'000'000'000LL == static_cast<intmax_t>(
+                                    daw::bigint_t<100>( 5'000'000'000ULL ) ) );
+
+static_assert( 5'000'000'000LL ==
+               static_cast<intmax_t>( daw::bigint_t<100>( "5000000000" ) ) );
+
+static_assert( -5'000'000'000LL ==
+               static_cast<intmax_t>( daw::bigint_t<100>( "-5000000000" ) ) );
+
+static_assert( 5'000'000'000ULL == daw::bigint_t<100>( "5000000000" ) );
+
+static_assert( daw::bigint_t<100>( "5000000000" ) == 5'000'000'000ULL );
+
+static_assert( -5'000'000'000LL == daw::bigint_t<100>( "-5000000000" ) );
+
+static_assert( daw::bigint_t<100>( "-5000000000" ) == -5'000'000'000LL );
+
 int main( ) {
-	static_assert( daw::bigint_t<32>( std::numeric_limits<int32_t>::min( ) ) ==
-	               daw::bigint_t<32>( "-2147483648" ) );
-
-	static_assert( static_cast<intmax_t>( daw::bigint_t<32>(
-	                 std::numeric_limits<int32_t>::min( ) ) ) ==
-	               -2'147'483'648LL );
-
-	static_assert( daw::bigint_t<64>( std::numeric_limits<int64_t>::min( ) ) ==
-	               daw::bigint_t<64>( "-9223372036854775808" ) );
-
-	static_assert( daw::bigint_t<64>( std::numeric_limits<int64_t>::min( ) ) ==
-	               std::numeric_limits<int64_t>::min( ) );
-
-	static_assert( daw::bigint_t<daw::bsizeof<uint8_t>>( ) == 0 );
-	static_assert( daw::bigint_t<daw::bsizeof<uint8_t>>( 5 ) == 5 );
-	static_assert( daw::bigint_t<daw::bsizeof<uint8_t>>( -5 ) == -5 );
-
-
-	static_assert( -5'000'000'000LL == static_cast<intmax_t>( daw::bigint_t<100>(
-	                                     -5'000'000'000LL ) ) );
-
-	static_assert( 5'000'000'000LL == static_cast<intmax_t>( daw::bigint_t<100>(
-	                                    5'000'000'000ULL ) ) );
-
-	static_assert( 5'000'000'000LL ==
-	               static_cast<intmax_t>( daw::bigint_t<100>( "5000000000" ) ) );
-
-	static_assert( -5'000'000'000LL ==
-	               static_cast<intmax_t>( daw::bigint_t<100>( "-5000000000" ) ) );
-
-	static_assert( 5'000'000'000ULL == daw::bigint_t<100>( "5000000000" ) );
-
-	static_assert( daw::bigint_t<100>( "5000000000" ) == 5'000'000'000ULL );
-
-	static_assert( -5'000'000'000LL == daw::bigint_t<100>( "-5000000000" ) );
-
-	static_assert( daw::bigint_t<100>( "-5000000000" ) == -5'000'000'000LL );
-
 	test_001( );
 	test_002( );
 	test_003( );

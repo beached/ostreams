@@ -41,11 +41,56 @@ namespace daw {
 		static_assert( sizeof( intmax_t ) == sizeof( int64_t ),
 		               "Assumed that uint64_t is largest integer type" );
 
+		template<typename T = uint8_t>
+		constexpr T to_digit( char c ) noexcept {
+			if( '0' <= c && c <= '9' ) {
+				return static_cast<T>( c - '0' );
+			}
+			if( 'a' <= c && c <= 'f' ) {
+				return static_cast<T>( 10 ) + static_cast<T>( c - 'a' );
+			}
+			if( 'A' <= c && c <= 'F' ) {
+				return static_cast<T>( 10 ) + static_cast<T>( c - 'A' );
+			}
+			std::terminate( );
+		}
+
+		template<typename T = uint8_t>
+		constexpr T to_digit( wchar_t c ) noexcept {
+			if( L'0' <= c && c <= L'9' ) {
+				return static_cast<T>( c - L'0' );
+			}
+			if( L'a' <= c && c <= L'f' ) {
+				return static_cast<T>( 10 ) + static_cast<T>( c - L'a' );
+			}
+			if( 'A' <= c && c <= 'F' ) {
+				return static_cast<T>( 10 ) + static_cast<T>( c - L'A' );
+			}
+			std::terminate( );
+		}
+
 		template<typename T>
 		using half_max_t = std::conditional_t<
 		  sizeof( T ) == 8, uint32_t,
 		  std::conditional_t<sizeof( T ) == 4, uint16_t,
 		                     std::conditional_t<sizeof( T ) == 2, uint8_t, void>>>;
+
+		constexpr auto low_part( uintmax_t value ) noexcept {
+			using value_t = half_max_t<uintmax_t>;
+			auto const lower_mask =
+			  daw::get_left_mask<uintmax_t>( bsizeof<uintmax_t> - bsizeof<value_t> );
+
+			return static_cast<value_t>( value bitand lower_mask );
+		}
+
+		constexpr auto high_part( uintmax_t value ) noexcept {
+			using value_t = half_max_t<uintmax_t>;
+			auto const high_mask =
+					daw::get_right_mask<uintmax_t>( bsizeof<uintmax_t> - bsizeof<value_t> );
+
+			return static_cast<value_t>( value bitand high_mask );
+		}
+
 
 		template<typename T, size_t N>
 		struct bigint_storage_t {
@@ -56,6 +101,8 @@ namespace daw {
 			using iterator = typename std::array<value_type, N>::iterator;
 			using const_iterator = typename std::array<value_type, N>::const_iterator;
 
+			static_assert( N > 0, "Cannot store 0 bytes of anything" );
+
 			std::array<value_type, N> m_data = {};
 			size_type m_idx = 0;
 			sign_t m_sign = sign_t::positive;
@@ -63,26 +110,38 @@ namespace daw {
 			constexpr bigint_storage_t( ) noexcept = default;
 
 			constexpr void clear( ) noexcept {
-				while( m_idx-- > 0 ) {
+				while( m_idx > 0 ) {
+					--m_idx;
 					m_data[m_idx] = 0;
 				}
 			}
 
 			constexpr void shrink_to_fit( ) noexcept {
-				while( m_idx > 0 && m_data[m_idx-1] == 0 ) {
+				while( m_idx > 0 && m_data[m_idx - 1] == 0 ) {
 					--m_idx;
 				}
 			}
 
-			constexpr reference operator[]( size_type idx ) noexcept {
-				return m_data[idx];
+			template<typename Size>
+			constexpr reference operator[]( Size idx ) noexcept {
+				daw::exception::dbg_precondition_check<std::out_of_range>( idx >= 0 );
+				daw::exception::dbg_precondition_check<std::out_of_range>( idx < N );
+				return m_data[static_cast<size_type>( idx )];
 			}
 
-			constexpr const_reference operator[]( size_type idx ) const noexcept {
-				return m_data[idx];
+			template<typename Size>
+			constexpr const_reference operator[]( Size idx ) const noexcept {
+				daw::exception::dbg_precondition_check<std::out_of_range>( idx >= 0 );
+				daw::exception::dbg_precondition_check<std::out_of_range>(
+				  static_cast<size_t>( idx ) < N );
+				return m_data[static_cast<size_type>( idx )];
 			}
 
 			constexpr size_type const &size( ) const noexcept {
+				return m_idx;
+			}
+
+			constexpr size_type &size( ) noexcept {
 				return m_idx;
 			}
 
@@ -114,12 +173,12 @@ namespace daw {
 				return m_data.cbegin( ) + static_cast<ptrdiff_t>( m_idx );
 			}
 
-			constexpr size_type &size( ) noexcept {
-				return m_idx;
-			}
-
 			constexpr size_type capacity( ) const noexcept {
 				return N;
+			}
+
+			constexpr bool full( ) noexcept {
+				return size( ) > capacity( );
 			}
 
 			constexpr void sign_flip( ) noexcept {
@@ -129,23 +188,26 @@ namespace daw {
 
 			constexpr void push_back( value_type v ) {
 				daw::exception::dbg_precondition_check<std::overflow_error>(
-				  size( ) < capacity( ) );
+				  not full( ) );
 
 				m_data[m_idx++] = v;
 			}
 
 			constexpr reference back( ) {
-				daw::exception::dbg_precondition_check<std::overflow_error>( !empty( ), "Attempt to access value on empty stack" );
-				return m_data[m_idx-1];
+				daw::exception::dbg_precondition_check<std::out_of_range>(
+				  !empty( ), "Attempt to access value on empty stack" );
+				return m_data[m_idx - 1];
 			}
 
 			constexpr const_reference back( ) const {
-				daw::exception::dbg_precondition_check<std::overflow_error>( !empty( ), "Attempt to access value on empty stack" );
-				return m_data[m_idx-1];
+				daw::exception::dbg_precondition_check<std::out_of_range>(
+				  !empty( ), "Attempt to access value on empty stack" );
+				return m_data[m_idx - 1];
 			}
 
 			constexpr value_type pop_back( ) {
-				daw::exception::dbg_precondition_check<std::overflow_error>( !empty( ), "Attempt to pop empty stack" );
+				daw::exception::dbg_precondition_check<std::overflow_error>(
+				  !empty( ), "Attempt to pop empty stack" );
 				auto result = back( );
 				back( ) = 0;
 				--m_idx;
@@ -172,31 +234,26 @@ namespace daw {
 			return result;
 		}
 
-		template<typename value_t>
-		constexpr value_t overflow( uintmax_t &carry ) noexcept {
-			uintmax_t result = carry bitand get_left_mask<uintmax_t>(
-			                                  bsizeof<uintmax_t> - bsizeof<value_t> );
-			carry &=
-			  get_right_mask<uintmax_t>( bsizeof<uintmax_t> - bsizeof<value_t> );
+		constexpr auto overflow( uintmax_t &carry ) noexcept {
+			using value_t = half_max_t<uintmax_t>;
+			auto result = low_part( carry );
 			carry >>= bsizeof<value_t>;
-			return static_cast<value_t>( result );
+			return result;
 		}
 
-		template<bit_position_t bit_pos, typename value_t, size_t N>
-		constexpr void add( impl::bigint_storage_t<value_t, N> &lhs,
-		                    value_t rhs ) noexcept( !MAY_THROW_EXCEPTIONS ) {
+		template<typename value_t, size_t N>
+		constexpr void add( impl::bigint_storage_t<value_t, N> &lhs, value_t rhs,
+		                    size_t index = 0 ) noexcept( !MAY_THROW_EXCEPTIONS ) {
 
 			daw::exception::precondition_check( rhs >= 0 );
-			auto const lower_mask =
-			  daw::get_left_mask<uintmax_t>( bsizeof<uintmax_t> - bsizeof<value_t> );
 
-			uintmax_t carry = rhs;
-			auto pos = static_cast<size_t>( bit_pos );
-			auto const end_pos = lhs.size( );
-			for( ; pos < end_pos; ++pos ) {
-				carry += lhs[pos];
-				lhs[pos] = static_cast<value_t>( carry bitand lower_mask );
-				carry >>= bsizeof<value_t>;
+
+			auto carry = static_cast<uintmax_t>( rhs );
+
+			while( index < lhs.size( ) ) {
+				carry += lhs[index];
+				lhs[index] = overflow( carry );
+				++index;
 			}
 			if( carry > 0 ) {
 				lhs.push_back( static_cast<value_t>( carry ) );
@@ -241,19 +298,14 @@ namespace daw {
 		constexpr void add( impl::bigint_storage_t<value_t, N> &lhs,
 		                    uintmax_t rhs ) noexcept( !MAY_THROW_EXCEPTIONS ) {
 
-			auto const low_mask =
-			  daw::get_left_mask<uintmax_t>( bsizeof<uintmax_t> - bsizeof<value_t> );
-			auto const high_mask =
-			  daw::get_right_mask<uintmax_t>( bsizeof<uintmax_t> - bsizeof<value_t> );
-
-			auto const lower = static_cast<value_t>( rhs bitand low_mask );
+			auto const lower = low_part( rhs );
 			if( lower > 0 ) {
-				add<bit_position_t::low>( lhs, lower );
+				add( lhs, lower, 0 );
 			}
 
-			auto const higher = static_cast<value_t>( rhs bitand high_mask );
+			auto const higher = high_part( rhs );
 			if( higher > 0 ) {
-				add<bit_position_t::high>( lhs, higher );
+				add( lhs, higher, 1 );
 			}
 		}
 
@@ -261,106 +313,79 @@ namespace daw {
 		constexpr void add( impl::bigint_storage_t<value_t, N> &lhs,
 		                    impl::bigint_storage_t<value_t, N> const
 		                      &rhs ) noexcept( !MAY_THROW_EXCEPTIONS ) {
-			auto const low_mask =
-			  daw::get_left_mask<uintmax_t>( bsizeof<uintmax_t> - bsizeof<value_t> );
 
-			auto const min_len = daw::min( lhs.size( ), rhs.size( ) );
-			uintmax_t carry = 0;
-			for( size_t n = 0; n < min_len; ++n ) {
-				carry +=
-				  static_cast<uintmax_t>( lhs[n] ) + static_cast<uintmax_t>( rhs[n] );
-				lhs[n] = static_cast<value_t>( carry bitand low_mask );
-				carry >>= bsizeof<value_t>;
-			}
-			if( lhs.size( ) < rhs.size( ) ) {
-				lhs.size( ) = rhs.size( );
-			}
-
-			for( size_t n = min_len; n < rhs.size( ); ++n ) {
-				carry +=
-				  static_cast<uintmax_t>( lhs[n] ) + static_cast<uintmax_t>( rhs[n] );
-				lhs[n] = static_cast<value_t>( carry bitand low_mask );
-				carry >>= bsizeof<value_t>;
-			}
-			if( carry > 0 ) {
-				lhs.push_back( static_cast<value_t>( carry ) );
+			for( size_t n = 0; n < rhs.size( ); ++n ) {
+				add( lhs, rhs[n], n );
 			}
 		}
 
 		template<typename value_t, size_t N>
-		constexpr void
-		mul( impl::bigint_storage_t<value_t, N> &lhs, value_t rhs,
-		     bit_position_t bit_pos ) noexcept( !MAY_THROW_EXCEPTIONS ) {
+		constexpr void mul( impl::bigint_storage_t<value_t, N> &lhs, value_t rhs,
+		                    size_t index ) noexcept( !MAY_THROW_EXCEPTIONS ) {
 
 			if( rhs == 0ULL ) {
 				lhs.clear( );
 				return;
 			}
-			auto const low_mask =
-			  daw::get_left_mask<uintmax_t>( bsizeof<uintmax_t> - bsizeof<value_t> );
 
 			uintmax_t carry = 0;
-			auto pos = static_cast<size_t>( bit_pos );
-			for( ; pos < lhs.size( ); ++pos ) {
-				carry += static_cast<uintmax_t>( lhs[pos] ) * static_cast<uintmax_t>( rhs );
-				lhs[pos] = static_cast<value_t>( carry bitand low_mask );
-				carry >>= bsizeof<value_t>;
+
+			auto tmp = lhs;
+			for( size_t pos = 0ULL; pos < lhs.size( ); ++pos ) {
+				carry +=
+				  static_cast<uintmax_t>( lhs[pos] ) * static_cast<uintmax_t>( rhs );
+				tmp[pos] = overflow( carry );
 			}
 			if( carry > 0 ) {
-				lhs.push_back( static_cast<value_t>( carry ) );
+				tmp.push_back( static_cast<value_t>( carry ) );
+				carry = 0;
 			}
+			lhs = tmp;
+			while( index > 0 ) {
+				--index;
+				for( size_t pos = 0; pos < lhs.size( ); ++pos ) {
+					carry += static_cast<uintmax_t>( lhs[pos] ) * static_cast<uintmax_t>( std::numeric_limits<value_t>::max( ) );
+					tmp[pos] = overflow( carry );
+				}
+			}
+			if( carry > 0 ) {
+				tmp.push_back( static_cast<value_t>( carry ) );
+			}
+			lhs = tmp;
 		}
 
 		template<typename value_t, size_t N>
 		constexpr void mul( impl::bigint_storage_t<value_t, N> &lhs,
 		                    uintmax_t rhs ) noexcept( !MAY_THROW_EXCEPTIONS ) {
-			auto const low_mask =
-			  daw::get_left_mask<uintmax_t>( bsizeof<uintmax_t> - bsizeof<value_t> );
-			auto const high_mask =
-			  daw::get_right_mask<uintmax_t>( bsizeof<uintmax_t> - bsizeof<value_t> );
 
 			auto tmp = lhs;
 
-			auto const lower = static_cast<value_t>( rhs bitand low_mask );
-			if( lower > 0 ) {
-				mul( lhs, lower, bit_position_t::low );
-			}
-
-			auto const higher = static_cast<value_t>( rhs bitand high_mask );
-			if( higher > 0 ) {
-				mul( tmp, higher, bit_position_t::high );
-				add( lhs, tmp );
-			}
+			mul( lhs, low_part( rhs ), 0 );
+			mul( tmp, high_part( rhs ), 1 );
+			add( lhs, tmp );
 		}
 
 		template<typename value_t, size_t N>
-		constexpr void mul( std::array<value_t, N> &lhs, size_t &lhs_idx,
-		                    std::array<value_t, N> const &rhs,
-		                    size_t rhs_idx ) noexcept( !MAY_THROW_EXCEPTIONS ) {
+		constexpr void mul( impl::bigint_storage_t<value_t, N> &lhs,
+		                    impl::bigint_storage_t<value_t, N> const
+		                      &rhs ) noexcept( !MAY_THROW_EXCEPTIONS ) {
 
-			if( lhs_idx == 0 ) {
+			if( lhs.empty( ) ) {
 				return;
 			}
-			if( rhs_idx == 0 ) {
-				lhs.fill( 0 );
-				lhs_idx = 0;
+			if( rhs.empty( ) ) {
+				lhs.clear( );
 				return;
 			}
 
-			auto const min_len = daw::min( lhs_idx, rhs_idx );
-			std::array<value_t, N> result{};
-			size_t result_idx = 0;
-			for( size_t n = 0; n < min_len; ++n ) {
+			bigint_storage_t<value_t, N> result{};
+
+			for( size_t n = 0; n < rhs.size( ); ++n ) {
 				auto tmp = lhs;
-				auto tmp_idx = lhs_idx;
-				mul( tmp, tmp_idx, rhs[n] );
-				for( size_t p = 1; p < n; ++p ) {
-					mul( tmp, tmp_idx, 10U );
-				}
-				add( result, result_idx, tmp, tmp_idx );
+				mul( tmp, rhs[n], n );
+				add( result, tmp );
 			}
-			lhs = result;
-			lhs_idx = result_idx;
+			lhs = std::move( result );
 		}
 	} // namespace impl
 
@@ -421,12 +446,9 @@ namespace daw {
 			size_t elem_needed =
 			  impl::rdiv( bsizeof<SignedInteger>, bsizeof<value_t> );
 
-			auto const mask = get_left_mask<uintmax_t>( bsizeof<uintmax_t> - bsizeof<value_t> );
-			while( elem_needed-- > 0 ) {
-				auto const cur_part = static_cast<uintmax_t>( value ) bitand mask;
-				m_data.push_back( cur_part );
-
-				value >>= bsizeof<value_t>;
+			while( elem_needed > 0 ) {
+				--elem_needed;
+				m_data.push_back( impl::overflow( value ) );
 			}
 			daw::exception::dbg_precondition_check( value == 0 );
 		}
@@ -441,13 +463,8 @@ namespace daw {
 			m_data.m_sign = value < 0 ? sign_t::negative : sign_t::positive;
 			value *= static_cast<uintmax_t>( m_data.m_sign );
 
-			size_t elem_needed =
-			  impl::rdiv( bsizeof<UnsignedInteger>, bsizeof<value_t> );
-			while( elem_needed-- > 0 ) {
-				m_data.push_back(
-				  static_cast<uintmax_t>( value ) bitand
-				  get_left_mask<uintmax_t>( bsizeof<uintmax_t> - bsizeof<value_t> ) );
-				value >>= bsizeof<value_t>;
+			while( value > 0 ) {
+				m_data.push_back( impl::overflow( value ) );
 			}
 			daw::exception::dbg_precondition_check( value == 0 );
 		}
@@ -470,16 +487,17 @@ namespace daw {
 
 			// TODO non char input and other bases
 			while( !str.empty( ) and daw::parser::is_number( str.front( ) ) ) {
-				auto digit = static_cast<uintmax_t>( str.pop_front( ) - '0' );
-				impl::mul( m_data, static_cast<value_t>( 10U ));
+				auto digit =
+				  static_cast<uintmax_t>( impl::to_digit( str.pop_front( ) ) );
+				impl::mul( m_data, 10UL );
 				impl::add( m_data, digit );
 			}
 		}
 
 		template<typename CharT, size_t N>
 		constexpr bigint_t( CharT const ( &str )[N] )
-		  : bigint_t( daw::basic_string_view<CharT>( str, str[N-1] == 0 ? N - 1 : N ) ) { }
-
+		  : bigint_t(
+		      daw::basic_string_view<CharT>( str, str[N - 1] == 0 ? N - 1 : N ) ) {}
 
 		explicit constexpr operator intmax_t( ) const
 		  noexcept( !MAY_THROW_EXCEPTIONS ) {
@@ -517,69 +535,42 @@ namespace daw {
 		template<size_t>
 		friend struct bigint_t;
 
-		template<typename UnsignedInteger,
-		         std::enable_if_t<!is_signed_v<remove_cvref_t<UnsignedInteger>>,
-		                          std::nullptr_t> = nullptr>
-		constexpr bigint_t &
-		operator*=( UnsignedInteger value ) noexcept( !MAY_THROW_EXCEPTIONS ) {
-			impl::mul( m_data, value );
-			return *this;
-		}
-
-		template<typename SignedInteger,
-		         std::enable_if_t<is_signed_v<remove_cvref_t<SignedInteger>>,
-		                          std::nullptr_t> = nullptr>
-		constexpr bigint_t &
-		operator*=( SignedInteger value ) noexcept( !MAY_THROW_EXCEPTIONS ) {
-			if( value < 0 ) {
-				m_data.sign_flip( );
-				value = -value;
-			}
-			impl::mul( m_data, value );
-			return *this;
-		}
-
-		template<typename Integer,
-		         std::enable_if_t<is_integral_v<remove_cvref_t<Integer>>,
-		                          std::nullptr_t> = nullptr>
-		constexpr bigint_t operator*( Integer value ) const
-		  noexcept( !MAY_THROW_EXCEPTIONS ) {
-
-			auto result = *this;
-			result *= value;
-			return result;
-		}
-
-		template<typename UnsignedInteger,
-		         std::enable_if_t<is_signed_v<remove_cvref_t<UnsignedInteger>>,
-		                          std::nullptr_t> = nullptr>
-		constexpr bigint_t &
-		operator+=( UnsignedInteger value ) noexcept( !MAY_THROW_EXCEPTIONS ) {
-			if( m_data.m_sign == sign_t::negative ) {
-				sub( m_data, value );
-			} else {
-				add( m_data, value );
-			}
-			return *this;
-		}
-
 		template<typename Integer,
 		         std::enable_if_t<!is_integral_v<remove_cvref_t<Integer>>,
 		                          std::nullptr_t> = nullptr>
 		constexpr bigint_t &
-		operator+=( Integer value ) noexcept( !MAY_THROW_EXCEPTIONS ) {
-			add( m_data, value );
+		operator*=( Integer &&value ) noexcept( !MAY_THROW_EXCEPTIONS ) {
+			impl::mul( m_data, bigint_t( std::forward<Integer>( value ) ) );
 			return *this;
 		}
 
 		template<typename Integer,
 		         std::enable_if_t<is_integral_v<remove_cvref_t<Integer>>,
 		                          std::nullptr_t> = nullptr>
-		constexpr bigint_t operator+( Integer value ) const
+		constexpr bigint_t operator*( Integer &&value ) const
+		  noexcept( !MAY_THROW_EXCEPTIONS ) {
+
+			auto result = bigint_t( std::forward<Integer>( value ) );
+			impl::mul( result.m_data, m_data );
+			return result;
+		}
+
+		template<typename Integer,
+		         std::enable_if_t<is_integral_v<remove_cvref_t<Integer>>,
+		                          std::nullptr_t> = nullptr>
+		constexpr bigint_t &
+		operator+=( Integer &&value ) noexcept( !MAY_THROW_EXCEPTIONS ) {
+			impl::add( m_data, bigint_t( std::forward<Integer>( value ) ) );
+			return *this;
+		}
+
+		template<typename Integer,
+		         std::enable_if_t<is_integral_v<remove_cvref_t<Integer>>,
+		                          std::nullptr_t> = nullptr>
+		constexpr bigint_t operator+( Integer &&value ) const
 		  noexcept( !MAY_THROW_EXCEPTIONS ) {
 			auto result = *this;
-
-			result += value;
+			impl::add( result, bigint_t( std::forward<Integer>( value ) ) );
 			return result;
 		}
 	};
@@ -613,14 +604,14 @@ namespace daw {
 
 		if( lhs.size( ) != rhs.size( ) ) {
 			if( lhs.size( ) == 0 ) {
-				for( size_t n=0; n<rhs.size( ); ++n ) {
+				for( size_t n = 0; n < rhs.size( ); ++n ) {
 					if( rhs[n] != 0 ) {
 						return false;
 					}
 				}
 				return true;
 			} else if( rhs.size( ) == 0 ) {
-				for( size_t n=0; n<lhs.size( ); ++n ) {
+				for( size_t n = 0; n < lhs.size( ); ++n ) {
 					if( lhs[n] != 0 ) {
 						return false;
 					}
