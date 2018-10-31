@@ -33,8 +33,6 @@
 
 namespace daw {
 	enum class sign_t : int_fast8_t { positive = 1, negative = -1 };
-	enum class bit_position_t : size_t { low = 0, high = 1 };
-
 	namespace impl {
 		static_assert( sizeof( uintmax_t ) == sizeof( uint64_t ),
 		               "Assumed that uint64_t is largest unsigned integer type" );
@@ -86,11 +84,10 @@ namespace daw {
 		constexpr auto high_part( uintmax_t value ) noexcept {
 			using value_t = half_max_t<uintmax_t>;
 			auto const high_mask =
-					daw::get_right_mask<uintmax_t>( bsizeof<uintmax_t> - bsizeof<value_t> );
+			  daw::get_right_mask<uintmax_t>( bsizeof<uintmax_t> - bsizeof<value_t> );
 
 			return static_cast<value_t>( value bitand high_mask );
 		}
-
 
 		template<typename T, size_t N>
 		struct bigint_storage_t {
@@ -116,24 +113,15 @@ namespace daw {
 				}
 			}
 
-			constexpr void shrink_to_fit( ) noexcept {
-				while( m_idx > 0 && m_data[m_idx - 1] == 0 ) {
-					--m_idx;
-				}
-			}
-
 			template<typename Size>
 			constexpr reference operator[]( Size idx ) noexcept {
-				daw::exception::dbg_precondition_check<std::out_of_range>( idx >= 0 );
-				daw::exception::dbg_precondition_check<std::out_of_range>( idx < N );
+				daw::exception::dbg_precondition_check<std::out_of_range>( in_range( static_cast<size_t>( idx ), 0ULL, N ) );
 				return m_data[static_cast<size_type>( idx )];
 			}
 
 			template<typename Size>
 			constexpr const_reference operator[]( Size idx ) const noexcept {
-				daw::exception::dbg_precondition_check<std::out_of_range>( idx >= 0 );
-				daw::exception::dbg_precondition_check<std::out_of_range>(
-				  static_cast<size_t>( idx ) < N );
+				daw::exception::dbg_precondition_check<std::out_of_range>( in_range( static_cast<size_t>( idx ), 0ULL, N ) );
 				return m_data[static_cast<size_type>( idx )];
 			}
 
@@ -217,8 +205,8 @@ namespace daw {
 
 		template<typename T, size_t BitsNeeded>
 		constexpr size_t elements_needed( ) noexcept {
-			size_t const bits_per_T = bsizeof<T>;
-			size_t result = ( BitsNeeded + ( bits_per_T / 2 ) ) / bits_per_T;
+			size_t const bits_in_T = bsizeof<T>;
+			size_t result = ( BitsNeeded + ( bits_in_T / 2 ) ) / bits_in_T;
 			if( result == 0 ) {
 				return 1;
 			}
@@ -247,7 +235,6 @@ namespace daw {
 
 			daw::exception::precondition_check( rhs >= 0 );
 
-
 			auto carry = static_cast<uintmax_t>( rhs );
 
 			while( index < lhs.size( ) ) {
@@ -260,10 +247,9 @@ namespace daw {
 			}
 		}
 
-		template<bit_position_t bit_pos, typename value_t, size_t N,
-		         typename Integer>
-		constexpr void sub( impl::bigint_storage_t<value_t, N> &lhs, size_t &idx,
-		                    value_t rhs ) noexcept( !MAY_THROW_EXCEPTIONS ) {
+		template<typename value_t, size_t N>
+		constexpr void sub( impl::bigint_storage_t<value_t, N> &lhs,
+		                    value_t ) noexcept( !MAY_THROW_EXCEPTIONS ) {
 			/*
 			      auto const lower_mask =
 			          daw::get_left_mask<uintmax_t>( bsizeof<uintmax_t> -
@@ -344,7 +330,9 @@ namespace daw {
 			while( index > 0 ) {
 				--index;
 				for( size_t pos = 0; pos < lhs.size( ); ++pos ) {
-					carry += static_cast<uintmax_t>( lhs[pos] ) * static_cast<uintmax_t>( std::numeric_limits<value_t>::max( ) );
+					carry +=
+					  static_cast<uintmax_t>( lhs[pos] ) *
+					  static_cast<uintmax_t>( std::numeric_limits<value_t>::max( ) );
 					tmp[pos] = overflow( carry );
 				}
 			}
@@ -471,10 +459,11 @@ namespace daw {
 
 		// TODO: add octal/hex/binary via 0o, 0x, 0b
 		template<typename CharT>
-		constexpr bigint_t( basic_string_view<CharT> str ) noexcept(
+		explicit constexpr bigint_t( basic_string_view<CharT> str ) noexcept(
 		  !MAY_THROW_EXCEPTIONS ) {
 
 			str = daw::parser::trim_left( str );
+			daw::exception::precondition_check( !str.empty( ) );
 			if( str.front( ) == '-' ) {
 				str.remove_prefix( );
 				m_data.m_sign = sign_t::negative;
@@ -495,7 +484,7 @@ namespace daw {
 		}
 
 		template<typename CharT, size_t N>
-		constexpr bigint_t( CharT const ( &str )[N] )
+		explicit constexpr bigint_t( CharT const ( &str )[N] )
 		  : bigint_t(
 		      daw::basic_string_view<CharT>( str, str[N - 1] == 0 ? N - 1 : N ) ) {}
 
