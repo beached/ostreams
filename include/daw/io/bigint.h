@@ -49,8 +49,9 @@ namespace daw {
 			}
 			if( 'A' <= c && c <= 'F' ) {
 				return static_cast<T>( 10 ) + static_cast<T>( c - 'A' );
-			}
-			std::terminate( );
+            } else {    // Work around constexpr bug in gcc 8.2.  Need to put else clause
+                std::terminate();
+            }
 		}
 
 		template<typename T = uint8_t>
@@ -63,8 +64,9 @@ namespace daw {
 			}
 			if( 'A' <= c && c <= 'F' ) {
 				return static_cast<T>( 10 ) + static_cast<T>( c - L'A' );
-			}
-			std::terminate( );
+			} else {    // Work around constexpr bug in gcc 8.2.  Need to put else clause
+                std::terminate();
+            }
 		}
 
 		template<typename T>
@@ -100,7 +102,7 @@ namespace daw {
 
 			static_assert( N > 0, "Cannot store 0 bytes of anything" );
 
-			std::array<value_type, N> m_data = {};
+			std::array<value_type, N> m_data = {0};
 			size_type m_idx = 0;
 			sign_t m_sign = sign_t::positive;
 
@@ -237,10 +239,9 @@ namespace daw {
 
 			auto carry = static_cast<uintmax_t>( rhs );
 
-			while( index < lhs.size( ) ) {
+			for( ; index <lhs.size( ); ++index ) {
 				carry += lhs[index];
 				lhs[index] = overflow( carry );
-				++index;
 			}
 			if( carry > 0 ) {
 				lhs.push_back( static_cast<value_t>( carry ) );
@@ -327,19 +328,21 @@ namespace daw {
 				carry = 0;
 			}
 			lhs = tmp;
-			while( index > 0 ) {
-				--index;
-				for( size_t pos = 0; pos < lhs.size( ); ++pos ) {
-					carry +=
-					  static_cast<uintmax_t>( lhs[pos] ) *
-					  static_cast<uintmax_t>( std::numeric_limits<value_t>::max( ) );
-					tmp[pos] = overflow( carry );
+			if( index > 0 ) {
+				while (index > 0) {
+					--index;
+					for (size_t pos = 0; pos < lhs.size(); ++pos) {
+						carry +=
+								static_cast<uintmax_t>( lhs[pos] ) *
+								static_cast<uintmax_t>( std::numeric_limits<value_t>::max());
+						tmp[pos] = overflow(carry);
+					}
 				}
+				if (carry > 0) {
+					tmp.push_back(static_cast<value_t>( carry ));
+				}
+				lhs = tmp;
 			}
-			if( carry > 0 ) {
-				tmp.push_back( static_cast<value_t>( carry ) );
-			}
-			lhs = tmp;
 		}
 
 		template<typename value_t, size_t N>
@@ -367,6 +370,7 @@ namespace daw {
 			}
 
 			bigint_storage_t<value_t, N> result{};
+			result.push_back( 0 );
 
 			for( size_t n = 0; n < rhs.size( ); ++n ) {
 				auto tmp = lhs;

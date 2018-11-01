@@ -31,57 +31,62 @@ static_assert(
   daw::is_same_v<daw::bigint_digits_t<1000>, daw::bigint_t<3322>> );
 
 template<typename Integer>
-daw::bigint_t<113> mul_test( ) {
+constexpr daw::bigint_t<113> mul_test( ) {
 	auto result = daw::bigint_t<113>( "91844674407370955161634534534543" );
 	result = result * static_cast<Integer>( 100 );
 	return result;
 }
 
-daw::bigint_t<104> mul_test2( ) {
+constexpr daw::bigint_t<104> mul_test2( ) {
 	daw::bigint_t<104> result( 1 );
 	result = result * 8589934592ULL;
 	return result;
 }
 
-bool test_004( ) {
+constexpr bool test_004( ) {
 	auto v0 = daw::bigint_t<32>( std::numeric_limits<int32_t>::min( ) );
 	auto v1 = daw::bigint_t<32>( "-2147483648" );
 	return v0 == v1;
 }
 
-constexpr void test( bool ) {}
+constexpr void test( bool b ) {
+    if( !b ) std::terminate( );
+}
 
-void test_001( ) {
-	constexpr daw::bigint_t<100> m( "18446744073709551616" );
-	static_assert( m[0] == 0 );
-	static_assert( m[1] == 0 );
-	static_assert( m[2] == 1 );
+constexpr bool test_001( ) {
+	daw::bigint_t<100> m( "18446744073709551616" );
+	test( m[0] == 0 );
+	test( m[1] == 0 );
+	test( m[2] == 1 );
+	return true;
 }
 
 //#define static_assert test
 
-void test_002( ) {
-	constexpr daw::bigint_t<104> m1( "1844674407370955161634534534543" );
-	static_assert( m1[0] == 0x0a6b'2d8f );
-	static_assert( m1[1] == 0x0000'0008 );
-	static_assert( m1[2] == 0x4876'e800 );
-	static_assert( m1[3] == 0x0000'0017 );
+constexpr bool test_002( ) {
+	daw::bigint_t<104> m1( "1844674407370955161634534534543" );
+	test( m1[0] == 0x0a6b'2d8f );
+	test( m1[1] == 0x0000'0008 );
+	test( m1[2] == 0x4876'e800 );
+	test( m1[3] == 0x0000'0017 );
+	return true;
 }
 
-#define static_assert test
+//#define static_assert test
 
-void test_003( ) {
-	auto m2 = daw::bigint_t<113>( "9184467440737095516163453453454300" );
-	auto m_test = mul_test<int>( );
-	auto is_eq = m_test == m2;
-	static_assert( is_eq );
-	static_assert( mul_test<unsigned int>( ) == m2 );
-	auto m3 = mul_test2( );
-	auto m_test2 = mul_test2( );
-	//	static_assert( mul_test2( ) == 8589934592ULL );
+constexpr bool test_003( ) {
+	auto const m2 = daw::bigint_t<113>( "9184467440737095516163453453454300" );
+	auto const m_test = mul_test<int>( );
+	auto const is_eq = m_test == m2;
+	test( is_eq );
+	test( mul_test<unsigned int>( ) == m2 );
+	auto const m3 = mul_test2( );
+	auto const m_test2 = mul_test2( );
+	test( mul_test2( ) == 8589934592ULL );
+	return true;
 }
 
-#undef static_assert
+//#undef static_assert
 
 static_assert( daw::bigint_t<32>( std::numeric_limits<int32_t>::min( ) ) ==
                daw::bigint_t<32>( "-2147483648" ) );
@@ -120,9 +125,10 @@ static_assert( -5'000'000'000LL == daw::bigint_t<100>( "-5000000000" ) );
 static_assert( daw::bigint_t<100>( "-5000000000" ) == -5'000'000'000LL );
 
 int main( ) {
-	test_001( );
-	test_002( );
+	static_assert( test_001( ) );
+	static_assert( test_002( ) );
 	test_003( );
-	test_004( );
+	//static_assert( test_003( ) );
+	static_assert( test_004( ) );
 	return 0;
 }
