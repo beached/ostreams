@@ -24,6 +24,8 @@
 
 #include <array>
 
+#include <MacTypes.h>
+#include <daw/daw_algorithm.h>
 #include <daw/daw_bit.h>
 #include <daw/daw_exception.h>
 #include <daw/daw_math.h>
@@ -49,9 +51,9 @@ namespace daw {
 			}
 			if( 'A' <= c && c <= 'F' ) {
 				return static_cast<T>( 10 ) + static_cast<T>( c - 'A' );
-            } else {    // Work around constexpr bug in gcc 8.2.  Need to put else clause
-                std::terminate();
-            }
+			} else { // Work around constexpr bug in gcc 8.2.  Need to put else clause
+				std::terminate( );
+			}
 		}
 
 		template<typename T = uint8_t>
@@ -64,9 +66,9 @@ namespace daw {
 			}
 			if( 'A' <= c && c <= 'F' ) {
 				return static_cast<T>( 10 ) + static_cast<T>( c - L'A' );
-			} else {    // Work around constexpr bug in gcc 8.2.  Need to put else clause
-                std::terminate();
-            }
+			} else { // Work around constexpr bug in gcc 8.2.  Need to put else clause
+				std::terminate( );
+			}
 		}
 
 		template<typename T>
@@ -91,22 +93,64 @@ namespace daw {
 			return static_cast<value_t>( value bitand high_mask );
 		}
 
-		template<typename T, size_t N>
+		template<typename T, size_t ItemCount>
 		struct bigint_storage_t {
-			using value_type = T;
+			using value_t = T;
 			using size_type = size_t;
-			using reference = value_type &;
-			using const_reference = value_type const &;
-			using iterator = typename std::array<value_type, N>::iterator;
-			using const_iterator = typename std::array<value_type, N>::const_iterator;
+			using reference = value_t &;
+			using const_reference = value_t const &;
+			using iterator = typename std::array<value_t, ItemCount>::iterator;
+			using const_iterator = typename std::array<value_t, ItemCount>::const_iterator;
 
-			static_assert( N > 0, "Cannot store 0 bytes of anything" );
+			static_assert( ItemCount > 0, "Cannot store 0 of anything" );
 
-			std::array<value_type, N> m_data = {0};
+			std::array<value_t, ItemCount> m_data = {0};
 			size_type m_idx = 0;
 			sign_t m_sign = sign_t::positive;
 
 			constexpr bigint_storage_t( ) noexcept = default;
+			~bigint_storage_t( ) = default;
+		//	bigint_storage_t( bigint_storage_t const & ) = default;
+	//		bigint_storage_t & operator=( bigint_storage_t const & ) = default;
+
+			template<size_t N>
+			constexpr bigint_storage_t( bigint_storage_t<T, N> const & other ): m_idx( other.m_idx ), m_sign( other.m_sign ) {
+				daw::exception::precondition_check<std::out_of_range>( m_idx <= ItemCount );
+				daw::algorithm::copy_n( other.m_data.data( ), m_data.data( ), m_idx );
+			}
+
+			template<size_t N>
+			constexpr bigint_storage_t & operator=( bigint_storage_t<T, N> const & rhs ) {
+				daw::exception::precondition_check<std::out_of_range>( rhs.m_idx <= ItemCount );
+				if( this == &rhs ) {
+					return *this;
+				}
+
+				m_idx = rhs.m_idx;
+				m_sign = rhs.m_sign;
+				daw::algorithm::copy_n( rhs.m_data.data( ), m_data.data( ), m_idx );
+				return *this;
+			}
+
+			template<size_t N>
+			constexpr bigint_storage_t( bigint_storage_t<T, N> && other ): m_idx( std::move( other.m_idx ) ), m_sign( std::move( other.m_sign ) ) {
+				daw::exception::precondition_check<std::out_of_range>( m_idx <= ItemCount );
+
+				daw::algorithm::move_n( other.m_data.data( ), m_data.data( ), m_idx );
+			}
+
+			template<size_t N>
+			constexpr bigint_storage_t & operator=( bigint_storage_t<T, N> && rhs ) {
+				daw::exception::precondition_check<std::out_of_range>( rhs.m_idx <= ItemCount );
+				if( this == &rhs ) {
+					return *this;
+				}
+
+				m_idx = std::move( rhs.m_idx );
+				m_sign = std::move( rhs.m_sign );
+				daw::algorithm::move_n( rhs.m_data.data( ), m_data.data( ), m_idx );
+				return *this;
+			}
 
 			constexpr void clear( ) noexcept {
 				while( m_idx > 0 ) {
@@ -117,13 +161,15 @@ namespace daw {
 
 			template<typename Size>
 			constexpr reference operator[]( Size idx ) noexcept {
-				daw::exception::dbg_precondition_check<std::out_of_range>( in_range( static_cast<size_t>( idx ), 0ULL, N ) );
+				daw::exception::dbg_precondition_check<std::out_of_range>(
+				  in_range( static_cast<size_t>( idx ), 0ULL, ItemCount ) );
 				return m_data[static_cast<size_type>( idx )];
 			}
 
 			template<typename Size>
 			constexpr const_reference operator[]( Size idx ) const noexcept {
-				daw::exception::dbg_precondition_check<std::out_of_range>( in_range( static_cast<size_t>( idx ), 0ULL, N ) );
+				daw::exception::dbg_precondition_check<std::out_of_range>(
+				  in_range( static_cast<size_t>( idx ), 0ULL, ItemCount ) );
 				return m_data[static_cast<size_type>( idx )];
 			}
 
@@ -147,10 +193,6 @@ namespace daw {
 				return m_data.begin( );
 			}
 
-			constexpr const_iterator cbegin( ) const noexcept {
-				return m_data.cbegin( );
-			}
-
 			constexpr iterator end( ) noexcept {
 				return m_data.begin( ) + static_cast<ptrdiff_t>( m_idx );
 			}
@@ -159,12 +201,8 @@ namespace daw {
 				return m_data.begin( ) + static_cast<ptrdiff_t>( m_idx );
 			}
 
-			constexpr const_iterator cend( ) const noexcept {
-				return m_data.cbegin( ) + static_cast<ptrdiff_t>( m_idx );
-			}
-
 			constexpr size_type capacity( ) const noexcept {
-				return N;
+				return ItemCount;
 			}
 
 			constexpr bool full( ) noexcept {
@@ -176,7 +214,42 @@ namespace daw {
 				  m_sign == sign_t::positive ? sign_t::negative : sign_t::positive;
 			}
 
-			constexpr void push_back( value_type v ) {
+			template<typename Value, size_t Brhs>
+			constexpr int
+			unsigned_compare( bigint_storage_t<Value, Brhs> const &rhs ) const {
+				if( size( ) > rhs.size( ) ) {
+					return 1;
+				} else if( size( ) < rhs.size( ) ) {
+					return -1;
+				}
+				for( size_t n = size( ); n > 0; --n ) {
+					if( m_data[n] > rhs.m_data[n] ) {
+						return 1;
+					} else if( m_data[n] < rhs.m_data[n] ) {
+						return -1;
+					}
+				}
+				return 0;
+			}
+
+			template<typename Value, size_t Brhs>
+			constexpr int compare( bigint_storage_t<Value, Brhs> const &rhs ) const {
+				if( m_sign == sign_t::positive ) {
+					if( rhs.m_sign == sign_t::negative ) {
+						// pos neg
+						return 1;
+					}
+					// pos pos
+					return unsigned_compare( rhs );
+				} else if( rhs.m_sign == sign_t::positive ) {
+					// neg pos
+					return -1;
+				}
+				// neg neg
+				return -unsigned_compare( rhs );
+			}
+
+			constexpr void push_back( value_t v ) {
 				daw::exception::dbg_precondition_check<std::overflow_error>(
 				  not full( ) );
 
@@ -195,7 +268,7 @@ namespace daw {
 				return m_data[m_idx - 1];
 			}
 
-			constexpr value_type pop_back( ) {
+			constexpr value_t pop_back( ) {
 				daw::exception::dbg_precondition_check<std::overflow_error>(
 				  !empty( ), "Attempt to pop empty stack" );
 				auto result = back( );
@@ -233,13 +306,13 @@ namespace daw {
 
 		template<typename value_t, size_t N>
 		constexpr void add( impl::bigint_storage_t<value_t, N> &lhs, value_t rhs,
-		                    size_t index = 0 ) noexcept( !MAY_THROW_EXCEPTIONS ) {
+		                    size_t index = 0 ) {
 
 			daw::exception::precondition_check( rhs >= 0 );
 
 			auto carry = static_cast<uintmax_t>( rhs );
 
-			for( ; index <lhs.size( ); ++index ) {
+			for( ; index < lhs.size( ); ++index ) {
 				carry += lhs[index];
 				lhs[index] = overflow( carry );
 			}
@@ -249,8 +322,38 @@ namespace daw {
 		}
 
 		template<typename value_t, size_t N>
-		constexpr void sub( impl::bigint_storage_t<value_t, N> &lhs,
-		                    value_t ) noexcept( !MAY_THROW_EXCEPTIONS ) {
+		constexpr uintmax_t div( impl::bigint_storage_t<value_t, N> &lhs,
+		                         value_t const rhs ) {
+			if( lhs.m_data.size( ) == 0 ) {
+				return rhs;
+			}
+			impl::bigint_storage_t<value_t, N> result{};
+			uint64_t carry = 0;
+			for( size_t n = lhs.m_data.size( ); n > 0; --n ) {
+				carry += lhs.m_data[n - 1];
+				auto tmp = carry / rhs;
+				result.push_back( tmp );
+				carry -= tmp * rhs;
+			}
+			lhs.m_data = std::move( result );
+			return carry;
+		};
+
+		template<typename value_t, size_t LhsN, size_t RhsN>
+		constexpr impl::bigint_storage_t<value_t, LhsN> div( impl::bigint_storage_t<value_t, LhsN> & lhs, impl::bigint_storage_t<value_t, RhsN> const & rhs ) {
+			auto cmp = lhs.compare( rhs );
+			if( cmp < 0 ) {
+					lhs = impl::bigint_storage_t<value_t, LhsN>{};
+					return rhs;
+			} else if( cmp == 0 ) {
+				lhs = 1UL;
+				return 0UL;
+			}
+
+		};
+
+		template<typename value_t, size_t N>
+		constexpr void sub( impl::bigint_storage_t<value_t, N> &lhs, value_t ) {
 			/*
 			      auto const lower_mask =
 			          daw::get_left_mask<uintmax_t>( bsizeof<uintmax_t> -
@@ -283,7 +386,7 @@ namespace daw {
 
 		template<typename value_t, size_t N>
 		constexpr void add( impl::bigint_storage_t<value_t, N> &lhs,
-		                    uintmax_t rhs ) noexcept( !MAY_THROW_EXCEPTIONS ) {
+		                    uintmax_t rhs ) {
 
 			auto const lower = low_part( rhs );
 			if( lower > 0 ) {
@@ -298,8 +401,7 @@ namespace daw {
 
 		template<typename value_t, size_t N>
 		constexpr void add( impl::bigint_storage_t<value_t, N> &lhs,
-		                    impl::bigint_storage_t<value_t, N> const
-		                      &rhs ) noexcept( !MAY_THROW_EXCEPTIONS ) {
+		                    impl::bigint_storage_t<value_t, N> const &rhs ) {
 
 			for( size_t n = 0; n < rhs.size( ); ++n ) {
 				add( lhs, rhs[n], n );
@@ -308,7 +410,7 @@ namespace daw {
 
 		template<typename value_t, size_t N>
 		constexpr void mul( impl::bigint_storage_t<value_t, N> &lhs, value_t rhs,
-		                    size_t index ) noexcept( !MAY_THROW_EXCEPTIONS ) {
+		                    size_t index ) {
 
 			if( rhs == 0ULL ) {
 				lhs.clear( );
@@ -329,17 +431,17 @@ namespace daw {
 			}
 			lhs = tmp;
 			if( index > 0 ) {
-				while (index > 0) {
+				while( index > 0 ) {
 					--index;
-					for (size_t pos = 0; pos < lhs.size(); ++pos) {
+					for( size_t pos = 0; pos < lhs.size( ); ++pos ) {
 						carry +=
-								static_cast<uintmax_t>( lhs[pos] ) *
-								static_cast<uintmax_t>( std::numeric_limits<value_t>::max());
-						tmp[pos] = overflow(carry);
+						  static_cast<uintmax_t>( lhs[pos] ) *
+						  static_cast<uintmax_t>( std::numeric_limits<value_t>::max( ) );
+						tmp[pos] = overflow( carry );
 					}
 				}
-				if (carry > 0) {
-					tmp.push_back(static_cast<value_t>( carry ));
+				if( carry > 0 ) {
+					tmp.push_back( static_cast<value_t>( carry ) );
 				}
 				lhs = tmp;
 			}
@@ -347,7 +449,7 @@ namespace daw {
 
 		template<typename value_t, size_t N>
 		constexpr void mul( impl::bigint_storage_t<value_t, N> &lhs,
-		                    uintmax_t rhs ) noexcept( !MAY_THROW_EXCEPTIONS ) {
+		                    uintmax_t rhs ) {
 
 			auto tmp = lhs;
 
@@ -358,8 +460,7 @@ namespace daw {
 
 		template<typename value_t, size_t N>
 		constexpr void mul( impl::bigint_storage_t<value_t, N> &lhs,
-		                    impl::bigint_storage_t<value_t, N> const
-		                      &rhs ) noexcept( !MAY_THROW_EXCEPTIONS ) {
+		                    impl::bigint_storage_t<value_t, N> const &rhs ) {
 
 			if( lhs.empty( ) ) {
 				return;
@@ -394,33 +495,59 @@ namespace daw {
 	struct bigint_t {
 		using value_t = impl::half_max_t<uintmax_t>;
 
-	private:
-		static constexpr size_t m_capacity =
-		  impl::elements_needed<value_t, Bits>( );
-
-	public:
-		static constexpr size_t bits_v = m_capacity * 8;
-
 		static_assert( !daw::is_signed_v<value_t>,
 		               "Unsupported T, must be unsigned" );
+
 		static_assert( sizeof( value_t ) * 2 <= sizeof( uintmax_t ),
 		               "T must be no more than the size of uintmax_t" );
 
 	private:
-		constexpr void sign_flip( ) noexcept {
-			m_data.sign_flip( );
-		}
+		static constexpr size_t const m_capacity =
+		  impl::elements_needed<value_t, Bits>( );
 
 		impl::bigint_storage_t<value_t, m_capacity + 1> m_data{};
 
+		constexpr void clear_mdata( ) noexcept {
+			m_data = decltype( m_data ){};
+		}
+
 	public:
-		constexpr bigint_t( ) noexcept = default;
+		static constexpr size_t const bits_v = m_capacity * 8;
+
+		constexpr bool is_zero( ) const noexcept {
+			return m_data.empty( ) or
+			       ( m_data.size( ) = 1 and m_data.front( ) == 0UL );
+		}
+
+		constexpr void negate( ) noexcept {
+			if( !is_zero( ) ) {
+				m_data.sign_flip( );
+			}
+		}
+
+		constexpr void operator-( ) noexcept {
+			return negate( );
+		}
+
+		constexpr bigint_t operator~( ) const noexcept {
+			bigint_t result{};
+			for( auto item: m_data ) {
+				result.push_back( ~item );
+			}
+			for( size_t n=m_data.size( ); n<m_data.capacity( ); ++n ) {
+				result.push_back( std::numeric_limits<value_t>::max( ) );
+			}
+			return result;
+		}
+
+		constexpr bigint_t( ) noexcept {
+			m_data.push_back( 0 );
+		}
 
 		template<typename SignedInteger,
 		         std::enable_if_t<is_signed_v<remove_cvref_t<SignedInteger>>,
 		                          std::nullptr_t> = nullptr>
-		explicit constexpr bigint_t( SignedInteger v ) noexcept(
-		  !MAY_THROW_EXCEPTIONS ) {
+		explicit constexpr bigint_t( SignedInteger v ) {
 
 			m_data.m_sign = v < 0 ? sign_t::negative : sign_t::positive;
 			uintmax_t value = 0;
@@ -446,10 +573,11 @@ namespace daw {
 		}
 
 		template<typename UnsignedInteger,
-		         std::enable_if_t<!is_signed_v<remove_cvref_t<UnsignedInteger>>,
-		                          std::nullptr_t> = nullptr>
-		explicit constexpr bigint_t( UnsignedInteger v ) noexcept(
-		  !MAY_THROW_EXCEPTIONS ) {
+		         std::enable_if_t<
+		           all_true_v<is_integral_v<remove_cvref_t<UnsignedInteger>>,
+		                      !is_signed_v<remove_cvref_t<UnsignedInteger>>>,
+		           std::nullptr_t> = nullptr>
+		explicit constexpr bigint_t( UnsignedInteger v ) {
 
 			uintmax_t value = v;
 			m_data.m_sign = value < 0 ? sign_t::negative : sign_t::positive;
@@ -463,8 +591,7 @@ namespace daw {
 
 		// TODO: add octal/hex/binary via 0o, 0x, 0b
 		template<typename CharT>
-		explicit constexpr bigint_t( basic_string_view<CharT> str ) noexcept(
-		  !MAY_THROW_EXCEPTIONS ) {
+		explicit constexpr bigint_t( basic_string_view<CharT> str ) {
 
 			str = daw::parser::trim_left( str );
 			daw::exception::precondition_check( !str.empty( ) );
@@ -492,8 +619,7 @@ namespace daw {
 		  : bigint_t(
 		      daw::basic_string_view<CharT>( str, str[N - 1] == 0 ? N - 1 : N ) ) {}
 
-		explicit constexpr operator intmax_t( ) const
-		  noexcept( !MAY_THROW_EXCEPTIONS ) {
+		explicit constexpr operator intmax_t( ) const {
 
 			daw::exception::precondition_check(
 			  m_data.empty( ) or
@@ -528,43 +654,91 @@ namespace daw {
 		template<size_t>
 		friend struct bigint_t;
 
-		template<typename Integer,
-		         std::enable_if_t<!is_integral_v<remove_cvref_t<Integer>>,
-		                          std::nullptr_t> = nullptr>
-		constexpr bigint_t &
-		operator*=( Integer &&value ) noexcept( !MAY_THROW_EXCEPTIONS ) {
-			impl::mul( m_data, bigint_t( std::forward<Integer>( value ) ) );
+		template<typename Integer>
+		constexpr auto operator*=( Integer &&value )
+		  -> std::enable_if_t<is_integral_v<remove_cvref_t<Integer>>, bigint_t &> {
+
+			bigint_t const tmp( std::forward<Integer>( value ) );
+			impl::mul( m_data, tmp.m_data );
 			return *this;
 		}
 
-		template<typename Integer,
-		         std::enable_if_t<is_integral_v<remove_cvref_t<Integer>>,
-		                          std::nullptr_t> = nullptr>
-		constexpr bigint_t operator*( Integer &&value ) const
-		  noexcept( !MAY_THROW_EXCEPTIONS ) {
+		template<typename Integer>
+		constexpr auto operator*( Integer &&value ) const
+		  -> std::enable_if_t<is_integral_v<remove_cvref_t<Integer>>, bigint_t> {
 
-			auto result = bigint_t( std::forward<Integer>( value ) );
-			impl::mul( result.m_data, m_data );
+			auto result = *this;
+			auto tmp = bigint_t( std::forward<Integer>( value ) );
+			impl::mul( result.m_data, tmp.m_data );
 			return result;
 		}
 
-		template<typename Integer,
-		         std::enable_if_t<is_integral_v<remove_cvref_t<Integer>>,
-		                          std::nullptr_t> = nullptr>
-		constexpr bigint_t &
-		operator+=( Integer &&value ) noexcept( !MAY_THROW_EXCEPTIONS ) {
-			impl::add( m_data, bigint_t( std::forward<Integer>( value ) ) );
+		template<typename Integer>
+		constexpr auto operator+=( Integer &&value )
+		  -> std::enable_if_t<is_integral_v<remove_cvref_t<Integer>>, bigint_t &> {
+
+			auto const tmp = bigint_t( std::forward<Integer>( value ) );
+			impl::add( m_data, tmp.m_data );
 			return *this;
 		}
 
-		template<typename Integer,
-		         std::enable_if_t<is_integral_v<remove_cvref_t<Integer>>,
-		                          std::nullptr_t> = nullptr>
-		constexpr bigint_t operator+( Integer &&value ) const
-		  noexcept( !MAY_THROW_EXCEPTIONS ) {
+		template<typename Integer>
+		constexpr auto operator+( Integer &&value ) const
+		  -> std::enable_if_t<is_integral_v<remove_cvref_t<Integer>>, bigint_t> {
+
 			auto result = *this;
 			impl::add( result, bigint_t( std::forward<Integer>( value ) ) );
 			return result;
+		}
+
+		constexpr bigint_t &set_bit( size_t n ) {
+			auto const idx = n / bsizeof<value_t>;
+			n -= idx * bsizeof<value_t>;
+			for( size_t m = m_data.size( ); m <= idx; ++m ) {
+				m_data.push_back( 0 );
+			}
+			m_data[idx] = daw::set_bits( m_data[idx], n );
+			return *this;
+		}
+
+		static constexpr bigint_t pow2( size_t n ) {
+			bigint_t result{0};
+			result.set_bit( n );
+			return result;
+		}
+
+		static constexpr bigint_t one_shl_minus1( size_t n ) {
+			bigint_t result{};
+			result.clear_mdata( );
+			size_t bit_pos = 0;
+			while( bit_pos + bsizeof<value_t> <= n ) {
+				result.m_data.push_back( std::numeric_limits<value_t>::max( ) );
+				bit_pos += bsizeof<value_t>;
+			}
+			if( bit_pos == 0 ) {
+				result.m_data.push_back( 1 );
+				++bit_pos;
+			}
+			for( ; bit_pos <= n; ++bit_pos ) {
+				result.set_bit( bit_pos );
+			}
+			--result.m_data[0];
+			return result;
+		}
+
+		template<size_t B>
+		constexpr int compare( bigint_t<B> const &rhs ) const noexcept {
+			return m_data.compare( rhs.m_data );
+		}
+
+		template<size_t B>
+		constexpr int compare( bigint_t<B> const &&rhs ) const noexcept {
+			return m_data.compare( rhs.m_data );
+		}
+
+		template<typename Integer>
+		constexpr auto compare( Integer &&rhs ) const noexcept {
+			return m_data.compare( bigint_t( std::forward<Integer>( rhs ) ).m_data );
 		}
 	};
 
@@ -589,57 +763,44 @@ namespace daw {
 	template<typename T>
 	constexpr bool const is_bigint_v = is_bigint_t<T>::value;
 
-	template<
-	  typename BigIntLhs, typename BigIntRhs,
-	  std::enable_if_t<all_true_v<is_bigint_v<BigIntLhs>, is_bigint_v<BigIntRhs>>,
-	                   std::nullptr_t> = nullptr>
-	constexpr bool operator==( BigIntLhs &&lhs, BigIntRhs &&rhs ) noexcept {
-
-		if( lhs.size( ) != rhs.size( ) ) {
-			if( lhs.size( ) == 0 ) {
-				for( size_t n = 0; n < rhs.size( ); ++n ) {
-					if( rhs[n] != 0 ) {
-						return false;
-					}
-				}
-				return true;
-			} else if( rhs.size( ) == 0 ) {
-				for( size_t n = 0; n < lhs.size( ); ++n ) {
-					if( lhs[n] != 0 ) {
-						return false;
-					}
-				}
-				return true;
-			}
-			return false;
-		}
-		for( size_t n = 0; n < lhs.size( ); ++n ) {
-			if( lhs[n] != rhs[n] ) {
-				return false;
-			}
-		}
-		return true;
+	template<size_t LhsB, size_t RhsB>
+	constexpr auto operator==( bigint_t<LhsB> const &lhs,
+	                           bigint_t<RhsB> const &rhs ) noexcept {
+		return lhs.compare( rhs ) == 0;
 	}
 
-	template<
-	  typename BigInt, typename Integer,
-	  std::enable_if_t<all_true_v<is_bigint_v<BigInt>, is_integral_v<Integer>>,
-	                   std::nullptr_t> = nullptr>
-	constexpr bool operator==( BigInt &&lhs, Integer &&rhs ) noexcept {
-		using rhs_bigint = bigint_t<bsizeof<Integer>>;
+	template<size_t LhsB, typename Integer>
+	constexpr auto operator==( bigint_t<LhsB> const &lhs, Integer &&rhs ) noexcept
+	  -> std::enable_if_t<is_integral_v<Integer>, bool> {
 
-		return std::forward<BigInt>( lhs ) ==
-		       rhs_bigint( std::forward<Integer>( rhs ) );
+		return lhs.compare( std::forward<Integer>( rhs ) ) == 0;
 	}
 
-	template<
-	  typename BigInt, typename Integer,
-	  std::enable_if_t<all_true_v<is_bigint_v<BigInt>, is_integral_v<Integer>>,
-	                   std::nullptr_t> = nullptr>
-	constexpr bool operator==( Integer &&lhs, BigInt &&rhs ) noexcept {
-		using lhs_bigint = bigint_t<bsizeof<Integer>>;
+	template<typename Integer, size_t RhsB>
+	constexpr auto operator==( Integer &&lhs, bigint_t<RhsB> const &rhs ) noexcept
+	  -> std::enable_if_t<is_integral_v<Integer>, bool> {
 
-		return lhs_bigint( std::forward<Integer>( lhs ) ) ==
-		       std::forward<BigInt>( rhs );
+		return bigint_t<bsizeof<Integer>>( std::forward<Integer>( lhs ) )
+		         .compare( rhs ) == 0;
 	}
+
+	template<size_t LhsB, size_t RhsB>
+	constexpr auto operator!=( bigint_t<LhsB> const &lhs,
+	                           bigint_t<RhsB> const &rhs ) noexcept {
+
+		return lhs.m_data.compare( rhs ) != 0;
+	}
+
+	template<size_t LhsB, typename Integer>
+	constexpr auto operator!=( bigint_t<LhsB> const &lhs, Integer &&rhs ) noexcept
+	  -> std::enable_if_t<is_integral_v<Integer>, bool> {
+		return lhs.compare( std::forward<Integer>( rhs ) );
+	}
+
+	template<typename Integer, size_t RhsB>
+	constexpr auto operator!=( Integer &&lhs, bigint_t<RhsB> const &rhs ) noexcept
+	  -> std::enable_if_t<is_integral_v<Integer>, bool> {
+		return std::forward<Integer>( rhs ).compare( std::forward<Integer>( rhs ) );
+	}
+
 } // namespace daw

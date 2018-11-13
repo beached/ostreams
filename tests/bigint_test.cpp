@@ -48,43 +48,113 @@ constexpr bool test_004( ) {
 	auto v1 = daw::bigint_t<32>( "-2147483648" );
 	return v0 == v1;
 }
+static_assert( test_004( ) );
+
+constexpr bool test_1element_plus1( ) {
+	auto v0 = daw::bigint_t<48>(
+	  static_cast<uint64_t>( std::numeric_limits<uint32_t>::max( ) ) + 1ULL );
+	v0 += static_cast<uint64_t>( std::numeric_limits<uint32_t>::max( ) );
+	v0 += 1ULL;
+	return v0.size( ) > 1ULL;
+}
+static_assert( test_1element_plus1( ) );
+
+constexpr bool test_uintmax_plus1( ) {
+	auto v0 = daw::bigint_t<48>( std::numeric_limits<uint64_t>::max( ) );
+	v0 += 1ULL;
+	return v0.size( ) == 3 and v0[0] == 0 and v0[1] == 0 and v0[2] == 1;
+}
+static_assert( test_uintmax_plus1( ) );
+
+constexpr bool test_1element_times2( ) {
+	auto v0 = daw::bigint_t<48>(
+	  static_cast<uint64_t>( std::numeric_limits<uint32_t>::max( ) ) );
+	v0 *= 2ULL;
+	return v0.size( ) > 1ULL;
+}
+static_assert( test_1element_times2( ) );
+
+constexpr bool test_1element_times_1element( ) {
+	auto v0 = daw::bigint_t<48>(
+	  static_cast<uint64_t>( std::numeric_limits<uint32_t>::max( ) ) );
+	v0 *= std::numeric_limits<uint32_t>::max( );
+	return v0.size( ) == 2 and v0[0] == 1 and v0[1] == 0xFFFF'FFFE;
+}
+static_assert( test_1element_times_1element( ) );
+
+constexpr bool test_uintmax_times_uintmax( ) {
+	auto v0 = daw::bigint_t<130>( std::numeric_limits<uint64_t>::max( ) );
+	v0 *= std::numeric_limits<uint64_t>::max( );
+	return v0.size( ) == 4 and v0[0] == 0 and v0[1] == 1 and
+	       v0[2] == 0xFFFF'FFFF and v0[3] == 0xFFFF'FFFE;
+}
+static_assert( test_uintmax_times_uintmax( ) );
+
+constexpr bool test_pow2_32_max( ) {
+	auto v0 = daw::bigint_t<128>::pow2( 32 );
+	return v0.size( ) == 2 and v0[0] == 0 and v0[1] == 1;
+}
+static_assert( test_pow2_32_max( ) );
+
+constexpr bool test_pow2_64_max( ) {
+	auto v0 = daw::bigint_t<128>::pow2( 64 );
+	return v0.size( ) == 3 and v0[0] == 0 and v0[1] == 0 and v0[2] == 1;
+}
+static_assert( test_pow2_64_max( ) );
+
+constexpr bool test_one_shl_minus_1_31( ) {
+	auto v0 = daw::bigint_t<64>::one_shl_minus1( 31 );
+	return v0.size( ) == 1 and v0[0] == 0xFFFF'FFFE;
+}
+static_assert( test_one_shl_minus_1_31( ) );
+
+constexpr bool test_one_shl_minus_1_32( ) {
+	auto v0 = daw::bigint_t<64>::one_shl_minus1( 32 );
+	return v0.size( ) == 2 and v0[0] == 0xFFFF'FFFE and v0[1] == 1;
+}
+static_assert( test_one_shl_minus_1_32( ) );
+
+constexpr bool test_one_shl_minus_1_64( ) {
+	auto v0 = daw::bigint_t<64>::one_shl_minus1( 64 );
+	return v0.size( ) == 3 and v0[0] == 0xFFFF'FFFE and v0[1] == 0xFFFF'FFFF and
+	       v0[2] == 1;
+}
+static_assert( test_one_shl_minus_1_64( ) );
 
 constexpr void test( bool b ) {
-    if( !b ) std::terminate( );
+	if( !b )
+		std::terminate( );
 }
 
 constexpr bool test_001( ) {
 	daw::bigint_t<100> m( "18446744073709551616" );
-	test( m[0] == 0 );
-	test( m[1] == 0 );
-	test( m[2] == 1 );
-	return true;
+	return m[0] == 0 and m[1] == 0 and m[2] == 1;
 }
+static_assert( test_001( ) );
 
 //#define static_assert test
 
 constexpr bool test_002( ) {
 	daw::bigint_t<104> m1( "1844674407370955161634534534543" );
-	test( m1[0] == 0x0a6b'2d8f );
-	test( m1[1] == 0x0000'0008 );
-	test( m1[2] == 0x4876'e800 );
-	test( m1[3] == 0x0000'0017 );
-	return true;
+	return m1[0] == 0x0A6B'2D8F and m1[1] == 0x0000'0008 and
+	       m1[2] == 0x4876'E800 and m1[3] == 0x0000'0017;
 }
+static_assert( test_002( ) );
 
 //#define static_assert test
 
 constexpr bool test_003( ) {
-	auto const m2 = daw::bigint_t<113>( "9184467440737095516163453453454300" );
-	auto const m_test = mul_test<int>( );
-	auto const is_eq = m_test == m2;
-	test( is_eq );
-	test( mul_test<unsigned int>( ) == m2 );
-	auto const m3 = mul_test2( );
+	auto const m2a = daw::bigint_t<113>( "9184467440737095516163453453454300" );
+	auto m2b = daw::bigint_t<113>( "91844674407370955161634534534543" );
+	m2b *= 100ULL;
+	auto result = m2a == m2b;
+	auto m2c = daw::bigint_t<113>( "91844674407370955161634534534543" ) * 100ULL;
+	result = result and m2a == m2c;
 	auto const m_test2 = mul_test2( );
-	test( mul_test2( ) == 8589934592ULL );
-	return true;
+	result = result and mul_test2( ) == 8589934592ULL;
+	return result;
 }
+//static_assert( test_003( ) );
 
 //#undef static_assert
 
@@ -125,10 +195,6 @@ static_assert( -5'000'000'000LL == daw::bigint_t<100>( "-5000000000" ) );
 static_assert( daw::bigint_t<100>( "-5000000000" ) == -5'000'000'000LL );
 
 int main( ) {
-	static_assert( test_001( ) );
-	static_assert( test_002( ) );
-	test_003( );
-	//static_assert( test_003( ) );
-	static_assert( test_004( ) );
+	test_one_shl_minus_1_31( );
 	return 0;
 }
