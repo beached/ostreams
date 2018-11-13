@@ -25,6 +25,7 @@
 #include <array>
 
 #include <daw/daw_algorithm.h>
+#include <daw/daw_array_view.h>
 #include <daw/daw_bit.h>
 #include <daw/daw_exception.h>
 #include <daw/daw_math.h>
@@ -99,7 +100,8 @@ namespace daw {
 			using reference = value_t &;
 			using const_reference = value_t const &;
 			using iterator = typename std::array<value_t, ItemCount>::iterator;
-			using const_iterator = typename std::array<value_t, ItemCount>::const_iterator;
+			using const_iterator =
+			  typename std::array<value_t, ItemCount>::const_iterator;
 
 			static_assert( ItemCount > 0, "Cannot store 0 of anything" );
 
@@ -110,19 +112,24 @@ namespace daw {
 			constexpr bigint_storage_t( ) noexcept = default;
 			~bigint_storage_t( ) = default;
 			bigint_storage_t( bigint_storage_t const & ) = default;
-			bigint_storage_t & operator=( bigint_storage_t const & ) = default;
+			bigint_storage_t &operator=( bigint_storage_t const & ) = default;
 			bigint_storage_t( bigint_storage_t && ) = default;
-			bigint_storage_t & operator=( bigint_storage_t && ) = default;
+			bigint_storage_t &operator=( bigint_storage_t && ) = default;
 
 			template<size_t N>
-			constexpr bigint_storage_t( bigint_storage_t<T, N> const & other ): m_idx( other.m_idx ), m_sign( other.m_sign ) {
-				daw::exception::precondition_check<std::out_of_range>( m_idx <= ItemCount );
+			constexpr bigint_storage_t( bigint_storage_t<T, N> const &other )
+			  : m_idx( other.m_idx )
+			  , m_sign( other.m_sign ) {
+				daw::exception::precondition_check<std::out_of_range>( m_idx <=
+				                                                       ItemCount );
 				daw::algorithm::copy_n( other.m_data.data( ), m_data.data( ), m_idx );
 			}
 
 			template<size_t N>
-			constexpr bigint_storage_t & operator=( bigint_storage_t<T, N> const & rhs ) {
-				daw::exception::precondition_check<std::out_of_range>( rhs.m_idx <= ItemCount );
+			constexpr bigint_storage_t &
+			operator=( bigint_storage_t<T, N> const &rhs ) {
+				daw::exception::precondition_check<std::out_of_range>( rhs.m_idx <=
+				                                                       ItemCount );
 				if( this == &rhs ) {
 					return *this;
 				}
@@ -134,15 +141,19 @@ namespace daw {
 			}
 
 			template<size_t N>
-			constexpr bigint_storage_t( bigint_storage_t<T, N> && other ): m_idx( std::move( other.m_idx ) ), m_sign( std::move( other.m_sign ) ) {
-				daw::exception::precondition_check<std::out_of_range>( m_idx <= ItemCount );
+			constexpr bigint_storage_t( bigint_storage_t<T, N> &&other )
+			  : m_idx( std::move( other.m_idx ) )
+			  , m_sign( std::move( other.m_sign ) ) {
+				daw::exception::precondition_check<std::out_of_range>( m_idx <=
+				                                                       ItemCount );
 
 				daw::algorithm::move_n( other.m_data.data( ), m_data.data( ), m_idx );
 			}
 
 			template<size_t N>
-			constexpr bigint_storage_t & operator=( bigint_storage_t<T, N> && rhs ) {
-				daw::exception::precondition_check<std::out_of_range>( rhs.m_idx <= ItemCount );
+			constexpr bigint_storage_t &operator=( bigint_storage_t<T, N> &&rhs ) {
+				daw::exception::precondition_check<std::out_of_range>( rhs.m_idx <=
+				                                                       ItemCount );
 				if( this == &rhs ) {
 					return *this;
 				}
@@ -341,16 +352,29 @@ namespace daw {
 		};
 
 		template<typename value_t, size_t LhsN, size_t RhsN>
-		constexpr impl::bigint_storage_t<value_t, LhsN> div( impl::bigint_storage_t<value_t, LhsN> & lhs, impl::bigint_storage_t<value_t, RhsN> const & rhs ) {
+		constexpr impl::bigint_storage_t<value_t, LhsN>
+		div( impl::bigint_storage_t<value_t, LhsN> &lhs,
+		     impl::bigint_storage_t<value_t, RhsN> const &rhs ) {
+
+			// result = lhs/rhs
+			// lhs /= rhs;
 			auto cmp = lhs.compare( rhs );
 			if( cmp < 0 ) {
-					lhs = impl::bigint_storage_t<value_t, LhsN>{};
-					return rhs;
+				lhs = impl::bigint_storage_t<value_t, LhsN>{};
+				return rhs;
 			} else if( cmp == 0 ) {
 				lhs = 1UL;
 				return 0UL;
 			}
+			daw::exception::precondition_check( rhs != 0 );
+			daw::array_view<value_t> dividend( lhs.front( ), lhs.size( ) );
+			daw::array_view<value_t> divisor( rhs.front( ), rhs.size( ) );
 
+			while( !dividend.empty( ) ) {
+
+			}
+			// lhs > rhs
+			auto cur_quotient = lhs.back( )/rhs.back( );
 		};
 
 		template<typename value_t, size_t N>
@@ -532,10 +556,10 @@ namespace daw {
 
 		constexpr bigint_t operator~( ) const noexcept {
 			bigint_t result{};
-			for( auto item: m_data ) {
+			for( auto item : m_data ) {
 				result.push_back( ~item );
 			}
-			for( size_t n=m_data.size( ); n<m_data.capacity( ); ++n ) {
+			for( size_t n = m_data.size( ); n < m_data.capacity( ); ++n ) {
 				result.push_back( std::numeric_limits<value_t>::max( ) );
 			}
 			return result;
