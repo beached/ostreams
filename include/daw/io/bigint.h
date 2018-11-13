@@ -24,7 +24,6 @@
 
 #include <array>
 
-#include <MacTypes.h>
 #include <daw/daw_algorithm.h>
 #include <daw/daw_bit.h>
 #include <daw/daw_exception.h>
@@ -110,8 +109,10 @@ namespace daw {
 
 			constexpr bigint_storage_t( ) noexcept = default;
 			~bigint_storage_t( ) = default;
-		//	bigint_storage_t( bigint_storage_t const & ) = default;
-	//		bigint_storage_t & operator=( bigint_storage_t const & ) = default;
+			bigint_storage_t( bigint_storage_t const & ) = default;
+			bigint_storage_t & operator=( bigint_storage_t const & ) = default;
+			bigint_storage_t( bigint_storage_t && ) = default;
+			bigint_storage_t & operator=( bigint_storage_t && ) = default;
 
 			template<size_t N>
 			constexpr bigint_storage_t( bigint_storage_t<T, N> const & other ): m_idx( other.m_idx ), m_sign( other.m_sign ) {
