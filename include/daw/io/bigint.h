@@ -366,15 +366,15 @@ namespace daw {
 				lhs = 1UL;
 				return 0UL;
 			}
+			// lhs > rhs
 			daw::exception::precondition_check( rhs != 0 );
 			daw::array_view<value_t> dividend( lhs.front( ), lhs.size( ) );
 			daw::array_view<value_t> divisor( rhs.front( ), rhs.size( ) );
 
 			while( !dividend.empty( ) ) {
+				auto cur_quotient = dividend.back( )/divisor.back( );
 
 			}
-			// lhs > rhs
-			auto cur_quotient = lhs.back( )/rhs.back( );
 		};
 
 		template<typename value_t, size_t N>
