@@ -36,6 +36,7 @@ include_directories( ${HEADER_FOLDER} )
 
 set( HEADER_FILES
 	${HEADER_FOLDER}/daw/io/bigint.h
+	${HEADER_FOLDER}/daw/io/impl/bigint_impl.h
 	${HEADER_FOLDER}/daw/io/console_stream.h
 	${HEADER_FOLDER}/daw/io/file_stream.h
 	${HEADER_FOLDER}/daw/io/memory_stream.h
