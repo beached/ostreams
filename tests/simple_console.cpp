@@ -30,8 +30,8 @@ namespace {
 	// This includes std::basic_string, std::basic_string_view,
 	// daw::basic_string_view
 	template<typename CharT>
-	constexpr auto to_os_string( A ) noexcept {
-		daw::static_string_t<CharT, 1> result;
+	constexpr daw::static_string_t<CharT, 1> to_os_string( A ) noexcept {
+		daw::static_string_t<CharT, 1> result{};
 		result += 'A';
 		return result;
 	}

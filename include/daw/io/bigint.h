@@ -52,7 +52,7 @@ namespace daw {
 		               "Unsupported T, must be unsigned" );
 
 		static_assert( sizeof( value_t ) * 2 <= sizeof( uintmax_t ),
-		               "T must be no more than the size of uintmax_t" );
+		               "T multiplied by a T must fit into a uintmax_t" );
 
 	private:
 		static inline constexpr size_t const m_capacity =

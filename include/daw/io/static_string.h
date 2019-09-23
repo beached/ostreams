@@ -24,6 +24,7 @@
 
 #include <cstddef>
 
+#include <daw/daw_bounded_string.h>
 #include <daw/daw_string_view.h>
 
 #include "ostream_helpers.h"
@@ -102,7 +103,7 @@ namespace daw {
 
 		constexpr void push_back( value_type c ) {
 			daw::exception::precondition_check<daw::buffer_full_exception>(
-			  len + 1 <= capacity( ) );
+			  len < capacity( ) );
 			buffer[len++] = c;
 		}
 
@@ -422,7 +423,7 @@ namespace daw {
 	}
 
 	template<
-	  typename CharT, size_t N, typename LhsString,
+	  typename LhsString, typename CharT, size_t N,
 	  std::enable_if_t<is_static_string_v<LhsString>, std::nullptr_t> = nullptr>
 	constexpr bool operator>=( LhsString &&lhs,
 	                           CharT const ( &rhs )[N] ) noexcept {
@@ -450,7 +451,7 @@ namespace daw {
 	constexpr bool operator<=( LhsString &&lhs, RhsString &&rhs ) noexcept {
 		return lhs.compare( rhs ) <= 0;
 	}
-
+#include <mutex>
 	template<
 	  typename CharT, size_t N, typename LhsString,
 	  std::enable_if_t<is_static_string_v<LhsString>, std::nullptr_t> = nullptr>
@@ -480,8 +481,8 @@ namespace daw {
 	}
 
 	template<typename CharT, size_t N>
-	constexpr static_string_t<CharT, N> &&
+	constexpr static_string_t<CharT, N> and
 	to_os_string( static_string_t<CharT, N> &&str ) noexcept {
-		return std::move( str );
+		return daw::move( str );
 	}
 } // namespace daw

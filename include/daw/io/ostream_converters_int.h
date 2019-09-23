@@ -147,7 +147,7 @@ namespace ostream_converters {
 		                    !daw::is_floating_point_v<daw::remove_cvref_t<Integer>>,
 		                    !daw::traits::is_character_v<Integer>>,
 		    std::nullptr_t> = nullptr>
-		constexpr auto to_os_string( Integer value, daw::tag<int> ) {
+		constexpr auto to_os_string( Integer value, daw::tag_t<int> ) {
 			daw::static_string_t<CharT, int_string_sizes::get<sizeof( Integer )>( )>
 			  result{};
 
@@ -185,12 +185,12 @@ namespace ostream_converters {
 	                    !daw::traits::is_character_v<Integer>>,
 	    std::nullptr_t> = nullptr>
 	constexpr auto to_os_string( Integer value ) {
-		return impl::to_os_string<CharT>( value, daw::tag<int>{} );
+		return impl::to_os_string<CharT>( value, daw::tag<int> );
 	}
 
 	template<typename CharT, typename Integer,
 	         typename Traits = daw::char_traits<CharT>>
 	constexpr auto to_os_string( daw::as_int_t<Integer> value ) {
-		return impl::to_os_string<CharT>( value.value, daw::tag<int>{} );
+		return impl::to_os_string<CharT>( value.value, daw::tag<int> );
 	}
 } // namespace ostream_converters

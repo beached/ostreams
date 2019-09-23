@@ -28,6 +28,7 @@
 #include <daw/daw_bit.h>
 #include <daw/daw_exception.h>
 #include <daw/daw_math.h>
+#include <daw/daw_move.h>
 #include <daw/daw_parser_helper_sv.h>
 #include <daw/daw_span.h>
 #include <daw/daw_string_view.h>
@@ -80,7 +81,7 @@ namespace daw {
 		constexpr auto low_part( uintmax_t value ) noexcept {
 			using value_t = half_max_t<uintmax_t>;
 			auto const lower_mask =
-			  daw::get_left_mask<uintmax_t>( bsizeof<uintmax_t> - bsizeof<value_t> );
+			  daw::mask_msb<uintmax_t>( bsizeof<uintmax_t> - bsizeof<value_t> );
 
 			return static_cast<value_t>( value bitand lower_mask );
 		}
@@ -88,7 +89,7 @@ namespace daw {
 		constexpr auto high_part( uintmax_t value ) noexcept {
 			using value_t = half_max_t<uintmax_t>;
 			auto const high_mask =
-			  daw::get_right_mask<uintmax_t>( bsizeof<uintmax_t> - bsizeof<value_t> );
+			  daw::mask_lsb<uintmax_t>( bsizeof<uintmax_t> - bsizeof<value_t> );
 
 			return static_cast<value_t>( value bitand high_mask );
 		}
@@ -137,8 +138,8 @@ namespace daw {
 
 			template<size_t N, std::enable_if_t<(N!=ItemCount), std::nullptr_t> = nullptr>
 			constexpr bigint_storage_t( bigint_storage_t<T, N> &&other )
-			  : m_idx( std::move( other.m_idx ) )
-			  , m_sign( std::move( other.m_sign ) ) {
+			  : m_idx( daw::move( other.m_idx ) )
+			  , m_sign( daw::move( other.m_sign ) ) {
 				daw::exception::precondition_check<std::out_of_range>( m_idx <=
 				                                                       ItemCount );
 
@@ -153,8 +154,8 @@ namespace daw {
 					return *this;
 				}
 
-				m_idx = std::move( rhs.m_idx );
-				m_sign = std::move( rhs.m_sign );
+				m_idx = daw::move( rhs.m_idx );
+				m_sign = daw::move( rhs.m_sign );
 				daw::algorithm::move_n( rhs.m_data.data( ), m_data.data( ), m_idx );
 				return *this;
 			}
@@ -213,7 +214,7 @@ namespace daw {
 			}
 
 			constexpr bool full( ) noexcept {
-				return size( ) > capacity( );
+				return size( ) >= capacity( );
 			}
 
 			constexpr void sign_flip( ) noexcept {
@@ -342,7 +343,7 @@ namespace daw {
 				result.push_back( tmp );
 				carry -= tmp * rhs;
 			}
-			lhs.m_data = std::move( result );
+			lhs.m_data = daw::move( result );
 			return carry;
 		};
 
@@ -497,7 +498,7 @@ namespace daw {
 				mul( tmp, rhs[n], n );
 				add( result, tmp );
 			}
-			lhs = std::move( result );
+			lhs = daw::move( result );
 		}
 	} // namespace impl
 } // namespace daw
