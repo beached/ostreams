@@ -101,7 +101,7 @@ namespace daw {
 			                          std::nullptr_t> = nullptr>
 			inline void operator( )( String &&str ) const noexcept {
 				static_assert(
-				  daw::is_same_v<remove_cvref_t<CharT>,
+				  std::is_same_v<remove_cvref_t<CharT>,
 				                 remove_cvref_t<decltype( *str.data( ) )>>,
 				  "String's data( ) character type must match that of output stream" );
 
@@ -176,8 +176,8 @@ namespace daw {
 	}
 
 	template<typename CharT,
-	         std::enable_if_t<(daw::is_same_v<char, remove_cvref_t<CharT>> ||
-	                           daw::is_same_v<wchar_t, remove_cvref_t<CharT>>),
+	         std::enable_if_t<(std::is_same_v<char, remove_cvref_t<CharT>> ||
+	                           std::is_same_v<wchar_t, remove_cvref_t<CharT>>),
 	                          std::nullptr_t> = nullptr>
 	auto make_file_stream(
 	  CharT const *file_name,

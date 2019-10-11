@@ -26,13 +26,13 @@
 #include "daw/io/memory_stream.h"
 #include "daw/io/static_string.h"
 
-template<typename Float, std::enable_if_t<daw::is_same_v<Float, float>,
+template<typename Float, std::enable_if_t<std::is_same_v<Float, float>,
                                           std::nullptr_t> = nullptr>
 inline Float conv( const char *str, char **end ) noexcept {
 	return strtof( str, end );
 }
 
-template<typename Float, std::enable_if_t<daw::is_same_v<Float, double>,
+template<typename Float, std::enable_if_t<std::is_same_v<Float, double>,
                                           std::nullptr_t> = nullptr>
 inline Float conv( const char *str, char **end ) noexcept {
 	return strtod( str, end );

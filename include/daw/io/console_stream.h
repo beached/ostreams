@@ -66,7 +66,7 @@ namespace daw {
 			                          std::nullptr_t> = nullptr>
 			void operator( )( String &&str ) const noexcept {
 				static_assert(
-				  daw::is_same_v<remove_cvref_t<CharT>,
+				  std::is_same_v<remove_cvref_t<CharT>,
 				                 remove_cvref_t<decltype( *str.data( ) )>>,
 				  "String's data( ) character type must match that of output stream" );
 

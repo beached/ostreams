@@ -35,7 +35,7 @@ namespace ostream_converters {
 	namespace impl {
 		template<typename T, typename Result = daw::remove_cvref_t<T>>
 		constexpr Result num_digits( T value ) noexcept {
-			static_assert( daw::is_integral_v<Result>,
+			static_assert( std::is_integral_v<Result>,
 			               "Result must be an integer type" );
 			if( value == 0 ) {
 				return static_cast<Result>( 1 );
@@ -50,7 +50,7 @@ namespace ostream_converters {
 
 		template<
 		  typename Result, typename Integer,
-		  std::enable_if_t<daw::is_integral_v<Result>, std::nullptr_t> = nullptr>
+		  std::enable_if_t<std::is_integral_v<Result>, std::nullptr_t> = nullptr>
 		constexpr Result pow10( Integer n ) noexcept {
 			uint64_t const vals[10] = {1ULL,
 			                           100ULL,
@@ -142,9 +142,9 @@ namespace ostream_converters {
 		  typename CharT, typename Integer,
 		  typename Traits = daw::char_traits<CharT>,
 		  std::enable_if_t<
-		    daw::all_true_v<daw::is_integral_v<daw::remove_cvref_t<Integer>>,
-		                    !daw::is_same_v<bool, daw::remove_cvref_t<Integer>>,
-		                    !daw::is_floating_point_v<daw::remove_cvref_t<Integer>>,
+		    daw::all_true_v<std::is_integral_v<daw::remove_cvref_t<Integer>>,
+		                    !std::is_same_v<bool, daw::remove_cvref_t<Integer>>,
+		                    !std::is_floating_point_v<daw::remove_cvref_t<Integer>>,
 		                    !daw::traits::is_character_v<Integer>>,
 		    std::nullptr_t> = nullptr>
 		constexpr auto to_os_string( Integer value, daw::tag_t<int> ) {
@@ -179,9 +179,9 @@ namespace ostream_converters {
 	template<
 	  typename CharT, typename Integer, typename Traits = daw::char_traits<CharT>,
 	  std::enable_if_t<
-	    daw::all_true_v<daw::is_integral_v<daw::remove_cvref_t<Integer>>,
-	                    !daw::is_same_v<bool, daw::remove_cvref_t<Integer>>,
-	                    !daw::is_floating_point_v<daw::remove_cvref_t<Integer>>,
+	    daw::all_true_v<std::is_integral_v<daw::remove_cvref_t<Integer>>,
+	                    !std::is_same_v<bool, daw::remove_cvref_t<Integer>>,
+	                    !std::is_floating_point_v<daw::remove_cvref_t<Integer>>,
 	                    !daw::traits::is_character_v<Integer>>,
 	    std::nullptr_t> = nullptr>
 	constexpr auto to_os_string( Integer value ) {

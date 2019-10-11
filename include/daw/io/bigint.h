@@ -48,7 +48,7 @@ namespace daw {
 	struct bigint_t {
 		using value_t = impl::half_max_t<uintmax_t>;
 
-		static_assert( !daw::is_signed_v<value_t>,
+		static_assert( not std::is_signed_v<value_t>,
 		               "Unsupported T, must be unsigned" );
 
 		static_assert( sizeof( value_t ) * 2 <= sizeof( uintmax_t ),
@@ -73,7 +73,7 @@ namespace daw {
 		}
 
 		constexpr void negate( ) noexcept {
-			if( !is_zero( ) ) {
+			if( not is_zero( ) ) {
 				m_data.sign_flip( );
 			}
 		}
@@ -98,7 +98,7 @@ namespace daw {
 		}
 
 		template<typename SignedInteger,
-		         std::enable_if_t<is_signed_v<remove_cvref_t<SignedInteger>>,
+		         std::enable_if_t<std::is_signed_v<remove_cvref_t<SignedInteger>>,
 		                          std::nullptr_t> = nullptr>
 		explicit constexpr bigint_t( SignedInteger v ) {
 
@@ -127,8 +127,8 @@ namespace daw {
 
 		template<typename UnsignedInteger,
 		         std::enable_if_t<
-		           all_true_v<is_integral_v<remove_cvref_t<UnsignedInteger>>,
-		                      !is_signed_v<remove_cvref_t<UnsignedInteger>>>,
+		           all_true_v<std::is_integral_v<remove_cvref_t<UnsignedInteger>>,
+		                      not std::is_signed_v<remove_cvref_t<UnsignedInteger>>>,
 		           std::nullptr_t> = nullptr>
 		explicit constexpr bigint_t( UnsignedInteger v ) {
 
@@ -147,7 +147,7 @@ namespace daw {
 		explicit constexpr bigint_t( basic_string_view<CharT> str ) {
 
 			str = daw::parser::trim_left( str );
-			daw::exception::precondition_check( !str.empty( ) );
+			daw::exception::precondition_check( not str.empty( ) );
 			if( str.front( ) == '-' ) {
 				str.remove_prefix( );
 				m_data.m_sign = sign_t::negative;
@@ -159,7 +159,7 @@ namespace daw {
 			}
 
 			// TODO non char input and other bases
-			while( !str.empty( ) and daw::parser::is_number( str.front( ) ) ) {
+			while( notstr.empty( ) and daw::parser::is_number( str.front( ) ) ) {
 				auto digit =
 				  static_cast<uintmax_t>( impl::to_digit( str.pop_front( ) ) );
 				impl::mul( m_data, 10UL );
@@ -209,7 +209,7 @@ namespace daw {
 
 		template<typename Integer>
 		constexpr auto operator*=( Integer &&value )
-		  -> std::enable_if_t<is_integral_v<remove_cvref_t<Integer>>, bigint_t &> {
+		  -> std::enable_if_t<std::is_integral_v<remove_cvref_t<Integer>>, bigint_t &> {
 
 			bigint_t const tmp( std::forward<Integer>( value ) );
 			impl::mul( m_data, tmp.m_data );
@@ -218,7 +218,7 @@ namespace daw {
 
 		template<typename Integer>
 		constexpr auto operator*( Integer &&value ) const
-		  -> std::enable_if_t<is_integral_v<remove_cvref_t<Integer>>, bigint_t> {
+		  -> std::enable_if_t<std::is_integral_v<remove_cvref_t<Integer>>, bigint_t> {
 
 			auto result = *this;
 			auto tmp = bigint_t( std::forward<Integer>( value ) );
@@ -228,7 +228,7 @@ namespace daw {
 
 		template<typename Integer>
 		constexpr auto operator+=( Integer &&value )
-		  -> std::enable_if_t<is_integral_v<remove_cvref_t<Integer>>, bigint_t &> {
+		  -> std::enable_if_t<std::is_integral_v<remove_cvref_t<Integer>>, bigint_t &> {
 
 			auto const tmp = bigint_t( std::forward<Integer>( value ) );
 			impl::add( m_data, tmp.m_data );
@@ -237,7 +237,7 @@ namespace daw {
 
 		template<typename Integer>
 		constexpr auto operator+( Integer &&value ) const
-		  -> std::enable_if_t<is_integral_v<remove_cvref_t<Integer>>, bigint_t> {
+		  -> std::enable_if_t<std::is_integral_v<remove_cvref_t<Integer>>, bigint_t> {
 
 			auto result = *this;
 			impl::add( result, bigint_t( std::forward<Integer>( value ) ) );
@@ -324,14 +324,14 @@ namespace daw {
 
 	template<size_t LhsB, typename Integer>
 	constexpr auto operator==( bigint_t<LhsB> const &lhs, Integer &&rhs ) noexcept
-	  -> std::enable_if_t<is_integral_v<Integer>, bool> {
+	  -> std::enable_if_t<std::is_integral_v<Integer>, bool> {
 
 		return lhs.compare( std::forward<Integer>( rhs ) ) == 0;
 	}
 
 	template<typename Integer, size_t RhsB>
 	constexpr auto operator==( Integer &&lhs, bigint_t<RhsB> const &rhs ) noexcept
-	  -> std::enable_if_t<is_integral_v<Integer>, bool> {
+	  -> std::enable_if_t<std::is_integral_v<Integer>, bool> {
 
 		return bigint_t<bsizeof<Integer>>( std::forward<Integer>( lhs ) )
 		         .compare( rhs ) == 0;
@@ -346,13 +346,13 @@ namespace daw {
 
 	template<size_t LhsB, typename Integer>
 	constexpr auto operator!=( bigint_t<LhsB> const &lhs, Integer &&rhs ) noexcept
-	  -> std::enable_if_t<is_integral_v<Integer>, bool> {
+	  -> std::enable_if_t<std::is_integral_v<Integer>, bool> {
 		return lhs.compare( std::forward<Integer>( rhs ) );
 	}
 
 	template<typename Integer, size_t RhsB>
 	constexpr auto operator!=( Integer &&lhs, bigint_t<RhsB> const &rhs ) noexcept
-	  -> std::enable_if_t<is_integral_v<Integer>, bool> {
+	  -> std::enable_if_t<std::is_integral_v<Integer>, bool> {
 		return std::forward<Integer>( rhs ).compare( std::forward<Integer>( rhs ) );
 	}
 } // namespace daw

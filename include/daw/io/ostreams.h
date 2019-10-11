@@ -142,7 +142,7 @@ namespace daw {
 		constexpr OutputStream &operator<<( OutputStream &os,
 		                                    static_string_t<CharT, N> const &str ) {
 			static_assert(
-			  daw::is_same_v<remove_cvref_t<typename OutputStream::character_t>,
+			  std::is_same_v<remove_cvref_t<typename OutputStream::character_t>,
 			                 remove_cvref_t<CharT>>,
 			  "Character type in OutputStream does not match that of stirng" );
 			os( impl::accept_asciiz{}, str.data( ) );
@@ -155,7 +155,7 @@ namespace daw {
 		constexpr OutputStream &operator<<( OutputStream &os,
 		                                    static_string_t<CharT, N> &&str ) {
 			static_assert(
-			  daw::is_same_v<remove_cvref_t<typename OutputStream::character_t>,
+			  std::is_same_v<remove_cvref_t<typename OutputStream::character_t>,
 			                 remove_cvref_t<CharT>>,
 			  "Character type in OutputStream does not match that of stirng" );
 			os( impl::accept_asciiz{}, str.data( ) );

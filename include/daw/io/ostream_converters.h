@@ -62,8 +62,8 @@ namespace ostream_converters {
 	// Bool
 	template<typename CharT, typename Bool,
 	         std::enable_if_t<
-	           daw::all_true_v<daw::is_same_v<bool, daw::remove_cvref_t<Bool>>,
-	                           daw::is_same_v<char, daw::remove_cvref_t<CharT>>>,
+	           daw::all_true_v<std::is_same_v<bool, daw::remove_cvref_t<Bool>>,
+	                           std::is_same_v<char, daw::remove_cvref_t<CharT>>>,
 	           std::nullptr_t> = nullptr>
 	constexpr auto to_os_string( Bool b ) noexcept {
 		if( b ) {
@@ -75,8 +75,8 @@ namespace ostream_converters {
 	template<
 	  typename CharT, typename Bool,
 	  std::enable_if_t<
-	    daw::all_true_v<daw::is_same_v<bool, daw::remove_cvref_t<Bool>>,
-	                    daw::is_same_v<wchar_t, daw::remove_cvref_t<CharT>>>,
+	    daw::all_true_v<std::is_same_v<bool, daw::remove_cvref_t<Bool>>,
+	                    std::is_same_v<wchar_t, daw::remove_cvref_t<CharT>>>,
 	    std::nullptr_t> = nullptr>
 	constexpr auto to_os_string( Bool b ) noexcept {
 		if( b ) {

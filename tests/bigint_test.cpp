@@ -28,7 +28,7 @@ static_assert( daw::bits_needed_for_digits( 100 ) == 333 );
 static_assert( daw::bits_needed_for_digits( 1000 ) == 3322 );
 
 static_assert(
-  daw::is_same_v<daw::bigint_digits_t<1000>, daw::bigint_t<3322>> );
+  std::is_same_v<daw::bigint_digits_t<1000>, daw::bigint_t<3322>> );
 
 template<typename Integer>
 constexpr daw::bigint_t<113> mul_test( ) {

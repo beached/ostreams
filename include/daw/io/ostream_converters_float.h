@@ -39,7 +39,7 @@ namespace ostream_converters {
 #ifndef SMALL_MEMORY
 		template<
 		  typename Result, typename Int,
-		  std::enable_if_t<daw::is_same_v<Result, float>, std::nullptr_t> = nullptr>
+		  std::enable_if_t<std::is_same_v<Result, float>, std::nullptr_t> = nullptr>
 		constexpr float pow10( Int n ) noexcept {
 			daw::exception::dbg_precondition_check( 0 <= n && n <= 38, "overflow" );
 			float const vals[20] = {1e0f,  1e2f,  1e4f,  1e6f,  1e8f,  1e10f, 1e12f,
@@ -51,7 +51,7 @@ namespace ostream_converters {
 			return vals[n / 2] * 1e1f;
 		}
 		template<typename Result, typename Int,
-		         std::enable_if_t<daw::is_same_v<Result, double>, std::nullptr_t> =
+		         std::enable_if_t<std::is_same_v<Result, double>, std::nullptr_t> =
 		           nullptr>
 		constexpr double pow10( Int n ) noexcept {
 			daw::exception::dbg_precondition_check( 0 <= n && n <= 308, "overflow" );
@@ -80,7 +80,7 @@ namespace ostream_converters {
 #else
 		template<
 		  typename Result, typename Int,
-		  std::enable_if_t<daw::is_same_v<Result, float>, std::nullptr_t> = nullptr>
+		  std::enable_if_t<std::is_same_v<Result, float>, std::nullptr_t> = nullptr>
 		constexpr float pow10( Int n ) noexcept {
 			daw::exception::dbg_precondition_check( n <= 38, "overflow" );
 
@@ -91,7 +91,7 @@ namespace ostream_converters {
 			return result;
 		}
 		template<typename Result, typename Int,
-		         std::enable_if_t<daw::is_same_v<Result, double>, std::nullptr_t> =
+		         std::enable_if_t<std::is_same_v<Result, double>, std::nullptr_t> =
 		           nullptr>
 		constexpr double pow10( Int n ) noexcept {
 			daw::exception::dbg_precondition_check( n <= 308, "overflow" );
@@ -120,7 +120,7 @@ namespace ostream_converters {
 	// Floating point numbers
 	template<
 	  typename CharT, typename Float, typename Traits = daw::char_traits<CharT>,
-	  std::enable_if_t<daw::is_floating_point_v<Float>, std::nullptr_t> = nullptr>
+	  std::enable_if_t<std::is_floating_point_v<Float>, std::nullptr_t> = nullptr>
 	constexpr auto to_os_string(
 	  Float value,
 	  int significant_digits = std::numeric_limits<Float>::max_digits10,
