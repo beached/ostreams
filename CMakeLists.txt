@@ -11,9 +11,6 @@ include("${CMAKE_SOURCE_DIR}/glean/CMakeLists.txt")
 set( HEADER_FOLDER "include" )
 set( TEST_FOLDER "tests" )
 
-set( HEADER_FOLDER "include" )
-set( TEST_FOLDER "tests" )
-
 include_directories( ${HEADER_FOLDER} )
 
 set( HEADER_FILES

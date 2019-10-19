@@ -159,7 +159,7 @@ namespace daw {
 			}
 
 			// TODO non char input and other bases
-			while( notstr.empty( ) and daw::parser::is_number( str.front( ) ) ) {
+			while( not str.empty( ) and daw::parser::is_number( str.front( ) ) ) {
 				auto digit =
 				  static_cast<uintmax_t>( impl::to_digit( str.pop_front( ) ) );
 				impl::mul( m_data, 10UL );

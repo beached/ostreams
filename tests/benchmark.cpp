@@ -134,7 +134,7 @@ struct test_t {
 		}
 	}
 
-	template<typename Number, std::enable_if_t<daw::is_integral_v<Number>,
+	template<typename Number, std::enable_if_t<std::is_integral_v<Number>,
 	                                           std::nullptr_t> = nullptr>
 	void snprintf_test( size_t count, Number number ) const {
 		daw::static_string_t<char, 325> buffer{};
@@ -148,7 +148,7 @@ struct test_t {
 		}
 	}
 
-	template<typename Number, std::enable_if_t<daw::is_floating_point_v<Number>,
+	template<typename Number, std::enable_if_t<std::is_floating_point_v<Number>,
 	                                           std::nullptr_t> = nullptr>
 	void snprintf_test( size_t count, Number number ) const {
 		daw::static_string_t<char, 325> buffer{};
@@ -200,7 +200,7 @@ struct test_t {
 		}
 	}
 
-	template<typename Number, std::enable_if_t<daw::is_integral_v<Number>,
+	template<typename Number, std::enable_if_t<std::is_integral_v<Number>,
 	                                           std::nullptr_t> = nullptr>
 	void printf_test( size_t count, Number number ) const {
 		for( size_t n = 0; n < count; ++n ) {
@@ -209,7 +209,7 @@ struct test_t {
 		}
 	}
 
-	template<typename Number, std::enable_if_t<daw::is_floating_point_v<Number>,
+	template<typename Number, std::enable_if_t<std::is_floating_point_v<Number>,
 	                                           std::nullptr_t> = nullptr>
 	void printf_test( size_t count, Number number ) const {
 		for( size_t n = 0; n < count; ++n ) {
