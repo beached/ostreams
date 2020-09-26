@@ -1,41 +1,75 @@
-cmake_minimum_required(VERSION 3.13)
-project( ostreams )
+# Copyright (c) Darrell Wright
+#
+# Distributed under the Boost Software License, Version 1.0. (See accompanying
+# file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
+#
+# Official repository: https://github.com/beached/ostreams
+#
 
-set(CMAKE_CXX_STANDARD 17)
+cmake_minimum_required( VERSION 3.13 ) 
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+project( "ostreams"
+	VERSION "1.0.0" 
+	DESCRIPTION "Test implementation of a more modern ostreams"
+	HOMEPAGE_URL "https://github.com/beached/ostreams"
+	LANGUAGES C CXX)
 
-include("${CMAKE_SOURCE_DIR}/glean/CMakeListsCompiler.txt")
-include("${CMAKE_SOURCE_DIR}/glean/CMakeLists.txt")
+set( CMAKE_CXX_STANDARD 17 CACHE STRING "The C++ standard whose features are requested.")
+set( CMAKE_CXX_STANDARD_REQUIRED ON)
+set( CMAKE_CXX_EXTENSIONS OFF)
 
-set( HEADER_FOLDER "include" )
-set( TEST_FOLDER "tests" )
+add_subdirectory(extern)
 
-include_directories( ${HEADER_FOLDER} )
+include( GNUInstallDirs)
+set( ostreams_INSTALL_CMAKEDIR
+	"${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/cmake"
+	CACHE STRING
+	"The install directory to use for CMake package config files") 
 
-set( HEADER_FILES
-	${HEADER_FOLDER}/daw/io/bigint.h
-	${HEADER_FOLDER}/daw/io/impl/bigint_impl.h
-	${HEADER_FOLDER}/daw/io/console_stream.h
-	${HEADER_FOLDER}/daw/io/file_stream.h
-	${HEADER_FOLDER}/daw/io/memory_stream.h
-	${HEADER_FOLDER}/daw/io/ostreams.h
-	${HEADER_FOLDER}/daw/io/ostream_converters.h
-	${HEADER_FOLDER}/daw/io/ostream_converters_float.h
-	${HEADER_FOLDER}/daw/io/ostream_converters_impl.h
-	${HEADER_FOLDER}/daw/io/ostream_converters_int.h
-	${HEADER_FOLDER}/daw/io/ostream_helpers.h
-	${HEADER_FOLDER}/daw/io/static_string.h
+set( PROJECT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
+
+add_library( ${PROJECT_NAME} INTERFACE ) 
+add_library( daw::${PROJECT_NAME} ALIAS ${PROJECT_NAME} )
+target_link_libraries( ${PROJECT_NAME} INTERFACE daw::header_libraries ) 
+
+target_link_libraries( ${PROJECT_NAME} INTERFACE daw::header_libraries ${COMPILER_SPECIFIC_LIBS} )
+target_compile_features( ${PROJECT_NAME} INTERFACE cxx_std_17)
+target_include_directories( ${PROJECT_NAME}
+	INTERFACE
+	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
-add_executable( console_test ${HEADER_FILES} ${TEST_FOLDER}/console_test.cpp )
-add_executable( file_test ${HEADER_FILES} ${TEST_FOLDER}/file_test.cpp )
-add_executable( memory_test ${HEADER_FILES} ${TEST_FOLDER}/memory_test.cpp )
-add_executable( simple_console ${HEADER_FILES} ${TEST_FOLDER}/simple_console.cpp )
-add_executable( benchmark ${HEADER_FILES} ${TEST_FOLDER}/benchmark.h ${TEST_FOLDER}/benchmark.cpp )
-add_executable( double_benchmark ${HEADER_FILES} ${TEST_FOLDER}/benchmark.h ${TEST_FOLDER}/double_benchmark.cpp )
-add_executable( floating_round_trip ${HEADER_FILES} ${TEST_FOLDER}/floating_round_trip.cpp )
-add_executable( to_os_string_test ${HEADER_FILES} ${TEST_FOLDER}/to_os_string_test.cpp )
-add_executable( bigint_test ${HEADER_FILES} ${TEST_FOLDER}/bigint_test.cpp )
+install( TARGETS ${PROJECT_NAME}
+	EXPORT ${PROJECT_NAME}_Targets
+	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-install( DIRECTORY ${HEADER_FOLDER}/daw DESTINATION include )
+include( CMakePackageConfigHelpers)
+
+configure_package_config_file( 
+	"${PROJECT_SOURCE_DIR}/cmake/daw_${PROJECT_NAME}Config.cmake.in"
+	"${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+	INSTALL_DESTINATION
+	${ostreams_INSTALL_CMAKEDIR} )
+
+write_basic_package_version_file( "${PROJECT_NAME}ConfigVersion.cmake"
+	VERSION ${PROJECT_VERSION}
+	COMPATIBILITY SameMajorVersion)
+
+install( EXPORT ${PROJECT_NAME}_Targets
+	FILE ${PROJECT_NAME}Targets.cmake
+	NAMESPACE daw::
+	DESTINATION ${ostreams_INSTALL_CMAKEDIR})
+
+install( FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+	"${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+	DESTINATION ${ostreams_INSTALL_CMAKEDIR}$ )
+
+install( DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION include )
+
+if (DAW_ENABLE_TESTING)
+    add_subdirectory(tests)
+endif ()
+
